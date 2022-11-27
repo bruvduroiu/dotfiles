@@ -1,0 +1,39 @@
+{
+	"diagnostic.checkCurrentLine": true,
+	"eslint.autoFixOnSave": false,
+	"eslint.filetypes": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+	"prettier.disableSuccessMessage": true,
+	"coc.preferences.diagnostic.virtualText": true,
+	"coc.preferences.formatOnSaveFiletypes": [
+		"javascript",
+		"javascriptreact",
+		"typescript",
+		"typescriptreact",
+		"tf",
+		"ts",
+		"terraform",
+		"go"
+	],
+	"tsserver.formatOnType": false,
+	"coc.preferences.formatOnType": false,
+	"languageserver": {
+		"terraform": {
+			"command": "terraform-ls",
+			"args": ["serve"],
+			"filetypes": [
+				"terraform",
+				"tf"
+			],
+			"initializationOptions": {},
+			"settings": {}
+		},
+		"golang": {
+			"command": "gopls",
+			"rootPatterns":["go.mod"],
+			"filetypes":["go"]
+		}
+	},
+	"yaml.schemas": {
+		"kubernetes": "/*.yaml"
+	}
+}
