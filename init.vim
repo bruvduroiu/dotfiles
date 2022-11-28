@@ -47,9 +47,11 @@ Plug 'Yggdroot/indentLine'        " Indentation Lines
 
 Plug 'APZelos/blamer.nvim'        " Git Blame
 
-Plug 'dracula/vim'
+Plug 'kaicataldo/material.vim'
 
 Plug 'voldikss/vim-floaterm'      " Floaterm
+
+Plug 'christoomey/vim-tmux-navigator' " What it says
 
 Plug 'ryanoasis/vim-devicons'     " Keep this last always
 call plug#end()
@@ -60,7 +62,11 @@ if (has("termguicolors"))
  set termguicolors
 endif
 syntax enable
-colorscheme dracula
+
+let g:material_terminal_italics = 1
+let g:material_theme_style = "default"
+let g:airline_theme = 'material'
+colorscheme material
 
 " NERDTree on ctrl+n
 let NERDTreeShowHidden=1
@@ -216,3 +222,7 @@ let g:indentLine_char = '⦙'
 " Increase win size
 nnoremap <silent> <Leader>= :exe "resize " . (winheight(0) * 3/2)<CR>
 nnoremap <silent> <Leader>- :exe "resize " . (winheight(0) * 2/3)<CR>
+
+" Airline nvim
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
