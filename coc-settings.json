@@ -4,15 +4,21 @@
 	"eslint.filetypes": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
 	"prettier.disableSuccessMessage": true,
 	"coc.preferences.diagnostic.virtualText": true,
+	"coc.preferences.rootPatterns": [".git"," poetry.lock"," package-lock.json"],
 	"coc.preferences.formatOnSaveFiletypes": [
-		"javascript",
-		"javascriptreact",
+		"html",
 		"typescript",
+		"javascriptreact",
 		"typescriptreact",
+		"json",
+		"graphql",
+		"handlebars",
 		"tf",
 		"ts",
 		"terraform",
-		"go"
+		"go",
+		"python",
+		"cpp"
 	],
 	"tsserver.formatOnType": false,
 	"coc.preferences.formatOnType": false,
@@ -34,6 +40,17 @@
 		}
 	},
 	"yaml.schemas": {
-		"kubernetes": "/*.yaml"
+		"https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": "**/docker-compose*.y*ml"
+	},
+	"python": {
+		"formatting": {
+			"provider": "none"
+		},
+		"poetryPath": "poetry",
+		"pythonPath": "python",
+		"venvPath": ".venv"
+	},
+	"ruff": {
+		"enable": true
 	}
 }
