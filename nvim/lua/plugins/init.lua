@@ -1,7 +1,7 @@
 return {
   {
     "stevearc/conform.nvim",
-    -- event = 'BufWritePre', -- uncomment for format on save
+    event = 'BufWritePre',  -- uncomment for format on save
     opts = require "configs.conform",
   },
 
@@ -14,20 +14,20 @@ return {
   },
 
   {
-  	"nvim-treesitter/nvim-treesitter",
-  	opts = {
-  		ensure_installed = {
-  			"vim", "lua", "vimdoc",
-       "html", "css", "python",
+    "nvim-treesitter/nvim-treesitter",
+    opts = {
+      ensure_installed = {
+        "vim", "lua", "vimdoc",
+        "html", "css", "python",
         "typescript", "go"
-  		},
-  	},
+      },
+    },
   },
   {
     "tpope/vim-fugitive",
-    cmd={"Git", "G", "Gdiffsplit", "Gvdiffsplit", "Gwrite", "Gread", "Ggrep", "GMove", "GDelete", "GBrowse"},
-    keys={
-      {"<leader>gs", "<cmd>vertical Git<cr>" },
+    cmd = { "Git", "G", "Gdiffsplit", "Gvdiffsplit", "Gwrite", "Gread", "Ggrep", "GMove", "GDelete", "GBrowse" },
+    keys = {
+      { "<leader>gs", "<cmd>vertical Git<cr>" },
       desc = "Open Fugitive"
     },
     opts = {
@@ -37,7 +37,7 @@ return {
   { "tpope/vim-rhubarb", opts = { enabled = true, lazy = false } },
   {
     "folke/zen-mode.nvim",
-    cmd="ZenMode",
+    cmd = "ZenMode",
     opts = {
       plugins = {
         kitty = {
@@ -54,12 +54,12 @@ return {
       auto_open = false,
       warn_no_results = false,
       modes = {
-        symbols = { -- Configure symbols mode
+        symbols = {             -- Configure symbols mode
           win = {
-            type = "split", -- split window
-            relative = "win", -- relative to current window
+            type = "split",     -- split window
+            relative = "win",   -- relative to current window
             position = "right", -- right side
-            size = 0.15, -- 30% of the window
+            size = 0.15,        -- 30% of the window
           },
         },
       },
@@ -112,11 +112,11 @@ return {
       },
       -- you can enable a preset for easier configuration
       presets = {
-        bottom_search = true, -- use a classic bottom cmdline for search
-        command_palette = true, -- position the cmdline and popupmenu together
+        bottom_search = true,         -- use a classic bottom cmdline for search
+        command_palette = true,       -- position the cmdline and popupmenu together
         long_message_to_split = true, -- long messages will be sent to a split
-        inc_rename = false, -- enables an input dialog for inc-rename.nvim
-        lsp_doc_border = false, -- add a border to hover docs and signature help
+        inc_rename = false,           -- enables an input dialog for inc-rename.nvim
+        lsp_doc_border = false,       -- add a border to hover docs and signature help
       },
     },
   },
@@ -127,5 +127,9 @@ return {
     build = {
       "cp ./*.py ~/.config/kitty/"
     }
+  },
+  {
+    "gfontenot/vim-xcode",
+    enabled = true,
   },
 }
