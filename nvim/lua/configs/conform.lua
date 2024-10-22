@@ -3,14 +3,22 @@ local options = {
     lua = { "stylua" },
     css = { "prettier" },
     html = { "prettier" },
-    python = { "ruff", "pyright" }
+    python = { "ruff_format" },
+    go = { "goimports", "gofmt" },
+    json = { "jq" },
   },
 
   format_on_save = {
     -- These options will be passed to conform.format()
     timeout_ms = 500,
-    lsp_fallback = true,
+    lsp_format = "fallback",
   },
+  -- Set the log level. Use `:ConformInfo` to see the location of the log file.
+  log_level = vim.log.levels.ERROR,
+  -- Conform will notify you when a formatter errors
+  notify_on_error = true,
+  -- Conform will notify you when no formatters are available for the buffer
+  notify_no_formatters = true,
 }
 
 return options
