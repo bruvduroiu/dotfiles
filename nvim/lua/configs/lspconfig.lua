@@ -13,8 +13,8 @@ local servers = {
   },
   ruff = {
     lint = {
-      run = "onSave"
-    }
+      run = "onSave",
+    },
   },
   zls = {},
 
@@ -33,7 +33,7 @@ local servers = {
   ts_ls = {
     settings = {
       completions = {
-        completeFunctionCalls = true
+        completeFunctionCalls = true,
       },
     },
   },
@@ -51,4 +51,3 @@ for name, opts in pairs(servers) do
 
   require("lspconfig")[name].setup(opts)
 end
-

@@ -3,7 +3,7 @@ local options = {
     lua = { "stylua" },
     css = { "prettier" },
     html = { "prettier" },
-    python = { "ruff_format" },
+    python = { "ruff_format", "ruff_fix", "ruff_organize_imports" },
     go = { "goimports", "gofmt" },
     json = { "jq" },
   },
