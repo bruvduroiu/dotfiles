@@ -70,13 +70,51 @@ return {
 						size = 0.20, -- 30% of the window
 					},
 				},
+				diagnostics = {
+					win = {
+						type = "split",
+						relative = "win",
+						position = "bottom",
+						size = 0.30,
+					},
+				},
+				lsp = { -- Configure LSP references mode
+					win = {
+						type = "split", -- split window
+						relative = "win", -- relative to current window
+						position = "right", -- appear below
+						size = 0.25, -- 25% of the window height
+					},
+				},
+				preview = {
+					mode = "diagnostics",
+					preview = {
+						type = "split",
+						relative = "win",
+						position = "right",
+						size = 0.3,
+					},
+				},
+				preview_float = {
+					mode = "diagnostics",
+					preview = {
+						type = "float",
+						relative = "editor",
+						border = "rounded",
+						title = "Preview",
+						title_pos = "center",
+						position = { 0, -2 },
+						size = { width = 0.3, height = 0.5 },
+						zindex = 200,
+					},
+				},
 			},
 		}, -- for default options, refer to the configuration section for custom setup.
 		cmd = "Trouble",
 		keys = {
 			{
 				"<leader>xx",
-				"<cmd>Trouble diagnostics toggle<cr>",
+				"<cmd>Trouble preview toggle<cr>",
 				desc = "Diagnostics (Trouble)",
 			},
 			{
@@ -91,7 +129,7 @@ return {
 			},
 			{
 				"<leader>cl",
-				"<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+				"<cmd>Trouble lsp toggle focus=false<cr>",
 				desc = "LSP Definitions / references / ... (Trouble)",
 			},
 			{
@@ -183,5 +221,11 @@ return {
 				ft = { "markdown", "Avante" },
 			},
 		},
+	},
+	{
+		"folke/edgy.nvim",
+		event = "VeryLazy",
+		enabled = false,
+		opts = require("configs.edgy"),
 	},
 }
