@@ -7,6 +7,9 @@ local options = {
 		tf = { "tflint", "terraform-ls" },
 		go = { "goimports", "gofmt" },
 		json = { "jq" },
+		templ = { "templ" },
+		ts = { "typescript-language-server" },
+		zig = { "zls" },
 	},
 
 	format_on_save = {
