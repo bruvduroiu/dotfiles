@@ -1,0 +1,43 @@
+### Configuration
+# Font
+font-family = "Hack Nerd Font Mono"
+font-family-bold = "Hack Nerd Font Mono"
+font-family-italic = "Hack Nerd Font Mono"
+font-family-bold-italic = "Hack Nerd Font Mono"
+font-family = "Hack Nerd Font Mono"
+font-size = 15.0
+
+# Theme
+theme = "CutiePro"
+
+# Cursor
+cursor-style = "block"
+mouse-hide-while-typing = true
+background-opacity = 1
+background-blur = 10
+unfocused-split-opacity = 1
+
+# Window
+window-padding-x = 0
+window-padding-y = 0
+
+macos-titlebar-style = "tabs"
+macos-option-as-alt = left
+
+### Keybinds
+# Splits
+keybind = ctrl+a>v=new_split:right
+keybind = ctrl+a>n=new_split:down
+keybind = ctrl+a>z=toggle_split_zoom
+keybind = alt+h=goto_split:left
+keybind = alt+l=goto_split:right
+keybind = alt+j=goto_split:down
+keybind = alt+k=goto_split:up
+# Tabs
+keybind = cmd+t=new_tab
+keybind = cmd+w=close_tab
+keybind = ctrl+tab=next_tab
+keybind = ctrl+shift>tab=previous_tab
+keybind = ctrl+a>d=close_surface
+# Terminal
+keybind = global:cmd+grave_accent=toggle_quick_terminal

@@ -3,9 +3,9 @@
 
 # The current setup
 
-Terminal Emulator: [Kitty](https://sw.kovidgoyal.net/kitty/)
-- fast GPU accelerated terminal emulator
-- removes need for tmux (appreciate it)
+Terminal Emulator: [Ghostty](https://ghostty.org/)
+- Zig-based terminal emulator
+- uses platform-native UI & GPU acceleration (e.g. MacOS secure input for passwords)
 
 Shell: [fish](https://fishshell.com/)
 - completions
