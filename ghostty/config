@@ -8,7 +8,7 @@ font-family = "Hack Nerd Font Mono"
 font-size = 15.0
 
 # Theme
-theme = "CutiePro"
+theme = "detuned"
 
 # Cursor
 cursor-style = "block"
