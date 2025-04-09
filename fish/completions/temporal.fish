@@ -1,0 +1,1 @@
+eval "$(temporal completion fish)"
