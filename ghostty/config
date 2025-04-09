@@ -45,3 +45,4 @@ keybind = ctrl+shift>tab=previous_tab
 keybind = ctrl+a>d=close_surface
 # Terminal
 keybind = global:cmd+grave_accent=toggle_quick_terminal
+shell-integration = fish
