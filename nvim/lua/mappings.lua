@@ -1,4 +1,4 @@
-require "nvchad.mappings"
+require("nvchad.mappings")
 
 -- add yours here
 
@@ -14,3 +14,4 @@ map("n", "<C-f>", "<cmd> Telescope live_grep<cr>")
 map("n", "<leader>fs", "<cmd> Telescope grep_string<cr>")
 map("n", "<leader>fb", "<cmd> Telescope buffers<cr>")
 map("n", "<leader>fh", "<cmd> Telescope help_tags<cr>")
+map("n", "<leader>co", "<cmd> Telescope git_branches<cr>")

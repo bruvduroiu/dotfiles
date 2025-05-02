@@ -34,6 +34,7 @@ return {
 		cmd = { "Git", "G", "Gdiffsplit", "Gvdiffsplit", "Gwrite", "Gread", "Ggrep", "GMove", "GDelete", "GBrowse" },
 		keys = {
 			{ "<leader>gs", "<cmd>vertical Git<cr>" },
+			{ "<leader>gb", "<cmd>Git blame<cr>" },
 			desc = "Open Fugitive",
 		},
 		opts = {
@@ -165,14 +166,6 @@ return {
 				inc_rename = false, -- enables an input dialog for inc-rename.nvim
 				lsp_doc_border = false, -- add a border to hover docs and signature help
 			},
-		},
-	},
-	{
-		"knubie/vim-kitty-navigator",
-		enabled = true,
-		lazy = false,
-		build = {
-			"cp ./*.py ~/.config/kitty/",
 		},
 	},
 	{
