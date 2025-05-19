@@ -13,6 +13,8 @@ vim.opt.rtp:prepend(lazypath)
 
 local lazy_config = require("configs.lazy")
 
+vim.opt.relativenumber = true
+
 -- load plugins
 require("lazy").setup({
 	{
