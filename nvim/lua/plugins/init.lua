@@ -68,8 +68,16 @@ return {
 					win = {
 						type = "split", -- split window
 						relative = "win", -- relative to current window
-						position = "left", -- right side
-						size = 0.20, -- 30% of the window
+						position = "right", -- right side
+						size = 0.30, -- 30% of the window
+					},
+				},
+				lsp_document_symbols = { -- Configure symbols mode
+					win = {
+						type = "split", -- split window
+						relative = "win", -- relative to current window
+						position = "right", -- right side
+						size = 0.30, -- 30% of the window
 					},
 				},
 				diagnostics = {
@@ -84,8 +92,8 @@ return {
 					win = {
 						type = "split", -- split window
 						relative = "win", -- relative to current window
-						position = "right", -- appear below
-						size = 0.25, -- 25% of the window height
+						position = "bottom", -- appear below
+						size = 0.20, -- 25% of the window height
 					},
 				},
 				preview = {
@@ -110,6 +118,14 @@ return {
 						zindex = 200,
 					},
 				},
+				lsp_references = {
+					mode = "lsp_references",
+					win = {
+						type = "split",
+						relative = "win",
+						position = "bottom",
+					},
+				},
 			},
 		}, -- for default options, refer to the configuration section for custom setup.
 		cmd = "Trouble",
@@ -126,13 +142,18 @@ return {
 			},
 			{
 				"<leader>cs",
-				"<cmd>Trouble symbols toggle focus=false<cr>",
+				"<cmd>Trouble lsp_document_symbols toggle focus=false pinned=false<cr>",
 				desc = "Symbols (Trouble)",
 			},
 			{
 				"<leader>cl",
-				"<cmd>Trouble lsp toggle focus=false<cr>",
+				"<cmd>Trouble lsp toggle focus=false pinned=false<cr>",
 				desc = "LSP Definitions / references / ... (Trouble)",
+			},
+			{
+				"<leader>cr",
+				"<cmd>Trouble lsp_references toggle focus=false<cr>",
+				desc = "LSP references / ... (Trouble)",
 			},
 			{
 				"<leader>xL",
