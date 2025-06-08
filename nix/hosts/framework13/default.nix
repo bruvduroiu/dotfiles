@@ -1,9 +1,10 @@
-{ self, ... }:
+{ self, inputs, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
     ./hyprland.nix
+    inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
   ];
 
   # System configuration

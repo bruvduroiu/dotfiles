@@ -10,6 +10,8 @@ let laptop = [
   ./network
   ./network/tailscale.nix
 
+  ./nix
+
   ./programs
 
   ./services/kanata

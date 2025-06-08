@@ -3,7 +3,7 @@
 {
   imports = [
     ./walker.nix
-    ./waybar.nix
+    ./waybar
     ./hyprlock.nix
   ];
 

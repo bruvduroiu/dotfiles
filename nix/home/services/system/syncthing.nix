@@ -1,5 +1,5 @@
 {
-  programs.waybar = {
+  services.syncthing = {
     enable = true;
   };
 }

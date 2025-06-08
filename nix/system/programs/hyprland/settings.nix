@@ -12,7 +12,7 @@
 
     exec-once = [
       # Finalize startup
-      "uswm finalize"
+      "uwsm finalize"
       "walker --gapplication-service"
       "fcitx5 -d -r"
       "nm-applet --indicator"
@@ -71,7 +71,6 @@
 
     misc = {
       force_default_wallpaper = 0;
-      disable_hyperland_logo = true;
     };
 
     input = {
@@ -85,6 +84,10 @@
 
     gestures = {
       workspace_swipe = false;
+    };
+
+    animations = {
+      enabled = false;
     };
   };
 }

@@ -36,10 +36,10 @@ in {
       "$mod Control, Q, exec, hyprlock"
 
       # move focus
-      "$mainMod, h, movefocus, l"
-      "$mainMod, l, movefocus, r"
-      "$mainMod, k, movefocus, u"
-      "$mainMod, j, movefocus, d"
+      "$mod, h, movefocus, l"
+      "$mod, l, movefocus, r"
+      "$mod, k, movefocus, u"
+      "$mod, j, movefocus, d"
     ]
     ++ workspaces;
 
