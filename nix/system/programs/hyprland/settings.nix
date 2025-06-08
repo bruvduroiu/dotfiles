@@ -20,6 +20,8 @@
       "wl-paste --type text --watch cliphist store"
       "wl-paste --type image --watch cliphist store"
       "hyprlock"
+      "fcitx5 -d -r"
+      "fcitx5-remote -r"
     ];
 
     general = {
