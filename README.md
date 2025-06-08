@@ -3,6 +3,9 @@
 
 # The current setup
 
+System Management: [NixOS](https://nixos.org/)
+- replacing all dotfile management with NixOS Home Manager
+
 Terminal Emulator: [Ghostty](https://ghostty.org/)
 - Zig-based terminal emulator
 - uses platform-native UI & GPU acceleration (e.g. MacOS secure input for passwords)
