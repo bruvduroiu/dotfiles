@@ -9,6 +9,7 @@ let laptop = [
 
   ./network
   ./network/tailscale.nix
+  ./network/syncthing.nix
 
   ./nix
 

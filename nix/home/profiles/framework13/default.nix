@@ -9,6 +9,8 @@
 
     # terminal emulators
     ../../terminal/emulators/ghostty.nix
+
+    ../../services/system/syncthing.nix
   ];
 
   wayland.windowManager.hyprland.settings = {
