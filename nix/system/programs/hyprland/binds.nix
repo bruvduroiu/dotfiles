@@ -11,6 +11,8 @@ let
     ]
   )
   10);
+
+  runOnce = program: "pgrep ${program} || uwsm app -- ${program}";
 in {
   programs.hyprland.settings = {
     bindm = [
@@ -24,9 +26,9 @@ in {
       # compositor commands
       "$mod Control ALT, Q, exit,"
       "$mod, Q, killactive,"
-      "$mod, F, fullscreen,"
+      "$mod SHIFT, F, fullscreen,"
       "$mod, G, togglegroup,"
-      "$mod, T, togglefloating,"
+      "$mod, F, togglefloating,"
       "$mod ALT, , resizeactive"
 
       # utilities
@@ -40,6 +42,11 @@ in {
       "$mod, l, movefocus, r"
       "$mod, k, movefocus, u"
       "$mod, j, movefocus, d"
+
+      # screenshot
+      # area
+      ", Print, exec, ${runOnce "grimblast"} --notify copysave area"
+      "$mod SHIFT, R, exec, ${runOnce "grimblast"} --notify copysave area"
     ]
     ++ workspaces;
 
@@ -48,8 +55,8 @@ in {
       ",XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
       ",XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
       ",XF86AudioMicMute, exec, wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
-      ",XF86MonBrightnessUp, exec, brightnessctl -e4 -n2 set 5%+'"
-      ",XF86MonBrightnessDown, exec, brightnessctl -e4 -n2 set 5%-"
+      ",XF86MonBrightnessUp, exec, brightnessctl -c backlight s \"10%+\""
+      ",XF86MonBrightnessDown, exec, brightnessctl -c backlight s \"10%-\""
     ];
 
     bindl = [

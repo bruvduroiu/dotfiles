@@ -25,8 +25,8 @@
     ];
 
     general = {
-      gaps_in = 5;
-      gaps_out = 20;
+      gaps_in = 2;
+      gaps_out = 5;
 
       border_size = 2;
 
@@ -64,6 +64,11 @@
 
         vibrancy = 0.1696;
       };
+    };
+
+    master = {
+      orientation = "center";
+      slave_count_for_center_master = 2;
     };
 
     dwindle = {

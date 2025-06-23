@@ -5,7 +5,7 @@ font-family-bold = "Hack Nerd Font Mono"
 font-family-italic = "Hack Nerd Font Mono"
 font-family-bold-italic = "Hack Nerd Font Mono"
 font-family = "Hack Nerd Font Mono"
-font-size = 15.0
+font-size = 13.0
 
 # Theme
 theme = "detuned"

@@ -20,6 +20,8 @@ let laptop = [
   ./services/pipewire.nix
   ./services/backlight.nix
   ./services/power.nix
+  ./services/podman.nix
+  ./services/brightnessctl.nix
 ];
 in {
   inherit laptop;

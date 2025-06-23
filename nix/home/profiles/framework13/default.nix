@@ -5,12 +5,15 @@
 
     # programs
     ../../programs
-    # ../../programs/wayland
+    ../../programs/keepassxc.nix
+    ../../programs/wayland
 
     # terminal emulators
     ../../terminal/emulators/ghostty.nix
 
     ../../services/system/syncthing.nix
+    ../../services/wayland/hyprpaper.nix
+    ../../services/mako.nix
   ];
 
   wayland.windowManager.hyprland.settings = {

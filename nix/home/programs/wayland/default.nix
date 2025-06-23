@@ -5,9 +5,14 @@
     ./walker.nix
     ./waybar
     ./hyprlock.nix
+    ./hypridle.nix
   ];
 
   home.packages = with pkgs; [
+    # screenshot
+    grim
+    slurp
+
     wl-clipboard
   ];
 

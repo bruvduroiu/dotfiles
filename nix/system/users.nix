@@ -1,11 +1,14 @@
 { config, pkgs, ... }:
 
 {
-  users.users.bogdan = {
-    isNormalUser = true;
-    description = "Bogdan";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
-    shell = pkgs.fish;
+  users = {
+    defaultUserShell = pkgs.fish;
+
+    users.bogdan = {
+      isNormalUser = true;
+      description = "Bogdan";
+      extraGroups = [ "networkmanager" "wheel" "docker" ];
+    };
   };
 
   # Enable fish shell system-wide

@@ -4,5 +4,6 @@
     ./wayland
     ./messaging.nix
     ./office.nix
+    ./development.nix
   ];
 }
