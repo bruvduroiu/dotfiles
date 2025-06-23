@@ -215,4 +215,10 @@ return {
 		enabled = false,
 		opts = require("configs.edgy"),
 	},
+  {
+    "supermaven-inc/supermaven-nvim",
+    event = "VeryLazy",
+    enabled = true,
+    opts = require("configs.supermaven"),
+  },
 }

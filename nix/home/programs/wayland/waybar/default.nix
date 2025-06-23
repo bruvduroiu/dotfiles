@@ -8,15 +8,20 @@
       height = 24;
       spacing = 5;
       margin = "0";
-      modules-left = ["hyprland/workspaces" "temperature" "custom/weather" ];
-      modules-center = ["clock"];
-      modules-right = ["pulseaudio" "battery" "backlight" "network" "hyprland/language" "cpu" "memory" "disk" "custom/uptime" "custom/updates" "tray"];
+      modules-left = ["clock" "temperature" "custom/weather" ];
+      modules-center = ["hyprland/workspaces"];
+      modules-right = ["pulseaudio" "battery" "network" "cpu" "memory" "disk" "custom/updates" "tray"];
       "hyprland/workspaces" = {
-        format = "<span size='larger'>{icon}</span>";
-        on-click = "actiate";
+        format = "{icon}";
+        format-icons = {
+          "active" = "";
+          "default" = "";
+          "empty" = "";
+        };
+        on-click = "activate";
         icon-size = 10;
         sort-by-number= true;
-        persistent_workspaces = {
+        persistent-workspaces = {
           "1" = [];
           "2" = [];
           "3" = [];
@@ -60,7 +65,7 @@
         format = "󰚰 {}";
         exec = "checkupdates | wc -l";
         interval = 3600;
-        on-click = "kitty -e sudo pacman -Syu";
+        on-click = "ghostty -e sudo pacman -Syu";
         signal = 8;
       };
 
@@ -80,7 +85,8 @@
       };
 
       clock = {
-        format = "{:%d.%m.%Y | %H:%M}";
+        format = "{:%I:%M:%S %p}";
+        interval = 1;
         format-alt = "󰃮 {:%Y-%m-%d}";
         tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
         calendar = {
@@ -110,20 +116,20 @@
         format = "󰘚 {usage}%";
         tooltip = true;
         interval = 1;
-        on-click = "kitty -e htop";
+        on-click = "ghostty -e htop";
       };
 
       memory = {
         format = "󰍛 {}%";
         interval = 1;
-        on-click = "kitty -e htop";
+        on-click = "ghostty -e htop";
       };
 
       temperature = {
         critical-threshold = 80;
         format = "{icon} {temperatureC}°C";
         format-icons = ["󱃃" "󰔏" "󱃂"];
-        on-click = "kitty -e s-tui";
+        on-click = "ghostty -e s-tui";
       };
 
       battery = {
@@ -146,7 +152,7 @@
         format-disconnected = "󰖪 Disconnected";
         format-alt = "{ifname}: {ipaddr}/{cidr}";
         tooltip-format = "{ifname}: {ipaddr}";
-        on-click = "kitty -e nmtui";
+        on-click = "ghostty -e nmtui";
       };
 
       bluetooth = {
@@ -189,7 +195,7 @@
         interval = 30;
         format = "󰋊 {percentage_used}%";
         path = "/";
-        on-click = "kitty -e gdu /";
+        on-click = "ghostty -e gdu /";
       };
 
       tray = {

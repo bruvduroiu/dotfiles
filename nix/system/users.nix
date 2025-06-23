@@ -12,5 +12,6 @@
   };
 
   # Enable fish shell system-wide
+  # (if you disable this, you must disable the default fish shell)
   programs.fish.enable = true;
 }
