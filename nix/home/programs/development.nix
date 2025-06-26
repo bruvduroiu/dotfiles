@@ -7,5 +7,6 @@
     sops
     kubectl
     aider-chat-with-playwright
+    lazysql
   ];
 }

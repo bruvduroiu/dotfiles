@@ -14,6 +14,8 @@ let laptop = [
   ./nix
 
   ./programs
+  ./programs/ranger.nix
+  ./programs/timewarrior.nix
 
   ./services/kanata
   ./services/greetd.nix

@@ -26,6 +26,11 @@
     # Hyprland
     hyprland.url = "github:hyprwm/hyprland";
 
+    hyprland-contrib = {
+      url = "github:hyprwm/contrib";
+      inputs.nixpkgs.follows = "hyprland/nixpkgs";
+    };
+
     hypridle = {
       url = "github:hyprwm/hypridle";
       inputs = {

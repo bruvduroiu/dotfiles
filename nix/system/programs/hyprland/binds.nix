@@ -45,8 +45,9 @@ in {
 
       # screenshot
       # area
-      ", Print, exec, ${runOnce "grimblast"} --notify copysave area"
-      "$mod SHIFT, R, exec, ${runOnce "grimblast"} --notify copysave area"
+      "SHIFT, Print, exec, ${runOnce "grimblast"} --notify copysave area"
+      # screen
+      ", Print, exec, ${runOnce "grimblast"} --notify copysave screen"
     ]
     ++ workspaces;
 

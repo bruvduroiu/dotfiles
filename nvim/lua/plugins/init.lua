@@ -1,4 +1,5 @@
 return {
+  { "hrsh7th/nvim-cmp", enabled = false },
 	{
 		"stevearc/conform.nvim",
 		event = "BufWritePre", -- uncomment for format on save
@@ -221,4 +222,13 @@ return {
     enabled = true,
     opts = require("configs.supermaven"),
   },
+
+  {
+    "saghen/blink.cmp",
+    dependencies = { "rafamadriz/friendly-snippets" },
+    event = "VeryLazy",
+    version = "*",
+
+    opts = require("configs.blink"),
+  }
 }

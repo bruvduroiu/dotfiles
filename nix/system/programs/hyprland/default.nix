@@ -9,7 +9,12 @@
     ./settings.nix
   ];
 
-  environment.pathsToLink = ["/share/icons"];
+  environment = {
+    pathsToLink = ["/share/icons"];
+    systemPackages = [
+      inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
+    ];
+  };
 
   programs.hyprland = {
     enable = true;

@@ -8,6 +8,7 @@
     env = [
       "XCURSOR_SIZE,${toString 16}"
       "HYPRCURSOR_SIZE,${toString 16}"
+      "GRIMBLAST_NO_CURSOR,1"
     ];
 
     exec-once = [

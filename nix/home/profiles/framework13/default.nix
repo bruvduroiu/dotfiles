@@ -7,6 +7,7 @@
     ../../programs
     ../../programs/keepassxc.nix
     ../../programs/wayland
+    ../../programs/yt-dlp.nix
 
     # terminal emulators
     ../../terminal/emulators/ghostty.nix
