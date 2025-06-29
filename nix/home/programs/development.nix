@@ -8,5 +8,6 @@
     kubectl
     aider-chat-with-playwright
     lazysql
+    lazydocker
   ];
 }
