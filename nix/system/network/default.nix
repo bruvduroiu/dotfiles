@@ -2,7 +2,10 @@
 
 {
   networking = {
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      dns = "none";
+    };
     
     nameservers = [
       "1.1.1.1"
