@@ -26,10 +26,17 @@ in {
       # compositor commands
       "$mod Control ALT, Q, exit,"
       "$mod, Q, killactive,"
+      "$mod SHIFT, ESCAPE, exec, systemctl suspend"
+      "$mod CTRL, ESCAPE, exec, "
+      "$mod SHIFT CTRL, ESCAPE, exec, systemctl poweroff"
+
+      # control tiling
       "$mod SHIFT, F, fullscreen,"
       "$mod, G, togglegroup,"
       "$mod, F, togglefloating,"
       "$mod ALT, , resizeactive"
+      "$mod SHIFT, J, togglesplit, " # dwindle
+      "$mod SHIFT, P, pseudo, " # dwindle
 
       # utilities
       "$mod, ENTER, exec, $terminal"
@@ -42,6 +49,18 @@ in {
       "$mod, l, movefocus, r"
       "$mod, k, movefocus, u"
       "$mod, j, movefocus, d"
+
+      # swap active window with the one next to it
+      "$mod SHIFT, h, swapwindow, l"
+      "$mod SHIFT, l, swapwindow, r"
+      "$mod SHIFT, k, swapwindow, u"
+      "$mod SHIFT, j, swapwindow, d"
+
+      # resize active window
+      "$mod, minus, resizeactive, -100 0"
+      "$mod, equal, resizeactive, 100 0"
+      "$mod SHIFT, minus, resizeactive, 0 -100"
+      "$mod SHIFT, equal, resizeactive, 0 100"
 
       # screenshot
       # area

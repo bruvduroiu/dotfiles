@@ -21,6 +21,7 @@
       "wl-paste --type text --watch cliphist store"
       "wl-paste --type image --watch cliphist store"
       "hyprlock"
+      "mako"
       "fcitx5 -d -r"
       "fcitx5-remote -r"
     ];
@@ -44,11 +45,6 @@
 
     decoration = {
       rounding = 0;
-      rounding_power = 2;
-
-      # Change transparency of focused and unfocused windows
-      active_opacity = 1.0;
-      inactive_opacity = 1.0;
 
       shadow = {
         enabled = true;
@@ -75,6 +71,7 @@
     dwindle = {
       pseudotile = true;
       preserve_split = true;
+      force_split = 2;
     };
 
     misc = {
