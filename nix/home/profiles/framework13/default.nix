@@ -17,6 +17,8 @@
     ../../services/mako.nix
   ];
 
+  wayland.windowManager.hyprland.systemd.enable = false;
+
   wayland.windowManager.hyprland.settings = {
     monitor = [
       ", preferred, auto, 1.60000"
