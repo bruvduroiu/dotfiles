@@ -15,7 +15,7 @@
       # Finalize startup
       "uwsm finalize"
       "walker --gapplication-service"
-      "fcitx5 -d -r"
+      "fcitx5-remote -r"
       "nm-applet --indicator"
       "waybar"
       "wl-paste --type text --watch cliphist store"
