@@ -1,7 +1,12 @@
-# dotfiles
+<h1 align="center">dotfiles</h1> 
 
+## Why?
 
-# The current setup
+- keeping sanity while managing packages between a Linux & MacOS machine
+- I like Nix
+- I want to manage my home directory from a single reproducible pipeline
+
+## The current setup
 
 System Management: [NixOS](https://nixos.org/)
 - replacing all dotfile management with NixOS Home Manager
@@ -20,3 +25,7 @@ Text Editor: [neovim](https://neovim.io/)
 - great community, loads of plugins
 
 Code Completion & Language Servers: Neovim LSP & [Mason](https://github.com/williamboman/mason.nvim)
+
+## Rice 米
+
+![rice](./assets/rice.png)
