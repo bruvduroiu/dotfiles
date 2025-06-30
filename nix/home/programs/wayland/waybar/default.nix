@@ -8,7 +8,7 @@
       height = 24;
       spacing = 5;
       margin = "0";
-      modules-left = ["clock" "temperature" "custom/weather" ];
+      modules-left = ["clock" "temperature" "custom/weather" "custom/playerctl" ];
       modules-center = ["hyprland/workspaces"];
       modules-right = ["pulseaudio" "battery" "network" "cpu" "memory" "disk" "custom/updates" "tray"];
       "hyprland/workspaces" = {
@@ -116,13 +116,13 @@
         format = "󰘚 {usage}%";
         tooltip = true;
         interval = 1;
-        on-click = "ghostty -e htop";
+        on-click = "ghostty -e btop";
       };
 
       memory = {
         format = "󰍛 {}%";
         interval = 1;
-        on-click = "ghostty -e htop";
+        on-click = "ghostty -e btop";
       };
 
       temperature = {

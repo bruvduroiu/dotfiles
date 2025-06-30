@@ -17,6 +17,7 @@
     ../../services/wayland/hyprpaper.nix
     ../../services/mako.nix
     ../../services/podman.nix
+    ../../services/media/playerctl.nix
   ];
 
   wayland.windowManager.hyprland.settings = {
