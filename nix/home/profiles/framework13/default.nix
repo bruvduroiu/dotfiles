@@ -15,9 +15,8 @@
     ../../services/system/syncthing.nix
     ../../services/wayland/hyprpaper.nix
     ../../services/mako.nix
+    ../../services/podman.nix
   ];
-
-  wayland.windowManager.hyprland.systemd.enable = false;
 
   wayland.windowManager.hyprland.settings = {
     monitor = [
