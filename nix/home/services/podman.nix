@@ -1,5 +1,5 @@
 {
   home.sessionVariables = {
-    DOCKER_HOST = "${XDG_RUNTIME_DIR}/podman/podman.sock";
+    DOCKER_HOST = "unix://$XDG_RUNTIME_DIR/podman/podman.sock";
   };
 }
