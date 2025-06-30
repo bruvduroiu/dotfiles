@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   programs.neovim = {
@@ -11,5 +11,10 @@
     extraPackages = with pkgs; [
       clang
     ];
+  };
+
+  home.file."${config.xdg.configHome}/nvim" = {
+    source = ./nvchad;
+    recursive = true;
   };
 }
