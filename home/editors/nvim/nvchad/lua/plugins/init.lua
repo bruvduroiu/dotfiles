@@ -5,6 +5,10 @@ return {
 		event = "BufWritePre", -- uncomment for format on save
 		opts = require("configs.conform"),
 	},
+  {
+    "nvim-telescope/telescope.nvim",
+    opts = require("configs.telescope"),
+  },
 
 	-- These are some examples, uncomment them if you want to see them work!
 	{

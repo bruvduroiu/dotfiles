@@ -3,7 +3,8 @@
     ./browsers/firefox.nix
     ./wayland
     ./messaging.nix
-    ./office.nix
+    ./office
     ./development.nix
+    ./media
   ];
 }

@@ -7,6 +7,7 @@
 
     libnotify
     ripgrep
+    ripdrag
   ];
 
   programs = {

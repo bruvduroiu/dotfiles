@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{ config, lib, pkgs, ... }: let
+  eza_opts = lib.strings.concatStringsSep " " config.programs.eza.extraOptions;
+  fd_opts = lib.strings.concatStringsSep " " ["--hidden"];
+  delta_opts = lib.strings.concatStringsSep " " ["--paging=never"];
+in 
 
 {
   programs = {
@@ -13,6 +17,9 @@
       ];
       interactiveShellInit = ''
         fzf_configure_bindings --directory=\cp --processes=\co
+        set -gx fzf_fd_opts "${fd_opts}"
+        set -gx fzf_preview_dir_cmd "${pkgs.eza}/bin/eza ${eza_opts}"
+        set -gx fzf_diff_highlighter "${pkgs.delta}/bin/delta ${delta_opts}"
       '';
       shellAliases = {
         l = "ls -lah";
@@ -34,7 +41,13 @@
             set_color red
           end
 
-          echo -n '≫'
+          set -l nix_shell_info (
+            if test -n "$IN_NIX_SHELL"
+              echo -n "<nix-shell> "
+            end
+          )
+
+          echo -n -s "$nix_shell_info ≫"
 
           set_color normal
           echo -n ' '

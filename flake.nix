@@ -63,5 +63,6 @@
       };
     };
     walker.url = "github:abenz1267/walker";
+    yazi.url = "github:sxyazi/yazi";
   };
 }
