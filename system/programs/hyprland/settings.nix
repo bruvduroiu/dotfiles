@@ -15,15 +15,13 @@
       # Finalize startup
       "uwsm finalize"
       "walker --gapplication-service"
-      "fcitx5-remote -r"
       "nm-applet --indicator"
       "waybar"
       "wl-paste --type text --watch cliphist store"
       "wl-paste --type image --watch cliphist store"
       "hyprlock"
       "mako"
-      "fcitx5 -d -r"
-      "fcitx5-remote -r"
+      "fcitx5 --replace -d"
     ];
 
     general = {
