@@ -1,5 +1,6 @@
 {
   imports = [
+    ./aws.nix
     ./bat.nix
     ./btop.nix
     ./cli.nix
@@ -8,6 +9,7 @@
     ./fzf.nix
     ./gdu.nix
     ./git.nix
+    ./opencode.nix
     ./stui.nix
     ./yazi
     ./xdg.nix

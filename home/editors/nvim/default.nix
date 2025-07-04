@@ -10,6 +10,17 @@
 
     extraPackages = with pkgs; [
       clang
+
+      # formatters
+      gofumpt
+      goimports-reviser
+      golines
+
+      # gopls
+      gopls
+
+      # tools
+      go
     ];
   };
 

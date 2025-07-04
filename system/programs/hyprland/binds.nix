@@ -39,7 +39,7 @@ in {
       "$mod SHIFT, P, pseudo, " # dwindle
 
       # utilities
-      "$mod, return, exec, $terminal"
+      "$mod, RETURN, exec, uwsm app -- $terminal"
       "$mod, SPACE, exec, $menu"
       "$mod, E, exec, $fileManager"
       "$mod Control, Q, exec, hyprlock"
