@@ -13,7 +13,6 @@
     # terminal emulators
     ../../terminal/emulators/ghostty.nix
 
-    ../../services/system/syncthing.nix
     ../../services/wayland/hyprpaper.nix
     ../../services/mako.nix
     ../../services/podman.nix

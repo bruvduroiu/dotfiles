@@ -17,6 +17,7 @@ let laptop = [
   ./programs/ranger.nix
   ./programs/timewarrior.nix
 
+  ./services/syncthing.nix
   ./services/kanata
   ./services/greetd.nix
   ./services/pipewire.nix

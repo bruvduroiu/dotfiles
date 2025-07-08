@@ -37,11 +37,13 @@ in {
       "$mod ALT, , resizeactive"
       "$mod SHIFT, J, togglesplit, " # dwindle
       "$mod SHIFT, P, pseudo, " # dwindle
+      "$mod SHIFT, C, centerwindow" # center
+      "$mod SHIFT, C, resizeactive, exact 1000 600"
 
       # utilities
       "$mod, RETURN, exec, uwsm app -- $terminal"
+      "$mod, y, exec, uwsm app -- $fileManager"
       "$mod, SPACE, exec, $menu"
-      "$mod, E, exec, $fileManager"
       "$mod Control, Q, exec, hyprlock"
 
       # move focus

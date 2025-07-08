@@ -21,6 +21,10 @@
 
       # tools
       go
+
+      # nix
+      nixfmt-rfc-style
+      nil
     ];
   };
 

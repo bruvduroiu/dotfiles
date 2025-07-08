@@ -1,3 +1,5 @@
+{ config, ... }:
+
 {
   programs.waybar = {
     enable = true;
@@ -8,9 +10,9 @@
       height = 24;
       spacing = 5;
       margin = "0";
-      modules-left = ["clock" "temperature" "custom/weather" "custom/playerctl" ];
+      modules-left = ["clock" "custom/timew" "custom/playerctl" ];
       modules-center = ["hyprland/workspaces"];
-      modules-right = ["pulseaudio" "battery" "network" "cpu" "memory" "disk" "custom/updates" "tray"];
+      modules-right = ["pulseaudio" "battery" "network" "cpu" "memory" "disk" "temperature" "custom/updates" "tray"];
       "hyprland/workspaces" = {
         format = "{icon}";
         format-icons = {
@@ -47,18 +49,18 @@
       };
 
       "custom/weather" = {
-        exec = "curl 'https://wttr.in/?format=1'";
-        interval = 3600;
+        exec = "curl 'https://wttr.in/?format=%C+%t+Hum:+%h+%w'";
+        on-click = "xdg-open 'https://wttr.in/'";
+        interval = 900;
         format = "{}";
         tooltip = true;
       };
 
-      "custom/quote" = {
-        format = "󰚛 {}";
-        interval = 3600;
-        exec = "fortune -s";
-        on-click = "fortune | yad --text-info --width=400 --height=200 --title='Fortune'";
-        tooltip = true;
+      "custom/timew" = {
+        format = "󰔟 {}";
+        exec = "timew get dom.active.json | jq -r '.tags | join(\" \")'";
+        exec-if = "timew get dom.active";
+        interval = 10;
       };
 
       "custom/updates" = {
@@ -85,8 +87,8 @@
       };
 
       clock = {
-        format = "{:%A %H:%M}";
-        interval = 1;
+        format = "{:%H:%M}";
+        interval = 15;
         format-alt = "󰃮 {:%Y-%m-%d}";
         tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
         calendar = {

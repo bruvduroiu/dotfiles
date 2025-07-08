@@ -33,7 +33,7 @@
       "application/epub+zip" = ["org.pwmt.zathura"];
       "application/pdf" = ["org.pwmt.zathura"];
       "text/plain" = ["nvim"];
-      "inode/directory" = ["yazi"];
+      "inode/directory" = ["thunar.desktop"];
       "x-scheme-handler/magnet" = ["transmission-gtk"];
       # Full entry is org.telegram.desktop.desktop
       "x-scheme-handler/tg" = ["org.telegram.desktop"];

@@ -9,6 +9,7 @@
     ./fzf.nix
     ./gdu.nix
     ./git.nix
+    ./k9s.nix
     ./opencode.nix
     ./stui.nix
     ./yazi

@@ -5,6 +5,7 @@
     "$mod" = "SUPER";
     "$menu" = "walker";
     "$terminal" = "ghostty";
+    "$fileManager" = "yazi";
     env = [
       "XCURSOR_SIZE,${toString 16}"
       "HYPRCURSOR_SIZE,${toString 16}"

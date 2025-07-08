@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./thunar.nix
     ./zathura.nix
   ];
 
