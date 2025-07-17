@@ -1,4 +1,4 @@
-{ self, inputs, ... }:
+{ lib, pkgs, self, inputs, ... }:
 
 {
   imports = [
@@ -6,6 +6,10 @@
     ./hyprland.nix
     inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
   ];
+
+  boot = {
+    kernelPackages = lib.mkForce pkgs.linuxPackages_6_14;
+  };
 
   # System configuration
   networking.hostName = "framework13";

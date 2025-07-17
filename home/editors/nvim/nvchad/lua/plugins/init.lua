@@ -100,6 +100,28 @@ return {
 						position = "bottom", -- appear below
 						size = 0.20, -- 25% of the window height
 					},
+          filter = {
+            any = {
+              -- all symbol kinds for help / markdown files
+              ft = { "help", "markdown" },
+              -- default set of symbol kinds
+              kind = {
+                "Class",
+                "Constructor",
+                "Enum",
+                "Field",
+                "Function",
+                "Interface",
+                "Method",
+                "Module",
+                "Namespace",
+                "Package",
+                "Property",
+                "Struct",
+                "Trait",
+              },
+            },
+          },
 				},
 				preview = {
 					mode = "diagnostics",

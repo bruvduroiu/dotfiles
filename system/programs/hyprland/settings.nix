@@ -63,13 +63,11 @@
     };
 
     master = {
-      orientation = "center";
-      slave_count_for_center_master = 2;
+      orientation = "right";
     };
 
     dwindle = {
       pseudotile = true;
-      preserve_split = true;
       force_split = 2;
     };
 

@@ -1,8 +1,5 @@
 { config, pkgs, ... }:
 
-let
-  openrouterApiKey = builtins.getEnv "OPENROUTER_API_KEY";
-in 
 {
   home.file."${config.home.homeDirectory}/.opencode.json".text = ''
     {
@@ -23,7 +20,6 @@ in
           "disabled": true
         },
         "openrouter": {
-          "apiKey": "${openrouterApiKey}",
           "disabled": false
         }
       },

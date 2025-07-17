@@ -38,7 +38,6 @@ in {
       "$mod SHIFT, J, togglesplit, " # dwindle
       "$mod SHIFT, P, pseudo, " # dwindle
       "$mod SHIFT, C, centerwindow" # center
-      "$mod SHIFT, C, resizeactive, exact 1000 600"
 
       # utilities
       "$mod, RETURN, exec, uwsm app -- $terminal"
@@ -63,6 +62,18 @@ in {
       "$mod, equal, resizeactive, 100 0"
       "$mod SHIFT, minus, resizeactive, 0 -100"
       "$mod SHIFT, equal, resizeactive, 0 100"
+
+      # cycle workspaces
+      "$mod, bracketleft, workspace, m-1"
+      "$mod, bracketright, workspace, m+1"
+
+      # cycle monitors
+      "$mod SHIFT, bracketleft, focusmonitor, l"
+      "$mod SHIFT, bracketright, focusmonitor, r"
+
+      # send focused workspace to left/right monitor
+      "$mod SHIFT ALT, bracketleft, movecurrentworkspacetomonitor, l"
+      "$mod SHIFT ALT, bracketright, movecurrentworkspacetomonitor, r"
 
       # screenshot
       # area

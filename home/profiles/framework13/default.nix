@@ -16,12 +16,14 @@
     ../../services/wayland/hyprpaper.nix
     ../../services/mako.nix
     ../../services/podman.nix
+    ../../services/trayscale.nix
     ../../services/media/playerctl.nix
   ];
 
   wayland.windowManager.hyprland.settings = {
     monitor = [
-      ", preferred, auto, 1.60000"
+      "DP-3, 3840x2160@60.00, 0x0, 1"
+      "eDP-1, preferred, 3840x0, 1.5"
     ];
 
     device = {

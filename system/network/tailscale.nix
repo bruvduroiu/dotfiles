@@ -16,6 +16,7 @@
   services.tailscale = {
     enable = true;
     openFirewall = true;
+    extraUpFlags = [ "--operator=${config.users.users.bogdan.name}" ];
   };
 
   systemd.services.tailscale-autoconnect = {
@@ -29,7 +30,7 @@
 
     script = with pkgs; ''
       # wait for tailscaled to settle
-      sleep 5
+      sleep 2
 
     '';
 
