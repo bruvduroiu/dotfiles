@@ -4,7 +4,7 @@
   networking = {
     networkmanager = {
       enable = true;
-      dns = "none";
+      dns = "systemd-resolved";
     };
     
     nameservers = [
@@ -19,5 +19,12 @@
       127.0.0.1 authress
       127.0.0.1 localstack
     '';
+  };
+
+  services = {
+    resolved = {
+      enable = true;
+      dnsovertls = "opportunistic";
+    };
   };
 }
