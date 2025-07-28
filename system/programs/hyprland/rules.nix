@@ -27,6 +27,11 @@
 
       "tile, class:^com.mitchellh.ghostty$"
 
+      # Screen Sharing
+      "noscreenshare, initialClass:(discord)"
+      "noscreenshare, initialClass:(thunderbird)"
+      "noscreenshare, initialClass:(org.keepassxc.KeePassXC)"
+
       # Dialog windows - float+center
       "center, title:^(Open File)(.*)$"
       "center, title:^(Select a File)(.*)$"

@@ -75,6 +75,10 @@ in {
       "$mod SHIFT ALT, bracketleft, movecurrentworkspacetomonitor, l"
       "$mod SHIFT ALT, bracketright, movecurrentworkspacetomonitor, r"
 
+      # Cycle master orientation
+      "$mod SHIFT, SPACE, layoutmsg, orientationnext"
+      "$mod CTRL SHIFT, SPACE, layoutmsg, orientationprev"
+
       # screenshot
       # area
       "SHIFT, Print, exec, ${runOnce "grimblast"} --notify copysave area"

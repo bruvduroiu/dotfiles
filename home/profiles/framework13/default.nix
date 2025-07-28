@@ -22,7 +22,7 @@
 
   wayland.windowManager.hyprland.settings = {
     monitor = [
-      "DP-3, 3840x2160@60.00, 0x0, 1"
+      "DP-4, 3840x2160@60.00, 0x0, 1"
       "eDP-1, preferred, 3840x0, 1.5"
     ];
 

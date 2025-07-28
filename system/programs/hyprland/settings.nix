@@ -63,7 +63,10 @@
     };
 
     master = {
-      orientation = "right";
+      orientation = "center";
+      slave_count_for_center_master = 2;
+      center_master_fallback = "left";
+      mfact = 0.70;
     };
 
     dwindle = {

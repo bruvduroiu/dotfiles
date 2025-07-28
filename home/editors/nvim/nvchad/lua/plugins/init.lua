@@ -245,7 +245,7 @@ return {
   {
     "supermaven-inc/supermaven-nvim",
     event = "VeryLazy",
-    enabled = true,
+    enabled = false,
     opts = require("configs.supermaven"),
   },
 

@@ -13,12 +13,6 @@
       "8.8.8.8"
       "8.8.4.4"
     ];
-
-    extraHosts = ''
-      127.0.0.1 hatchet-lite
-      127.0.0.1 authress
-      127.0.0.1 localstack
-    '';
   };
 
   services = {
