@@ -1,4 +1,4 @@
-{ self, ... }:
+{ self, inputs, ... }:
 
 {
   nixpkgs = {
@@ -8,21 +8,21 @@
     ];
 
     overlays = [
+      inputs.nur.overlay
       (final: prev: {
         lib = 
           prev.lib
           // {
             colors = import "${self}/lib/colors" prev.lib;
           };
-        opencode = prev.opencode.overrideAttrs (oldAttrs: {
-          version = "0.0.55";
+        podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman.overrideAttrs (oldAttrs: rec {
+          version = "5.6.0-rc1";
           src = prev.fetchFromGitHub {
-            owner = "opencode-ai";
-            repo = "opencode";
-            rev = "v0.0.55";
-            hash = "sha256-UjGNtekqPVUxH/jfi6/D4hNM27856IjbepW7SgY2yQw="; 
+            owner = "containers";
+            repo = "podman";
+            rev = "v${version}";
+            hash = "sha256-pgilheesCs7BzPIloyYPPMGv+KKoiEsVZFoHwePdUKM="; 
           };
-          vendorHash = "sha256-Kcwd8deHug7BPDzmbdFqEfoArpXJb1JtBKuk+drdohM=";
         });
         podman-compose = prev.podman-compose.overrideAttrs (oldAttrs: rec {
           version = "1.5.0";

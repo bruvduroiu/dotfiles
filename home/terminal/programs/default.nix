@@ -10,7 +10,7 @@
     ./gdu.nix
     ./git.nix
     ./k9s.nix
-    ./opencode.nix
+    ./crush.nix
     ./stui.nix
     ./yazi
     ./xdg.nix

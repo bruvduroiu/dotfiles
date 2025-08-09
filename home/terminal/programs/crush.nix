@@ -1,10 +1,11 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
-  home.file."${config.home.homeDirectory}/.opencode.json".text = ''
+  home.file."${config.home.homeDirectory}/.config/crush/crush.json".text = ''
     {
+      "$schema": "https://charm.land/crush.json",
       "data": {
-        "directory": ".opencode"
+        "directory": ".crush"
       },
       "providers": {
         "openai": {
@@ -54,6 +55,10 @@
         "python": {
           "disabled": false,
           "command": "${pkgs.pyright}/bin/pyright"
+        },
+        "terraform": {
+          "disabled": false,
+          "command": "${pkgs.terraform-lsp}/bin/terraform-lsp"
         }
       },
       "debug": false,
@@ -62,7 +67,7 @@
     }
   '';
 
-  home.packages = with pkgs; [
-    opencode
+  home.packages = with pkgs.nur.repos.charmbracelet; [
+    crush
   ];
 }

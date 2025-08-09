@@ -30,5 +30,5 @@
   # don't touch this
   system.stateVersion = "25.11"; # Did you read the comment?
 
-  time.timeZone = "Asia/Taipei";
+  time.timeZone = "Europe/Bucharest";
 }
