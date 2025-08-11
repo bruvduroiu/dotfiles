@@ -36,16 +36,6 @@
               url = "https://github.com/abenz1267/walker";
               keywords = [ "walker" "github" ];
             }
-            {
-              label = "Aurelio - Saturn";
-              url = "https://github.com/aurelio-labs/saturn";
-              keywords = [ "aurelio" "saturn" "github" ];
-            }
-            {
-              label = "Alai - Spark";
-              url = "https://github.com/alai-studios/spark";
-              keywords = [ "alai" "spark" "github" ];
-            }
           ];
         };
         clipboard = {

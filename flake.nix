@@ -31,6 +31,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    openapi-tui.url = "github:zaghaghi/openapi-tui";
+
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";

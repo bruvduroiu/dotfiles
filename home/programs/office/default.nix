@@ -7,11 +7,12 @@
   ];
 
   home.packages = with pkgs; [
-    papers
-    xournalpp
     libreoffice
-    thunderbird
     obsidian
+    papers
+    pinta
     slack
+    thunderbird
+    xournalpp
   ];
 }
