@@ -4,8 +4,10 @@
   programs.hyprland.settings = {
     "$mod" = "SUPER";
     "$menu" = "walker";
-    "$terminal" = "ghostty";
-    "$fileManager" = "yazi";
+    "$terminal" = "uwsm app -- ghostty";
+    "$fileManager" = "uwsm app -- yazi";
+    "$browser" = "uwsm app -- firefox";
+    "$webapp"  = "$browser --new-tab";
     env = [
       "XCURSOR_SIZE,${toString 16}"
       "HYPRCURSOR_SIZE,${toString 16}"
@@ -39,6 +41,8 @@
 
       # Please see https://wiki.hyprland.org/Configuring/Tearing/ before you turn this on
       allow_tearing = false;
+
+      layout = "dwindle";
 
     };
 

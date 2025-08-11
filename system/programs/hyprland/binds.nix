@@ -40,10 +40,18 @@ in {
       "$mod SHIFT, C, centerwindow" # center
 
       # utilities
-      "$mod, RETURN, exec, uwsm app -- $terminal"
-      "$mod, y, exec, uwsm app -- $fileManager"
+      "$mod, RETURN, exec, $terminal"
+      "$mod, y, exec, $fileManager"
       "$mod, SPACE, exec, $menu"
       "$mod Control, Q, exec, hyprlock"
+
+      # Applications
+      "$mod, A, exec, $webapp https://openrouter.ai/chat"
+      "$mod, C, exec, $webapp https://app.hey.com/calendar/weeks/"
+      "$mod, D, exec, $terminal -e lazydocker"
+      "$mod, E, exec, $webapp https://app.hey.com"
+      "$mod, O, exec, uwsm app -- obsidian -disable-gpu"
+      "$mod, slash, exec, uwsm app -- keepassxc"
 
       # move focus
       "$mod, h, movefocus, l"

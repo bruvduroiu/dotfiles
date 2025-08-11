@@ -7,6 +7,8 @@
   ];
 
   home.packages = with pkgs; [
+    papers
+    xournalpp
     libreoffice
     thunderbird
     obsidian
