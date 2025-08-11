@@ -7,8 +7,8 @@
   ];
 
   home.packages = with pkgs; [
-    thunderbird
     libreoffice
+    thunderbird
     obsidian
     slack
   ];

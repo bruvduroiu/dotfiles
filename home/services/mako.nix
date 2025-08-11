@@ -17,8 +17,10 @@
         layer = "overlay";
         padding = "12,20";
         width = 420;
-        height = 120;
-        margin = 12;
+        height = 110;
+        margin = 10;
+        outer-margin = 20;
+        max-icon-size = 32;
 
         "urgency=low" = {
           border-color = "#cccccc";
