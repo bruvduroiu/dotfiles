@@ -33,6 +33,9 @@
             hash = "sha256-AEnq0wsDHaCxefaEX4lB+pCAIKzN0oyaBNm7t7tK/yI="; 
           };
         });
+        obsidian = prev.obsidian.overrideAttrs (oldAttrs: rec {
+          version = "1.9.10";
+        });
        })
     ];
   };
