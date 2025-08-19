@@ -25,6 +25,9 @@
       # nix
       nixfmt-rfc-style
       nil
+
+      # ts
+      prettierd
     ];
   };
 

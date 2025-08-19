@@ -61,6 +61,13 @@
           placeholder = "Switcher";
           prefix = "/";
         };
+        theme = {
+          weight = 5;
+          icon = "switcher";
+          placeholder = "Theme";
+          prefix = "theme";
+          exec = "hyprland-theme-switcher";
+        };
         translation = {
           provider = "googlefree";
         };

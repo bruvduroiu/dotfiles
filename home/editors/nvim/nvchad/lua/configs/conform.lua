@@ -8,7 +8,9 @@ local options = {
 		go = { "goimports", "gofmt" },
 		json = { "jq" },
 		templ = { "templ" },
-		ts = { "typescript-language-server", "prettier" },
+		javascript = { "prettierd" },
+		typescript = { "prettierd" },
+		typescriptReact = { "prettierd" },
 		zig = { "zls" },
 	},
 

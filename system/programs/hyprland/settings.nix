@@ -24,7 +24,7 @@
       "wl-paste --type image --watch cliphist store"
       "hyprlock"
       "mako"
-      "fcitx5 --replace -d"
+      "fcitx5 -d --replace"
     ];
 
     general = {
