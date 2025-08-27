@@ -4,6 +4,7 @@
   imports = [
     ./thunar.nix
     ./zathura.nix
+    ./invoice.nix
   ];
 
   home.packages = with pkgs; [
