@@ -10,7 +10,8 @@ local options = {
 		templ = { "templ" },
 		javascript = { "prettierd" },
 		typescript = { "prettierd" },
-		typescriptReact = { "prettierd" },
+    typescriptReact = { "prettierd" },
+    yaml = { "gh-actions-language-server" },
 		zig = { "zls" },
 	},
 

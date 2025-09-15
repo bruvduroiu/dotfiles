@@ -19,11 +19,35 @@
       type = "fcitx5";
       enable = true;
 
-      fcitx5.addons = with pkgs; [
-        fcitx5-rime
-        fcitx5-gtk
-        fcitx5-chewing
-      ];
+      fcitx5 = {
+        addons = with pkgs; [
+          rime-data
+          fcitx5-rime
+          fcitx5-gtk
+          fcitx5-chewing
+          fcitx5-rose-pine
+        ];
+
+        settings = {
+          inputMethod = {
+            GroupOrder."0" = "Default";
+            "Groups/0" = {
+              Name = "Default";
+              "Default Layout" = "gb";
+            };
+            "Groups/0/Items/0".Name = "keyboard-gb";
+            "Groups/0/Items/1".Name = "chewing";
+          };
+          addons.classicui.globalSection = {
+            Theme = "rose-pine-dawn";
+            DarkTheme = "rose-pine-moon";
+            UseDarkTheme = true;
+          };
+        };
+
+        # waylandFrontend = true;
+
+      };
     };
   };
 

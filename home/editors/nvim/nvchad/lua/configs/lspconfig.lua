@@ -19,6 +19,7 @@ local servers = {
 	zls = {},
 	terraformls = {},
 	templ = {},
+  gh_actions_ls = {},
 
 	pyright = {
 		settings = {

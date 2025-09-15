@@ -1,3 +1,5 @@
+{ pkgs, ... }:
+
 {
   imports = [
     ./aws.nix
@@ -14,5 +16,9 @@
     ./stui.nix
     ./yazi
     ./xdg.nix
+  ];
+
+  home.packages = with pkgs; [
+    mods
   ];
 }
