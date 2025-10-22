@@ -42,7 +42,27 @@
         "path": "${config.programs.fish.package}/bin/fish",
         "args": ["-l"]
       },
-      "mcpServers": { },
+      "mcp": {
+        "playwright": {
+          "type": "stdio",
+          "command": "${pkgs.playwright-mcp}/bin/mcp-server-playwright",
+          "args": [
+            "--executable-path",
+            "${pkgs.ungoogled-chromium}/bin/chromium"
+          ],
+          "env": {}
+        },
+        "sequential-thinking": {
+          "type": "stdio",
+          "command": "${pkgs.mcp-server-sequential-thinking}/bin/mcp-server-sequential-thinking",
+          "args": [],
+          "env": {}
+        },
+        "deepwiki": {
+          "type": "http",
+          "url": "https://mcp.deepwiki.com/mcp"
+        }
+      },
       "lsp": {
         "go": {
           "disabled": false,

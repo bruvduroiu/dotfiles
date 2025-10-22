@@ -36,6 +36,7 @@ return {
         "regex",
         "bash",
         "json",
+        "yaml",
 			},
 		},
 	},
@@ -306,5 +307,13 @@ return {
       },
     },
     config = true,
+  },
+  {
+    "cuducos/yaml.nvim",
+    ft = { "yaml" }, -- optional
+    dependencies = {
+      "folke/snacks.nvim", -- optional
+      "nvim-telescope/telescope.nvim", -- optional
+    },
   }
 }

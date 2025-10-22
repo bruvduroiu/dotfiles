@@ -8,7 +8,8 @@
     ];
 
     overlays = [
-      inputs.nur.overlay
+      inputs.nur.overlays.default
+      inputs.mcp-servers-nix.overlays.default
       (final: prev: {
         lib = 
           prev.lib
