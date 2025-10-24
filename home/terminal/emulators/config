@@ -13,9 +13,9 @@ theme = "detuned"
 # Cursor
 cursor-style = "block"
 mouse-hide-while-typing = true
-background-opacity = 0.85
+background-opacity = 0.8
 background-blur = 10
-unfocused-split-opacity = 1
+unfocused-split-opacity = 0.8
 
 # Window
 window-padding-x = 0

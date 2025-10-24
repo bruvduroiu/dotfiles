@@ -16,6 +16,11 @@
           // {
             colors = import "${self}/lib/colors" prev.lib;
           };
+        claude-code = (import inputs.nixpkgs-unstable.outPath {
+          system = prev.system;
+          config.allowUnfree = true;
+        }).claude-code;
+        opencode = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.opencode;
         podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman.overrideAttrs (oldAttrs: rec {
           version = "5.6.0-rc1";
           src = prev.fetchFromGitHub {

@@ -31,7 +31,7 @@
       gaps_in = 2;
       gaps_out = 5;
 
-      border_size = 2;
+      border_size = 1;
 
       "col.active_border" = "rgba(88888888)";
       "col.inactive_border" = "rgba(00000088)";
@@ -47,7 +47,7 @@
     };
 
     decoration = {
-      rounding = 0;
+      rounding = 4;
 
       shadow = {
         enabled = true;
@@ -59,8 +59,12 @@
       # https://wiki.hyprland.org/Configuring/Variables/#blur
       blur = {
         enabled = true;
-        size = 3;
+        size = 6;
         passes = 1;
+        ignore_opacity = true;
+        new_optimizations = true;
+        special = true;
+        popups = true;
 
         vibrancy = 0.1696;
       };
@@ -88,7 +92,10 @@
       follow_mouse = 1;
       sensitivity = 0;
 
-      touchpad.natural_scroll = true;
+      touchpad = {
+        natural_scroll = true;
+        disable_while_typing = true;
+      };
     };
 
     animations = {

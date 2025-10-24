@@ -1,31 +1,45 @@
 {
   programs.hyprland.settings = {
     windowrule = [
+      # Tags
+      "tag +browser, class:^([Ff]irefox|org.mozilla.firefox|[Ff]irefox-esr|[Ff]irefox-bin)$"
+      "tag +browser, class:^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$"
+      "tag +browser, class:^([Cc]hromium)$"
+      "tag +terminal, class:^(com.mitchellh.ghostty)$"
+      "tag +email, class:^([Tt]hunderbird)$"
+      "tag +im-work, class:^([Ss]lack)$"
+      "tag +im, class:^([Dd]iscord)$"
+      "tag +im, class:^([Ww]hatsapp-for-linux)$"
+      "tag +im, class:^(org.telegram.desktop)$"
+      "tag +file-manager, class:^([Tt]hunar|org.gnome.Nautilus)$"
+      "tag +pip, class:^(firefox)$, title:^(Picture-in-Picture)$"
+
       "suppressevent maximize, class:.*"
       "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
 
-      "opacity 0.97 0.9, class:*"
-      "opacity 1 0.97, class:^(firefox)$"
+      # Opacity
+      "opacity 1.0 0.97, tag:*"
+      "opacity 0.97 0.8, tag:file-manager"
+      "opacity 0.9 0.8, tag:terminal"
 
-      "workspace 1,class:firefox,title:Mozilla Firefox"
-      "workspace 4,class:Slack"
-      "workspace 4,class:thunderbird"
-      "workspace 5,class:org.telegram.desktop"
-      "workspace 5,class:discord"
+      "workspace 1,tag:browser"
+      "workspace 4,tag:im-work"
+      "workspace 4,tag:email"
+      "workspace 5,tag:im"
 
       "opacity 1 1, initialTitle:^Picture-in-Picture$"
-      "float, class:^(firefox)$, title:^(Picture-in-Picture)$"
-      "pin, class:^(firefox)$, title:^(Picture-in-Picture)$"
-      "nofocus, class:^(firefox)$, title:^(Picture-in-Picture)$"
-      "size 300 169, class:^(firefox)$, title:^(Picture-in-Picture)$"
-      "move 100%-320 100%-190, class:(firefox), title:(Picture-in-Picture)"
-      "keepaspectratio, class:(firefox), title:(Picture-in-Picture)"
+      "float, tag:pip"
+      "pin, tag:pip"
+      "nofocus, tag:pip"
+      "size 300 169, tag:pip"
+      "move 100%-320 100%-190, tag:pip"
+      "keepaspectratio, tag:pip"
 
       # Slack
-      "float, class:^(Slack)$, title:^(.*)(DM)(.*)$"
-      "center, class:^(Slack)$, title:^(.*)(DM)(.*)$"
+      "float, tag:im-work, title:^(.*)(DM)(.*)$"
+      "center, tag:im-work, title:^(.*)(DM)(.*)$"
 
-      "tile, class:^com.mitchellh.ghostty$"
+      "tile, tag:terminal"
 
       # Screen Sharing
       "noscreenshare, initialClass:(discord)"
@@ -46,6 +60,8 @@
       "float, title:^(Save As)(.*)$"
       "float, title:^(Library)(.*)$"
       "float, title:^(File Upload)(.*)$"
+
+      "center, class:([Tt]hunar), title:negative:(.*[Tt]hunar.*)"
     ];
   };
 }
