@@ -1,5 +1,9 @@
 { config, pkgs, inputs, ... }:
 
+let
+  uvxPath = "${pkgs.uv}/bin/uvx";
+  npxPath = "${pkgs.nodejs_24}/bin/npx";
+in 
 {
   home.file."${config.home.homeDirectory}/.config/crush/crush.json".text = ''
     {
@@ -22,19 +26,23 @@
         },
         "openrouter": {
           "disabled": false
+        },
+        "zai": {
+          "disabled": false,
+          "api-key": "$ANTHROPIC_AUTH_TOKEN"
         }
       },
       "agents": {
         "coder": {
-          "model": "anthropic/claude-sonnet-4",
+          "model": "zai/glm-4.6",
           "maxTokens": 5000
         },
         "task": {
-          "model": "anthropic/claude-sonnet-4",
+          "model": "zai/glm-4.6",
           "maxTokens": 5000
         },
         "title": {
-          "model": "anthropic/claude-3.5-haiku",
+          "model": "zai/glm-4.5-air",
           "maxTokens": 80
         }
       },
@@ -43,12 +51,23 @@
         "args": ["-l"]
       },
       "mcp": {
+        "fetch": {
+          "type": "stdio",
+          "command": "${uvxPath}",
+          "args": ["mcp-server-fetch"]
+        },
+        "terraform": {
+          "type": "stdio",
+          "command": "${pkgs.terraform-mcp-server}/bin/terraform-mcp-server",
+          "args": []
+        },
         "playwright": {
           "type": "stdio",
           "command": "${pkgs.playwright-mcp}/bin/mcp-server-playwright",
           "args": [
             "--executable-path",
-            "${pkgs.ungoogled-chromium}/bin/chromium"
+            "${pkgs.ungoogled-chromium}/bin/chromium",
+            "--headless"
           ],
           "env": {}
         },
@@ -61,6 +80,11 @@
         "deepwiki": {
           "type": "http",
           "url": "https://mcp.deepwiki.com/mcp"
+        },
+        "nixos": {
+          "type": "stdio",
+          "command": "${pkgs.nix}/bin/nix",
+          "args": ["run", "github:utensils/mcp-nixos", "--"]
         }
       },
       "lsp": {
@@ -70,15 +94,27 @@
         },
         "typescript": {
           "disabled": false,
-          "command": "${pkgs.typescript-language-server}/bin/typescript-language-server --stdio"
+          "command": "${pkgs.typescript-language-server}/bin/typescript-language-server",
+          "args": ["--stdio"]
         },
         "python": {
           "disabled": false,
-          "command": "${pkgs.pyright}/bin/pyright"
+          "command": "${pkgs.pyright}/bin/pyright-langserver"
         },
         "terraform": {
           "disabled": false,
-          "command": "${pkgs.terraform-lsp}/bin/terraform-lsp"
+          "command": "${pkgs.terraform-ls}/bin/terraform-ls",
+          "args": ["serve"]
+        },
+        "nix": {
+          "command": "${pkgs.nil}/bin/nil"
+        },
+        "markdown": {
+          "command": "${pkgs.markdown-oxide}/bin/markdown-oxide"
+        },
+        "yaml": {
+          "command": "${pkgs.yaml-language-server}/bin/yaml-language-server",
+          "arg": ["--stdio"]
         }
       },
       "debug": false,

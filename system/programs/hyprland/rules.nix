@@ -20,7 +20,7 @@
       # Opacity
       "opacity 1.0 0.97, tag:*"
       "opacity 0.97 0.8, tag:file-manager"
-      "opacity 0.9 0.8, tag:terminal"
+      "opacity 0.95 0.9, tag:terminal"
 
       "workspace 1,tag:browser"
       "workspace 4,tag:im-work"

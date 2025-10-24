@@ -21,6 +21,7 @@
           config.allowUnfree = true;
         }).claude-code;
         opencode = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.opencode;
+        terraform-mcp-server = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.terraform-mcp-server;
         podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman.overrideAttrs (oldAttrs: rec {
           version = "5.6.0-rc1";
           src = prev.fetchFromGitHub {
