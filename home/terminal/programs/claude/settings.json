@@ -1,0 +1,42 @@
+{
+  "model": "claude-sonnet-4",
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(npm run lint)",
+      "Bash(npm run test*)",
+      "Bash(cargo build)",
+      "Bash(cargo test)",
+      "Bash(nix build*)",
+      "Bash(nix develop*)",
+      "Read(~/.config/fish/**)",
+      "Read(~/.config/nvim/**)"
+    ],
+    "ask": [
+      "Bash(git push*)",
+      "Bash(git commit*)",
+      "Bash(rm -rf*)",
+      "Bash(cargo publish*)",
+      "Bash(npm publish*)",
+      "WebFetch(*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.ssh/**)",
+      "Bash(curl*)",
+      "Bash(wget*)"
+    ],
+    "defaultMode": "ask"
+  },
+  "env": {
+    "SHELL": "fish"
+  },
+  "includeCoAuthoredBy": true,
+  "cleanupPeriodDays": 30,
+  "outputStyle": "Explanatory"
+}
