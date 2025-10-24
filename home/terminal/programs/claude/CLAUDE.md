@@ -66,3 +66,50 @@ Final answer after validation
 - Test thoroughly before suggesting changes
 - Consider performance implications of proposed solutions
 - Follow language-specific conventions and style guides
+
+## Nix Development Environment
+
+This project uses **NixOS** and the **Nix package manager** for declarative system configuration and reproducible development environments.
+
+### Critical Requirements
+
+1. **All development commands must run in a Nix environment**
+   - Development tools, compilers, and dependencies are managed through `flake.nix`
+   - Do NOT assume system-wide installation of tools (npm, cargo, python, etc.)
+   - Always verify tool availability through Nix before executing commands
+
+2. **Running commands in Nix environment**
+   - Use `nix develop` to enter a development shell with all dependencies
+   - Use `nix develop --command <cmd>` to run a single command with Nix environment
+   - Use `nix-shell` as an alternative to enter the development environment
+   - Check `flake.nix` to understand available development shells and dependencies
+
+3. **Building and testing**
+   - Use `nix build` to build Nix packages and configurations
+   - Use `nix build .#<output>` to build specific outputs defined in flake.nix
+   - Test configuration changes with `nixos-rebuild test` (requires root)
+   - Apply system configuration with `nixos-rebuild switch` (requires root)
+
+4. **Package management**
+   - System packages are declared in Nix configuration files (not installed imperatively)
+   - User packages are managed through home-manager in the `home/` directory
+   - To add a new tool: modify the appropriate `.nix` file, don't use `apt`, `npm install -g`, etc.
+
+5. **Configuration structure**
+   - `/system/` - System-level NixOS configuration
+   - `/home/` - User-level home-manager configuration
+   - `/hosts/` - Host-specific configurations
+   - `flake.nix` - Main entry point defining all outputs and dependencies
+   - `flake.lock` - Locked dependency versions (don't modify directly)
+
+### When suggesting changes
+
+- **Before executing any build/dev command**: Verify it's available in the Nix environment
+- **Before suggesting package installation**: Identify the correct Nix configuration file to modify
+- **When adding new tools**: Suggest adding them to the appropriate Nix configuration, not installing them imperatively
+- **For testing changes**: Suggest using `nix build` or `nixos-rebuild test` rather than system-wide changes
+- **For dependencies**: Check if they need to be added to `flake.nix` or specific package configurations
+
+### Example workflows
+
+**Running a development command:**
