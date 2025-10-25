@@ -45,14 +45,6 @@ in {
       "$mod, SPACE, exec, $menu"
       "$mod Control, Q, exec, hyprlock"
 
-      # Applications
-      "$mod, A, exec, $webapp https://openrouter.ai/chat"
-      "$mod, C, exec, $webapp https://app.hey.com/calendar/weeks/"
-      "$mod, D, exec, $terminal -e lazydocker"
-      "$mod, E, exec, $webapp https://app.hey.com"
-      "$mod, O, exec, uwsm app -- obsidian -disable-gpu"
-      "$mod, slash, exec, uwsm app -- keepassxc"
-
       # move focus
       "$mod, h, movefocus, l"
       "$mod, l, movefocus, r"
@@ -64,12 +56,6 @@ in {
       "$mod SHIFT, l, swapwindow, r"
       "$mod SHIFT, k, swapwindow, u"
       "$mod SHIFT, j, swapwindow, d"
-
-      # resize active window
-      "$mod, minus, resizeactive, -100 0"
-      "$mod, equal, resizeactive, 100 0"
-      "$mod SHIFT, minus, resizeactive, 0 -100"
-      "$mod SHIFT, equal, resizeactive, 0 100"
 
       # cycle workspaces
       "$mod, bracketleft, workspace, m-1"
@@ -92,6 +78,19 @@ in {
       "SHIFT, Print, exec, ${runOnce "grimblast"} --notify copysave area"
       # screen
       ", Print, exec, ${runOnce "grimblast"} --notify copysave screen"
+
+      # special workspace
+      "$mod, grave, togglespecialworkspace, term"
+      "$mod SHIFT, grave, movetoworkspace, special:term"
+      
+      "$mod, N, togglespecialworkspace, notes"  # Quick notes/obsidian
+      "$mod SHIFT, N, movetoworkspace, special:notes"
+
+      "$mod, M, togglespecialworkspace, chat"
+      "$mod SHIFT, M, movetoworkspace, special:chat"
+
+      "$mod, B, togglespecialworkspace, work"
+      "$mod SHIFT, B, movetoworkspace, special:work"
     ]
     ++ workspaces;
 
@@ -111,4 +110,50 @@ in {
       ", XF86AudioPrev, exec, playerctl previous"
     ];
   };
+
+  programs.hyprland.extraConfig = ''
+    bind=$mod,R,submap,resize
+
+    # will start a submap called "resize"
+    submap=resize
+
+    # sets repeatable binds for resizing the active window
+    binde=,h,resizeactive,-100 0
+    binde=,l,resizeactive,100 0
+    binde=,k,resizeactive,0 -100
+    binde=,j,resizeactive,0 100
+
+    # use reset to go back to the global submap
+    bind=,escape,submap,reset
+    bind=,RETURN,submap,reset
+
+    # will reset the submap, meaning end the current one and return to the global one
+    submap=reset
+
+    bind=$mod,X,submap,launch
+
+    submap=launch
+
+    bind=,A,exec,$webapp https://openrouter.ai/chat
+    bind=,B,exec,$browser
+    bind=,C,exec,$webapp https://app.hey.com/calendar/weeks/"
+    bind=,D,exec,$terminal -e lazydocker
+    bind=,E,exec,$webapp https://app.hey.com
+    bind=,O,exec, uwsm app -- obsidian -disable-gpu
+    bind=,slash,exec, uwsm app -- keepassxc
+
+    bind=,escape,submap,reset
+
+    # Note, that after launching app submap immediately exits.
+    bind=,A,submap,reset
+    bind=,B,submap,reset
+    bind=,C,submap,reset
+    bind=,D,submap,reset
+    bind=,E,submap,reset
+    bind=,O,submap,reset
+    bind=,slash,submap,reset
+
+    # will reset the submap, meaning end the current one and return to the global one
+    submap=reset
+  '';
 }

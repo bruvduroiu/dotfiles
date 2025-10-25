@@ -10,9 +10,9 @@
       height = 24;
       spacing = 5;
       margin = "0";
-      modules-left = ["clock" "custom/timew" "custom/playerctl" ];
+      modules-left = ["clock" "custom/timew" "custom/playerctl"];
       modules-center = ["hyprland/workspaces"];
-      modules-right = ["pulseaudio" "battery" "network" "cpu" "memory" "disk" "temperature" "custom/updates" "tray"];
+      modules-right = ["pulseaudio" "battery" "network" "group/hardware" "temperature" "tray" "privacy"];
       "hyprland/workspaces" = {
         format = "{icon}";
         format-icons = {
@@ -39,6 +39,19 @@
       "hyprland/mode" = {
         format = "<span style=\"italic\">{}</span>";
       };
+
+      "group/hardware" = {
+        orientation = "inherit";
+        modules = [
+          "cpu"
+          "memory"
+          "disk"
+        ];
+        drawer = {
+          transition-duration = 250;
+        };
+      };
+
       "custom/playerctl" = {
         format = " 󰐊 {}";
         return-type = "json";
@@ -122,7 +135,7 @@
       };
 
       memory = {
-        format = "󰍛 {}%";
+        format = "󰍛 {used:0.1f}G/{total:0.1f}G";
         interval = 1;
         on-click = "ghostty -e btop";
       };
@@ -154,7 +167,7 @@
         format-disconnected = "󰖪 Disconnected";
         format-alt = "{ifname}: {ipaddr}/{cidr}";
         tooltip-format = "{ifname}: {ipaddr}";
-        on-click = "ghostty -e nmtui";
+        on-click = "ghostty -e sudo nmtui";
       };
 
       bluetooth = {
@@ -203,6 +216,24 @@
       tray = {
         icon-size = 16;
         spacing = 16;
+        show-passive-items = false;
+      };
+
+      privacy = {
+        icon-spacing = 4;
+        icon-size = 16;
+        modules = [
+          {
+            type = "screenshare";
+            tooltip = true;
+            tooltip-icon-size = 24;
+          }
+          {
+            type = "audio-in";
+            tooltip = true;
+            tooltip-icon-size = 24;
+          }
+        ];
       };
     }];
   };

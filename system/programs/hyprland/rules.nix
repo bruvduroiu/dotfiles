@@ -13,6 +13,7 @@
       "tag +im, class:^(org.telegram.desktop)$"
       "tag +file-manager, class:^([Tt]hunar|org.gnome.Nautilus)$"
       "tag +pip, class:^(firefox)$, title:^(Picture-in-Picture)$"
+      "tag +passwd, class:^(org.keepassxc.KeePassXC)$"
 
       "suppressevent maximize, class:.*"
       "nofocus,class:^$,title:^$,xwayland:1,floating:1,fullscreen:0,pinned:0"
@@ -22,16 +23,12 @@
       "opacity 0.97 0.8, tag:file-manager"
       "opacity 0.95 0.9, tag:terminal"
 
-      "workspace 1,tag:browser"
-      "workspace 4,tag:im-work"
-      "workspace 4,tag:email"
-      "workspace 5,tag:im"
+      "workspace special:chat, tag:im"
+      "workspace special:work, tag:im-work"
+      "workspace special:work, tag:email"
+      "workspace special:notes, class:^(obsidian)$"
 
-      # Floating
-      "float, workspace:4"
-      "size 800 600, workspace:4"
-      "float, workspace:5"
-      "size 800 600, workspace:5"
+      "workspace 1,tag:browser"
 
       "opacity 1 1, initialTitle:^Picture-in-Picture$"
       "float, tag:pip"
@@ -41,15 +38,16 @@
       "move 100%-320 100%-190, tag:pip"
       "keepaspectratio, tag:pip"
 
-      # Slack
-      "float, tag:im-work, title:^(.*)(DM)(.*)$"
-      "center, tag:im-work, title:^(.*)(DM)(.*)$"
+      "float, tag:passwd"
+      "center, tag:passwd"
+      "size 60% 70%, tag:passwd"
 
       "tile, tag:terminal"
 
       # Screen Sharing
-      "noscreenshare, initialClass:(discord)"
-      "noscreenshare, initialClass:(org.keepassxc.KeePassXC)"
+      "noscreenshare, tag:im"
+      "noscreenshare, tag:email"
+      "noscreenshare, tag:passwd"
 
       # Dialog windows - float+center
       "center, title:^(Open File)(.*)$"
@@ -68,6 +66,19 @@
       "float, title:^(File Upload)(.*)$"
 
       "center, class:([Tt]hunar), title:negative:(.*[Tt]hunar.*)"
+
+      "workspace special:term, class:^(scratchterm)$"
+      "float, class:^(scratchterm)$"
+      "size 80% 80%, class:^(scratchterm)$"
+      "center, class:^(scratchterm)$"
+    ];
+
+    workspace = [
+      "1, layoutopt:orientation:left"
+      "1, gapsout:40, gapsin:5, layoutopt:orientation:center"
+      "special:notes, layoutopt:orientation:center"
+      "special:notes, gapsout:40, gapsin:20, layoutopt:orientation:center"
+      "special:chat, gapsout:40, gapsin:10, layoutopt:orientation:center"
     ];
   };
 }
