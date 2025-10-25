@@ -16,15 +16,17 @@ let laptop = [
   ./programs
   ./programs/ranger.nix
   ./programs/timewarrior.nix
+  ./programs/wireshark.nix
 
-  ./services/syncthing.nix
-  ./services/kanata
-  ./services/greetd.nix
-  ./services/pipewire.nix
   ./services/backlight.nix
-  ./services/power.nix
-  ./services/podman.nix
   ./services/brightnessctl.nix
+  ./services/greetd.nix
+  ./services/kanata
+  ./services/opensnitch.nix
+  ./services/pipewire.nix
+  ./services/podman.nix
+  ./services/power.nix
+  ./services/syncthing.nix
 ];
 in {
   inherit laptop;

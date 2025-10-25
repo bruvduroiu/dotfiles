@@ -66,8 +66,7 @@ in
           "command": "${pkgs.playwright-mcp}/bin/mcp-server-playwright",
           "args": [
             "--executable-path",
-            "${pkgs.ungoogled-chromium}/bin/chromium",
-            "--headless"
+            "${pkgs.ungoogled-chromium}/bin/chromium"
           ],
           "env": {}
         },

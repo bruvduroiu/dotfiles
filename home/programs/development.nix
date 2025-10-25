@@ -14,5 +14,6 @@
     lazysql
     lazydocker
     docling
+    opensnitch-ui
   ];
 }
