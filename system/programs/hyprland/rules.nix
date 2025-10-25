@@ -27,6 +27,12 @@
       "workspace 4,tag:email"
       "workspace 5,tag:im"
 
+      # Floating
+      "float, workspace:4"
+      "size 800 600, workspace:4"
+      "float, workspace:5"
+      "size 800 600, workspace:5"
+
       "opacity 1 1, initialTitle:^Picture-in-Picture$"
       "float, tag:pip"
       "pin, tag:pip"

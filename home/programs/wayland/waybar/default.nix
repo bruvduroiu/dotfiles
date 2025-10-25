@@ -180,7 +180,7 @@
           car = "󰄋";
           default = ["󰕿" "󰖀" "󰕾"];
         };
-        on-click = "pavucontrol";
+        on-click = "pwvucontrol";
         on-click-right = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
         on-scroll-up = "pactl set-sink-volume @DEFAULT_SINK@ +2%";
         on-scroll-down = "pactl set-sink-volume @DEFAULT_SINK@ -2%";
