@@ -6,5 +6,8 @@
     ./office
     ./development.nix
     ./media
+    ./media/rss
   ];
+
+  programs.rssguard.enable = true;
 }
