@@ -98,7 +98,8 @@ in
         },
         "python": {
           "disabled": false,
-          "command": "${pkgs.pyright}/bin/pyright-langserver"
+          "command": "${pkgs.ruff}/bin/ruff",
+          "args": ["server", "-s"]
         },
         "terraform": {
           "disabled": false,
@@ -110,10 +111,6 @@ in
         },
         "markdown": {
           "command": "${pkgs.markdown-oxide}/bin/markdown-oxide"
-        },
-        "yaml": {
-          "command": "${pkgs.yaml-language-server}/bin/yaml-language-server",
-          "arg": ["--stdio"]
         }
       },
       "debug": false,
