@@ -19,7 +19,8 @@
       "Bash(rm -rf:*)",
       "Bash(cargo publish:*)",
       "Bash(npm publish:*)",
-      "WebFetch(domain:*)"
+      "WebFetch(domain:*)",
+      "Bash(curl:*)"
     ],
     "deny": [
       "Read(./.env)",
@@ -27,7 +28,6 @@
       "Read(./secrets/**)",
       "Read(~/.aws/**)",
       "Read(~/.ssh/**)",
-      "Bash(curl:*)",
       "Bash(wget:*)"
     ],
     "defaultMode": "default"

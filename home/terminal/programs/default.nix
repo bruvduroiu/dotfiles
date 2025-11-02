@@ -14,7 +14,6 @@
     ./gdu.nix
     ./git.nix
     ./k9s.nix
-    ./opencode
     ./stui.nix
     ./xdg.nix
     ./yazi
