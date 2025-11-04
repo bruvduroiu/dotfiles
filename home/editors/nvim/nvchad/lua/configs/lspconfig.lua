@@ -48,9 +48,15 @@ local on_attach = function(client, bufnr)
 end
 
 for name, opts in pairs(servers) do
-	opts.on_init = configs.on_init
-	opts.on_attach = on_attach
-	opts.capabilities = configs.capabilities
+  local ok = pcall(function()
+    opts.on_init = configs.on_init
+    opts.on_attach = on_attach
+    opts.capabilities = configs.capabilities
+    vim.lsp.config(name, opts)
+    vim.lsp.enable({name})
+  end)
 
-	require("lspconfig")[name].setup(opts)
+  if not ok then
+    vim.notify("Failed to set up LSP: " .. name, vim.log.levels.ERROR)
+  end
 end

@@ -23,8 +23,8 @@ return {
     ghost_text = {
       enabled = true,
     },
-    sources = {
-      default = { "lsp", "path", "snippets", "buffer" },
-    }
+  },
+  sources = {
+    default = { "lsp", "path", "snippets", "buffer" },
   }
 }
