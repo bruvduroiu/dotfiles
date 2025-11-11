@@ -91,38 +91,38 @@ in
           "disabled": false,
           "command": "${pkgs.gopls}/bin/gopls",
           "filetypes": ["go", "gomod", "gowork"],
-          "root_markers": ["go.mod", "go.work", ".git"]
+          "root_markers": ["go.mod", "go.work"]
         },
         "typescript": {
           "disabled": false,
           "command": "${pkgs.typescript-language-server}/bin/typescript-language-server",
           "args": ["--stdio"],
           "filetypes": ["js", "jsx", "ts", "tsx", "mdx"],
-          "root_markers": ["package.json", "tsconfig.json", "jsconfig.json", ".git"]
+          "root_markers": ["package.json", "tsconfig.json", "jsconfig.json"]
         },
         "python": {
           "disabled": false,
           "command": "${pkgs.ruff}/bin/ruff",
           "args": ["server", "-s"],
           "filetypes": ["py"],
-          "root_markers": ["pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", ".git"]
+          "root_markers": ["pyproject.toml", "setup.py", "setup.cfg", "requirements.txt"]
         },
         "terraform": {
           "disabled": false,
           "command": "${pkgs.terraform-ls}/bin/terraform-ls",
           "args": ["serve"],
           "filetypes": ["terraform", "tf", "hcl"],
-          "root_markers": [".terraform", "terraform.tfvars", ".git"]
+          "root_markers": [".terraform", "terraform.tfvars"]
         },
         "nix": {
           "command": "${pkgs.nil}/bin/nil",
           "filetypes": ["nix"],
-          "root_markers": ["flake.nix", "flake.lock", "default.nix", "shell.nix", ".git"]
+          "root_markers": ["flake.nix", "flake.lock", "default.nix", "shell.nix"]
         },
         "markdown": {
           "command": "${pkgs.markdown-oxide}/bin/markdown-oxide",
           "filetypes": ["markdown", "md"],
-          "root_markers": [".git", ".markdownlint.json", ".markdownlintrc"]
+          "root_markers": [".markdownlint.json", ".markdownlintrc"]
         }
       },
       "debug": false,

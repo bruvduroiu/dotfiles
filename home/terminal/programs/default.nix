@@ -13,7 +13,9 @@
     ./fzf.nix
     ./gdu.nix
     ./git.nix
+    ./happy.nix
     ./k9s.nix
+    ./openspec.nix
     ./stui.nix
     ./xdg.nix
     ./yazi
