@@ -6,6 +6,7 @@ let laptop = [
   ./hardware/uinput.nix
   ./hardware/graphics.nix
   ./hardware/bluetooth.nix
+  ./hardware/keyboard.nix
 
   ./network
   ./network/tailscale.nix

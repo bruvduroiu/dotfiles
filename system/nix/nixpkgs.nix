@@ -21,6 +21,11 @@
           config.allowUnfree = true;
         }).claude-code;
         terraform-mcp-server = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.terraform-mcp-server;
+        keymapp = (import inputs.nixpkgs-unstable.outPath {
+          system = prev.system;
+          config.allowUnfree = true;
+        }).keymapp;
+        gh-actions-language-server = prev.callPackage "${self}/pkgs/gh-actions-language-server.nix" {};
         podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman.overrideAttrs (oldAttrs: rec {
           version = "5.6.0-rc1";
           src = prev.fetchFromGitHub {

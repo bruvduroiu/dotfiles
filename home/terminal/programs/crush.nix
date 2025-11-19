@@ -123,10 +123,23 @@ in
           "command": "${pkgs.markdown-oxide}/bin/markdown-oxide",
           "filetypes": ["markdown", "md"],
           "root_markers": [".markdownlint.json", ".markdownlintrc"]
+        },
+        "github-actions": {
+          "command": "${pkgs.gh-actions-language-server}/bin/gh-actions-language-server",
+          "args": ["--stdio"],
+          "filetypes": ["yaml"],
+          "root_markers": [".github/workflows"],
+          "init_options": {
+            "workspace": {
+              "didChangeWorkspaceFolders": {
+                "dynamicRegistration": true
+              }
+            }
+          }
         }
       },
       "debug": false,
-      "debugLSP": false,
+      "debugLSP": true,
       "autoCompact": true
     }
   '';
