@@ -15,6 +15,7 @@
     ./git.nix
     ./happy.nix
     ./k9s.nix
+    ./opencode
     ./openspec.nix
     ./stui.nix
     ./xdg.nix

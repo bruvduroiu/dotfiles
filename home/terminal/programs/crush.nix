@@ -56,34 +56,9 @@ in
           "command": "${uvxPath}",
           "args": ["mcp-server-fetch"]
         },
-        "terraform": {
-          "type": "stdio",
-          "command": "${pkgs.terraform-mcp-server}/bin/terraform-mcp-server",
-          "args": []
-        },
-        "playwright": {
-          "type": "stdio",
-          "command": "${pkgs.playwright-mcp}/bin/mcp-server-playwright",
-          "args": [
-            "--executable-path",
-            "${pkgs.ungoogled-chromium}/bin/chromium"
-          ],
-          "env": {}
-        },
-        "sequential-thinking": {
-          "type": "stdio",
-          "command": "${pkgs.mcp-server-sequential-thinking}/bin/mcp-server-sequential-thinking",
-          "args": [],
-          "env": {}
-        },
         "deepwiki": {
           "type": "http",
           "url": "https://mcp.deepwiki.com/mcp"
-        },
-        "nixos": {
-          "type": "stdio",
-          "command": "${pkgs.nix}/bin/nix",
-          "args": ["run", "github:utensils/mcp-nixos", "--"]
         }
       },
       "lsp": {
