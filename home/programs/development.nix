@@ -12,6 +12,7 @@
     sops
     jq
     yq
+    flyctl
     kubectl
     lazysql
     lazydocker

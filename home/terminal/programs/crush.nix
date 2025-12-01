@@ -1,5 +1,16 @@
 { config, pkgs, inputs, ... }:
 
+
+  # "playwright": {
+  #   "type": "stdio",
+  #   "command": "${pkgs.playwright-mcp}/bin/mcp-server-playwright",
+  #   "args": [
+  #     "--executable-path",
+  #     "${pkgs.ungoogled-chromium}/bin/chromium"
+  #   ],
+  #   "env": {}
+  # },
+
 let
   uvxPath = "${pkgs.uv}/bin/uvx";
   npxPath = "${pkgs.nodejs_24}/bin/npx";
