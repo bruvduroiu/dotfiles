@@ -8,7 +8,7 @@
   ];
 
   boot = {
-    kernelPackages = lib.mkForce pkgs.linuxPackages_6_16;
+    kernelPackages = lib.mkForce pkgs.linuxPackages_6_17;
   };
 
   # System configuration

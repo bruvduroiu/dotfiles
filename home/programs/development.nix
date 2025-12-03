@@ -17,7 +17,6 @@
     lazysql
     lazydocker
     lazyjournal
-    docling
     opensnitch-ui
     posting
   ];

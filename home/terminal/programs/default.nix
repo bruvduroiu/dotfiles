@@ -13,7 +13,6 @@
     ./fzf.nix
     ./gdu.nix
     ./git.nix
-    ./happy.nix
     ./k9s.nix
     ./opencode
     ./openspec.nix
