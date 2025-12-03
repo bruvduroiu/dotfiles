@@ -3,8 +3,12 @@
     upower.enable = true;
 
     logind = {
-      powerKey = "suspend";
-      lidSwitch = "suspend";
+      settings = {
+        Login = {
+          HandleLidSwitch = "suspend";
+          HandlePowerKey  = "suspend";
+        };
+      };
     };
   };
 }

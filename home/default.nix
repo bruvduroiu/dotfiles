@@ -9,7 +9,7 @@
   home = {
     username = "bogdan";
     homeDirectory = "/home/bogdan";
-    stateVersion = "25.05";
+    stateVersion = "25.11";
   };
 
   # Let Home Manager install and manage itself

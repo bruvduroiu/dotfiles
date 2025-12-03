@@ -5,25 +5,6 @@ in {
   programs.git = {
     enable = true;
 
-    delta = {
-      enable = true;
-      options.dark = true;
-    };
-
-    extraConfig = {
-      diff.colorMoved = "default";
-      merge.conflictStyle = "diff3";
-
-      gpg.ssh.allowedSignersFile = config.home.homeDirectory + "/" + config.xdg.configFile."git/allowed_signers".target;
-      pull.rebase = true;
-    };
-
-    aliases = let
-      log = "log";
-    in {
-      a = "add --patch";
-    };
-
     ignores = [ ".swp" ];
 
     signing = {
@@ -32,11 +13,27 @@ in {
       format = "ssh";
     };
 
-    userName = "Bogdan Buduroiu";
-    userEmail = "bogdan@buduroiu.com";
+    settings = {
+      user = {
+        name = "Bogdan Buduroiu";
+        email = "bogdan@buduroiu.com";
+      };
+
+      aliases = let
+        log = "log";
+      in {
+        a = "add --patch";
+      };
+
+      diff.colorMoved = "default";
+      merge.conflictStyle = "diff3";
+
+      gpg.ssh.allowedSignersFile = config.home.homeDirectory + "/" + config.xdg.configFile."git/allowed_signers".target;
+      pull.rebase = true;
+    };
   };
 
   xdg.configFile."git/allowed_signers".text = ''
-    ${cfg.userEmail} namespaces="git" ${key}
+    ${cfg.settings.user.email} namespaces="git" ${key}
   '';
 }
