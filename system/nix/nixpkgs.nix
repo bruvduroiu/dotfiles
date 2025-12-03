@@ -49,7 +49,7 @@
           };
         });
         obsidian = prev.obsidian.overrideAttrs (oldAttrs: rec {
-          version = "1.9.10";
+          version = "1.10.6";
         });
        })
     ];

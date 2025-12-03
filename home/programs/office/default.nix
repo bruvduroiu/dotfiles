@@ -5,11 +5,11 @@
     ./thunar.nix
     ./zathura.nix
     ./invoice.nix
+    ./obsidian
   ];
 
   home.packages = with pkgs; [
     libreoffice
-    obsidian
     papers
     pinta
     slack
