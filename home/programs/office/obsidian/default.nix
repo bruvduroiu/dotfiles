@@ -16,22 +16,10 @@
                 trigger_on_file_creation = true;
                 auto_jump_to_cursor = true;
                 enable_system_commands = true;
-                shell_path = "zsh";
+                syntax_highlighting = true;
+                shell_path = "fish";
                 command_palette = true;
-              };
-            }
-            { 
-              pkg = pkgs.callPackage ./plugins/periodic-notes { };
-              settings = {
-                showNotification = false;
-                weekly = {
-                  template = "Templates/Weekly Note.md";
-                  format = "gggg-[W]ww";
-                };
-                daily = {
-                  template = "Templates/Daily Note.md";
-                  format = "yyyy-MM-dd";
-                };
+                templates_folder = "9 - Templates";
               };
             }
             { 
@@ -39,7 +27,8 @@
               settings = {
                 enableDataviewJs = true;
                 enableInlineDataviewJs = true;
-                warnOnEmptyResult = false;
+                taskCompletionUseEmojiShorthand = true;
+                taskCompletionTracking = true;
                 defaultDateFormat = "dd/MM/yyyy";
                 defaultDateTimeFormat = "HH:mm - dd/MM/yyyy";
               };
@@ -52,13 +41,9 @@
     defaultSettings = {
       app = {
         defaultViewMode = "preview"; 
-        readableLineLength = true;
-        showLineNumber = true;
         tabSize = 2;
         vimMode = true;
         focusNewTab = true;
-        livePreview = false;
-        strictLineBreaks = false;
         propertiesInDocument = "visible";
         foldHeading = true;
         foldIndent = true;
