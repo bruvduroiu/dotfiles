@@ -1,7 +1,7 @@
 { pkgs, inputs, config, ... }:
 
 let
-  wallpaper = ../../wallpapers/a_woman_wearing_a_helmet.jpg;
+  wallpaper = ../../wallpapers/a_fish_swimming_in_water.png;
 in {
   services.hyprpaper = {
     enable = true;
