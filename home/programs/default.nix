@@ -1,6 +1,8 @@
 {
   imports = [
     ./browsers/firefox.nix
+    ./browsers/ladybird.nix
+    ./browsers/lightpanda.nix
     ./wayland
     ./messaging.nix
     ./office

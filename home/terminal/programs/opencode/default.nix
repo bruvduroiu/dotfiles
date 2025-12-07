@@ -5,7 +5,6 @@
 }:
 
 let
-  uvxPath = "${pkgs.uv}/bin/uvx";
   opencodeConfigModule = import ./config.nix { inherit lib; };
   opencodeConfig = opencodeConfigModule.config;
 in

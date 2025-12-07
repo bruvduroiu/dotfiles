@@ -3,14 +3,12 @@
   # OpenCode configuration as Nix attrset
   config = {
     "$schema" = "https://opencode.ai/config.json";
-    model =  "z.ai/glm-4.6";
     disabled_providers = [
       "openai"
       "gemini"
       "moonshotai"
       "deepseek"
       "perplexity"
-      "anthropic"
     ];
     instructions = [ ];
     keybinds = { };

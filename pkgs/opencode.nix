@@ -1,38 +1,48 @@
 {
   lib,
   stdenv,
-  fetchFromGitHub,
+  fetchurl,
   fetchzip,
   autoPatchelfHook,
   makeWrapper,
   nodejs,          # Provides Node.js runtime for opencode
   patchelf,        # Needed to fix dynamic linking of downloaded binaries
-  writeShellScript,
   binutils,        # Additional tools for binary manipulation
   glibc,           # Standard C library for LD_LIBRARY_PATH
-  version ? "1.80.0",
+  version,
   hash ? "sha256-CaHAXuONZ/smju/IZ+M6MumlEkmqg7pXek+wpc63nUo=",
 }: let
-  # Maps Nix platform strings to opencode release architecture strings
-  arch_string = platform:
+  # Maps Nix platform strings to opencode release architecture strings and extensions
+  platformInfo = platform:
     if platform == "x86_64-linux"
-    then "linux-x64"
+    then { arch = "linux-x64"; ext = "tar.gz"; }
     else if platform == "aarch64-linux"
-    then "linux-arm64"
+    then { arch = "linux-arm64"; ext = "tar.gz"; }
     else if platform == "x86_64-darwin"
-    then "darwin-x64"
+    then { arch = "darwin-x64"; ext = "zip"; }
     else if platform == "aarch64-darwin"
-    then "darwin-arm64"
+    then { arch = "darwin-arm64"; ext = "zip"; }
     else throw "Unsupported architecture: ${platform}";
+  info = platformInfo stdenv.hostPlatform.system;
 in
   stdenv.mkDerivation rec {
     pname = "opencode";
     inherit version;
 
-    src = fetchzip {
-      url = "https://github.com/sst/opencode/releases/download/v${version}/opencode-${arch_string stdenv.hostPlatform.system}.zip";
-      inherit hash;
-    };
+    src =
+      if info.ext == "zip"
+      then fetchzip {
+        url = "https://github.com/sst/opencode/releases/download/v${version}/opencode-${info.arch}.${info.ext}";
+        inherit hash;
+      }
+      else fetchurl {
+        url = "https://github.com/sst/opencode/releases/download/v${version}/opencode-${info.arch}.${info.ext}";
+        inherit hash;
+      };
+
+    unpackPhase = lib.optionalString (info.ext == "tar.gz") ''
+      tar -xzf $src
+    '';
 
     dontBuild = true;  # Pre-compiled binary, no build step needed
     dontStrip = true;  # Preserve symbols for compatibility

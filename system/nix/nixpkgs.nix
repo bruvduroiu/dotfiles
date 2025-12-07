@@ -26,9 +26,11 @@
           config.allowUnfree = true;
         }).keymapp;
         gh-actions-language-server = prev.callPackage "${self}/pkgs/gh-actions-language-server.nix" {};
+        lightpanda = prev.callPackage "${self}/pkgs/lightpanda.nix" {};
+        gomcp = prev.callPackage "${self}/pkgs/gomcp.nix" {};
         opencode = prev.callPackage "${self}/pkgs/opencode.nix" {
-          version = "1.0.80";
-          hash = "sha256-CaHAXuONZ/smju/IZ+M6MumlEkmqg7pXek+wpc63nUo=";
+          version = "1.0.137";
+          hash = "sha256-XMAKKcbEYl3PJ4JAFlZg1d6Oc8wtaww22dDm9HEGnL4=";
         };
         podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman.overrideAttrs (oldAttrs: rec {
           version = "5.6.0-rc1";
