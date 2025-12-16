@@ -27,6 +27,7 @@ let laptop = [
   ./services/pipewire.nix
   ./services/podman.nix
   ./services/power.nix
+  ./services/rental-bot.nix
   ./services/syncthing.nix
 ];
 in {

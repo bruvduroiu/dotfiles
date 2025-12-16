@@ -84,5 +84,14 @@
     };
     walker.url = "github:abenz1267/walker";
     yazi.url = "github:sxyazi/yazi";
+
+    # Services
+    rental-bot.url = "path:/home/bogdan/development/scratch/591";
+
+    # Secrets management
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 }

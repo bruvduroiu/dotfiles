@@ -18,6 +18,13 @@
       ./framework13
 
       "${mod}/programs/hyprland"
+
+      # Secrets management
+      inputs.sops-nix.nixosModules.sops
+
+      # Services
+      inputs.rental-bot.nixosModules.default
+
       {
         home-manager = {
           users.bogdan.imports = homeImports."bogdan@framework13";

@@ -1,9 +1,7 @@
-# This example uses YAML anchors which allows reuse of multiple keys 
-# without having to repeat yourself.
-# Also see https://github.com/Mic92/dotfiles/blob/d6114726d859df36ccaa32891c4963ae5717ef7f/nixos/.sops.yaml
-# for a more complex example.
+# SOPS configuration for encrypting secrets
+# See: https://github.com/getsops/sops
 keys:
-  - &framework13 age1z823s8xg4chal0ugf788vyp8eys5826gh2ev95hx84lk0d6kpuds8kreym
+  - &framework13 age1hd4y0v9k4ng3xkmprgvvnxzm6wh72k9lrr2smjerwkkn7q5j4ers2e83wf
 creation_rules:
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
     age:
