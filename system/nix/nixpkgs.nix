@@ -32,27 +32,12 @@
           version = "1.0.137";
           hash = "sha256-XMAKKcbEYl3PJ4JAFlZg1d6Oc8wtaww22dDm9HEGnL4=";
         };
-        podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman.overrideAttrs (oldAttrs: rec {
-          version = "5.6.0-rc1";
-          src = prev.fetchFromGitHub {
-            owner = "containers";
-            repo = "podman";
-            rev = "v${version}";
-            hash = "sha256-pgilheesCs7BzPIloyYPPMGv+KKoiEsVZFoHwePdUKM="; 
-          };
-        });
-        podman-compose = prev.podman-compose.overrideAttrs (oldAttrs: rec {
-          version = "1.5.0";
-          src = prev.fetchFromGitHub {
-            owner = "containers";
-            repo = "podman-compose";
-            rev = "v1.5.0";
-            hash = "sha256-AEnq0wsDHaCxefaEX4lB+pCAIKzN0oyaBNm7t7tK/yI="; 
-          };
-        });
-        obsidian = prev.obsidian.overrideAttrs (oldAttrs: rec {
-          version = "1.10.6";
-        });
+        podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman;
+        podman-compose = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman-compose;
+        obsidian = (import inputs.nixpkgs-unstable.outPath {
+          system = prev.system;
+          config.allowUnfree = true;
+        }).obsidian;
        })
     ];
   };

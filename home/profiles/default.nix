@@ -3,4 +3,8 @@
     ../.
     ./framework13
   ];
+
+  "deck@steamdeck" = [
+    ./steamdeck
+  ];
 }

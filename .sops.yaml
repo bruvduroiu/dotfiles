@@ -2,6 +2,7 @@
 # See: https://github.com/getsops/sops
 keys:
   - &framework13 age1hd4y0v9k4ng3xkmprgvvnxzm6wh72k9lrr2smjerwkkn7q5j4ers2e83wf
+  - &steamdeck age1vc06cssvpwyc8m97yylevnm608z32um2cx4khjl2qt3nrmhqh57srkvcnt
   # Future hosts:
   # - &zimaboard age1...
 
@@ -16,6 +17,11 @@ creation_rules:
   - path_regex: secrets/framework13/.*\.(yaml|json|env|ini)$
     age:
       - *framework13
+
+  # Steam Deck-specific secrets
+  - path_regex: secrets/steamdeck/.*\.(yaml|json|env|ini)$
+    age:
+      - *steamdeck
 
   # Future: ZimaBoard-specific secrets
   # - path_regex: secrets/zimaboard/.*\.(yaml|json|env|ini)$

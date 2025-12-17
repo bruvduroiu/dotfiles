@@ -30,6 +30,24 @@ let laptop = [
   ./services/rental-bot.nix
   ./services/restic.nix
 ];
+
+# Steam Deck - minimal system modules
+# Hardware and Gaming Mode handled by Jovian-NixOS
+steamdeck = [
+  ./core
+  ./core/boot.nix
+
+  ./hardware/bluetooth.nix
+
+  ./network
+  ./network/tailscale.nix
+
+  ./nix
+
+  ./programs
+
+  ./services/pipewire.nix
+];
 in {
-  inherit laptop;
+  inherit laptop steamdeck;
 }

@@ -7,6 +7,7 @@
       "https://nix-community.cachix.org"
       "https://walker.cachix.org"
       "https://yazi.cachix.org"
+      "https://jovian-nixos.cachix.org"  # Steam Deck / Jovian-NixOS
     ];
 
     trusted-public-keys = [
@@ -15,6 +16,7 @@
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "walker.cachix.org-1:fG8q+uAaMqhsMxWjwvk0IMb4mFPFLqHjuvfwQxE4oJM="
       "yazi.cachix.org-1:Dcdz63NZKfvUCbDGngQDAZq6kOroIrFoyO064uvLh8k="
+      "jovian-nixos.cachix.org-1:mAWLjAxLNlfxAnozUjOqGj4AxQwCl7MXwOfu7msVlAo="  # Steam Deck / Jovian-NixOS
     ];
   };
 }
