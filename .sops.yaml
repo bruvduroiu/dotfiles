@@ -2,7 +2,22 @@
 # See: https://github.com/getsops/sops
 keys:
   - &framework13 age1hd4y0v9k4ng3xkmprgvvnxzm6wh72k9lrr2smjerwkkn7q5j4ers2e83wf
+  # Future hosts:
+  # - &zimaboard age1...
+
 creation_rules:
-  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
+  # Common secrets - encrypted to all hosts
+  - path_regex: secrets/common/.*\.(yaml|json|env|ini)$
     age:
-    - *framework13
+      - *framework13
+      # Add more host keys here as they are added
+
+  # Framework13-specific secrets
+  - path_regex: secrets/framework13/.*\.(yaml|json|env|ini)$
+    age:
+      - *framework13
+
+  # Future: ZimaBoard-specific secrets
+  # - path_regex: secrets/zimaboard/.*\.(yaml|json|env|ini)$
+  #   age:
+  #     - *zimaboard

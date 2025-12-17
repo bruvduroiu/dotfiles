@@ -1,7 +1,7 @@
 { config, self, pkgs, ... }:
 
 let
-  secretsFile = "${self}/secrets/rental-bot.yaml";
+  secretsFile = "${self}/secrets/framework13/rental-bot.yaml";
 in {
   # sops secrets configuration
   sops = {
