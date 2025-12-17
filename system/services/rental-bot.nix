@@ -35,5 +35,8 @@ in {
     environment = {
       GECKODRIVER_PATH = "${pkgs.geckodriver}/bin/geckodriver";
     };
+    serviceConfig = {
+      ReadWritePaths = [ "/home/bogdan/.cache/dconf" ];
+    };
   };
 }
