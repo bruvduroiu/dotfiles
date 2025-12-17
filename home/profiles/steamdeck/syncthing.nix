@@ -37,8 +37,10 @@ in {
     overrideDevices = true;
     overrideFolders = true;
 
-    # GUI accessible from all interfaces (secured by password)
-    guiAddress = "0.0.0.0:8384";
+    # Note: We use 127.0.0.1 here because home-manager's syncthing-init service
+    # uses guiAddress for API calls (0.0.0.0 is not a valid connect address).
+    # The actual binding address (0.0.0.0:8384) is set via ExecStartPost below.
+    guiAddress = "127.0.0.1:8384";
 
     # GUI password from SOPS secrets
     passwordFile = config.sops.secrets.syncthing_gui_password.path;
@@ -47,6 +49,9 @@ in {
       gui = {
         theme = "dark";
         user = "deck";
+        # Note: address is set via systemd ExecStartPost below because
+        # home-manager's syncthing module overwrites settings.gui.address
+        # with guiAddress at the end of the init script.
       };
 
       options = {
@@ -125,11 +130,36 @@ in {
     };
   };
 
-  # Ensure syncthing service waits for SOPS to decrypt secrets
+  # Ensure syncthing and syncthing-init services wait for SOPS to decrypt secrets
   systemd.user.services.syncthing = {
     Unit = {
       After = [ "sops-nix.service" ];
       Wants = [ "sops-nix.service" ];
+    };
+  };
+
+  systemd.user.services.syncthing-init = {
+    Unit = {
+      After = [ "sops-nix.service" ];
+      Wants = [ "sops-nix.service" ];
+    };
+    Service = {
+      # After the init script runs, set the GUI address to 0.0.0.0:8384 for remote access.
+      # This is needed because home-manager's syncthing module uses guiAddress for both
+      # API calls (must be 127.0.0.1) and the final bind address (we want 0.0.0.0).
+      ExecStartPost = let
+        script = pkgs.writeShellScript "syncthing-set-gui-address" ''
+          API_KEY=$(${pkgs.gnugrep}/bin/grep -oP '(?<=<apikey>)[^<]+' ~/.local/state/syncthing/config.xml)
+          ${pkgs.curl}/bin/curl -s -X PATCH \
+            -H "X-API-Key: $API_KEY" \
+            -d '{"address": "0.0.0.0:8384"}' \
+            http://127.0.0.1:8384/rest/config/gui
+          # Restart syncthing to apply the address change
+          ${pkgs.curl}/bin/curl -s -X POST \
+            -H "X-API-Key: $API_KEY" \
+            http://127.0.0.1:8384/rest/system/restart
+        '';
+      in "${script}";
     };
   };
 }
