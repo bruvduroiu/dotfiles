@@ -104,4 +104,14 @@ in
   # State version - matches when NixOS was first installed on Steam Deck
   # Use mkForce since system/core sets a default
   system.stateVersion = lib.mkForce "25.11";
+
+  systemd.services.steam-cef-debug = lib.mkIf config.jovian.decky-loader.enable {
+  description = "Create Steam CEF debugging file";
+  serviceConfig = {
+    Type = "oneshot";
+    User = config.jovian.steam.user;
+    ExecStart = "/bin/sh -c 'mkdir -p ~/.steam/steam && [ ! -f ~/.steam/steam/.cef-enable-remote-debugging ] && touch ~/.steam/steam/.cef-enable-remote-debugging || true'";
+  };
+  wantedBy = [ "multi-user.target" ];
+};
 }
