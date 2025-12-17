@@ -74,8 +74,6 @@
     ];
 
     workspace = [
-      "1, layoutopt:orientation:left"
-      "1, gapsout:40, gapsin:5, layoutopt:orientation:center"
       "special:notes, layoutopt:orientation:center"
       "special:notes, gapsout:40, gapsin:20, layoutopt:orientation:center"
       "special:chat, gapsout:40, gapsin:10, layoutopt:orientation:center"

@@ -28,10 +28,10 @@
     ];
 
     general = {
-      gaps_in = 2;
-      gaps_out = 5;
+      gaps_in = 1;
+      gaps_out = 0;
 
-      border_size = 1;
+      border_size = 0;
 
       "col.active_border" = "rgba(88888888)";
       "col.inactive_border" = "rgba(00000088)";
@@ -47,7 +47,7 @@
     };
 
     decoration = {
-      rounding = 4;
+      rounding = 0;
 
       shadow = {
         enabled = true;
