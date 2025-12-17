@@ -5,9 +5,10 @@ let
   secretsFile = "${self}/secrets/framework13/syncthing.yaml";
 
   # Device IDs - obtained from Syncthing on each device
-  # Framework 13 NixOS laptop ID will be auto-generated on first run
   # Pixel 8a GrapheneOS device ID
   pixelDeviceId = "5ZRXJPH-UF6W42O-F6X7T6X-PCUJVTR-ZJGRHYH-ZHKUJLO-WISVGNQ-744CAAX";
+  # Steam Deck device ID
+  steamdeckDeviceId = "K2C4VNS-LC6JK3Y-INBSG3M-CKEHHXN-23OWLLF-KEGGS5C-GGIQIBO-Y3PHHQ6";
 
   # Common versioning configuration for 3-2-1 backup strategy
   # Simple versioning keeps old versions for a configurable time
@@ -79,16 +80,21 @@ in {
           # Prefers local discovery, falls back to global/relay
           addresses = [ "dynamic" ];
         };
+        "Steam Deck" = {
+          id = steamdeckDeviceId;
+          autoAcceptFolders = false;
+          addresses = [ "dynamic" ];
+        };
       };
 
       # Folders to sync - matching restic backup paths
       folders = {
-        # Documents folder - bidirectional sync
+        # Documents folder - bidirectional sync with Pixel, send-only to Steam Deck
         "Documents" = {
           id = "documents";
           path = "/home/bogdan/Documents";
-          devices = [ "Pixel 8a" ];
-          # Bidirectional sync
+          devices = [ "Pixel 8a" "Steam Deck" ];
+          # Bidirectional sync (Steam Deck is configured as receive-only on its end)
           type = "sendreceive";
           # Versioning for 3-2-1 backup (local versions)
           versioning = versioningConfig;
@@ -107,6 +113,19 @@ in {
           devices = [ "Pixel 8a" ];
           type = "sendreceive";
           versioning = versioningConfig;
+          fsWatcherEnabled = true;
+          rescanIntervalS = 3600;
+          ignorePerms = true;
+        };
+
+        # Steam game recordings from Steam Deck - receive-only
+        "Steam Recordings" = {
+          id = "steam-recordings";
+          path = "/home/bogdan/Videos/Steam Recordings";
+          devices = [ "Steam Deck" ];
+          # Receive-only: Framework13 receives recordings but doesn't modify them
+          type = "receiveonly";
+          # No versioning for large video files
           fsWatcherEnabled = true;
           rescanIntervalS = 3600;
           ignorePerms = true;

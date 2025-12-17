@@ -65,67 +65,42 @@ in {
         startBrowser = false;
       };
 
-      # ============================================================
-      # DEVICES & FOLDERS - Currently disabled
-      # 
-      # The Steam Deck doesn't need to sync Documents/Pictures since
-      # those are synced between Framework13 and Pixel 8a.
-      #
-      # To enable syncing in the future:
-      # 1. Uncomment the devices you want to sync with
-      # 2. Uncomment and configure the folders you want to sync
-      # 3. Redeploy: nixos-rebuild switch --flake .#steamdeck --target-host deck@steamdeck
-      # ============================================================
-
       devices = {
-        # "Pixel 8a" = {
-        #   id = pixelDeviceId;
-        #   autoAcceptFolders = false;
-        #   addresses = [ "dynamic" ];
-        # };
-        # "Framework13" = {
-        #   id = framework13DeviceId;
-        #   autoAcceptFolders = false;
-        #   addresses = [ "dynamic" ];
-        # };
+        "Framework13" = {
+          id = framework13DeviceId;
+          autoAcceptFolders = false;
+          addresses = [ "dynamic" ];
+        };
       };
 
       folders = {
-        # Example: To sync Documents with other devices, uncomment:
-        # "Documents" = {
-        #   id = "documents";
-        #   path = "/home/deck/Documents";
-        #   devices = [ "Pixel 8a" "Framework13" ];
-        #   type = "sendreceive";
-        #   versioning = versioningConfig;
-        #   fsWatcherEnabled = true;
-        #   rescanIntervalS = 3600;
-        #   ignorePerms = true;
-        # };
-        #
-        # Example: To sync Pictures with other devices, uncomment:
-        # "Pictures" = {
-        #   id = "pictures";
-        #   path = "/home/deck/Pictures";
-        #   devices = [ "Pixel 8a" "Framework13" ];
-        #   type = "sendreceive";
-        #   versioning = versioningConfig;
-        #   fsWatcherEnabled = true;
-        #   rescanIntervalS = 3600;
-        #   ignorePerms = true;
-        # };
-        #
-        # Example: Steam Deck specific folder (e.g., for emulator saves):
-        # "EmulatorSaves" = {
-        #   id = "emulator-saves";
-        #   path = "/home/deck/.local/share/emulator-saves";
-        #   devices = [ "Framework13" ];
-        #   type = "sendreceive";
-        #   versioning = versioningConfig;
-        #   fsWatcherEnabled = true;
-        #   rescanIntervalS = 300;  # More frequent for game saves
-        #   ignorePerms = true;
-        # };
+        # Documents folder - receive-only from Framework13
+        # Changes made on Steam Deck will NOT sync back to Framework13
+        "Documents" = {
+          id = "documents";
+          path = "/home/deck/Documents";
+          devices = [ "Framework13" ];
+          # Receive-only: Steam Deck receives updates but never sends changes back
+          type = "receiveonly";
+          versioning = versioningConfig;
+          fsWatcherEnabled = true;
+          rescanIntervalS = 3600;
+          ignorePerms = true;
+        };
+
+        # Steam game recordings - send-only to Framework13
+        # Recordings made on Steam Deck sync to Framework13 for backup/editing
+        "Steam Recordings" = {
+          id = "steam-recordings";
+          path = "/home/deck/.local/share/Steam/userdata/1834090003/gamerecordings";
+          devices = [ "Framework13" ];
+          # Send-only: Steam Deck sends recordings but doesn't receive changes
+          type = "sendonly";
+          # No versioning needed for recordings (large files, append-only)
+          fsWatcherEnabled = true;
+          rescanIntervalS = 300;  # Check every 5 minutes for new recordings
+          ignorePerms = true;
+        };
       };
     };
   };
