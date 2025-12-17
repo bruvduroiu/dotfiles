@@ -1,5 +1,8 @@
 { lib, pkgs, config, inputs, ... }:
 
+let
+  mainUser = "deck";
+in 
 {
   imports = [
     ./hardware-configuration.nix
@@ -7,6 +10,11 @@
 
   # Steam Deck hardware support via Jovian-NixOS
   jovian = {
+    decky-loader = {
+      enable = true;
+      user = "deck";
+      stateDir = "/home/${mainUser}/.local/share/decky"; # Keep scoped to user
+    };
     devices.steamdeck = {
       enable = true;
       enableGyroDsuService = true;
@@ -18,7 +26,7 @@
     steam = {
       enable = true;
       autoStart = true;
-      user = "deck";
+      user = mainUser;
       
       # Switch to Plasma desktop when using "Switch to Desktop" in Gaming Mode
       desktopSession = "plasma";
