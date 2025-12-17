@@ -1,0 +1,125 @@
+{ config, lib, pkgs, self, ... }:
+
+let
+  # Secrets file location
+  secretsFile = "${self}/secrets/framework13/syncthing.yaml";
+
+  # Device IDs - obtained from Syncthing on each device
+  # Framework 13 NixOS laptop ID will be auto-generated on first run
+  # Pixel 8a GrapheneOS device ID
+  pixelDeviceId = "5ZRXJPH-UF6W42O-F6X7T6X-PCUJVTR-ZJGRHYH-ZHKUJLO-WISVGNQ-744CAAX";
+
+  # Common versioning configuration for 3-2-1 backup strategy
+  # Simple versioning keeps old versions for a configurable time
+  versioningConfig = {
+    type = "simple";
+    params = {
+      keep = "5";  # Keep 5 old versions of each file
+    };
+  };
+in {
+  # SOPS secrets configuration for Syncthing GUI authentication
+  sops = {
+    age.keyFile = "/home/bogdan/.config/sops/age/keys.txt";
+    secrets = {
+      syncthing_gui_password = {
+        sopsFile = secretsFile;
+      };
+    };
+  };
+
+  services.syncthing = {
+    enable = true;
+
+    # Declarative configuration - overwrite any manual changes
+    overrideDevices = true;
+    overrideFolders = true;
+
+    # GUI accessible from all interfaces (secured by password)
+    # Access via: http://localhost:8384 or http://<tailscale-ip>:8384
+    guiAddress = "0.0.0.0:8384";
+
+    # GUI password from SOPS secrets
+    passwordFile = config.sops.secrets.syncthing_gui_password.path;
+
+    settings = {
+      gui = {
+        theme = "dark";
+        # Hardcoded username for GUI authentication
+        user = "bogdan";
+      };
+
+      options = {
+        # Prefer local network syncing to save Tailscale/mobile data
+        # Local discovery on LAN - primary sync method
+        localAnnounceEnabled = true;
+        # Global discovery as fallback when not on same LAN
+        globalAnnounceEnabled = true;
+        # Relay servers as last resort (uses bandwidth)
+        relaysEnabled = true;
+        # NAT traversal for direct connections
+        natEnabled = true;
+        # Limit relay usage - prefer direct connections
+        relayReconnectIntervalM = 30;
+        # Automatically upgrade syncthing
+        autoUpgradeIntervalH = 0;  # Disabled - managed by Nix
+        # Crash reporting
+        crashReportingEnabled = false;
+        # Start browser on startup
+        startBrowser = false;
+      };
+
+      # Devices to sync with
+      devices = {
+        "Pixel 8a" = {
+          id = pixelDeviceId;
+          # Auto-accept folders shared by this device
+          autoAcceptFolders = false;
+          # Addresses - let Syncthing discover automatically
+          # Prefers local discovery, falls back to global/relay
+          addresses = [ "dynamic" ];
+        };
+      };
+
+      # Folders to sync - matching restic backup paths
+      folders = {
+        # Documents folder - bidirectional sync
+        "Documents" = {
+          id = "documents";
+          path = "/home/bogdan/Documents";
+          devices = [ "Pixel 8a" ];
+          # Bidirectional sync
+          type = "sendreceive";
+          # Versioning for 3-2-1 backup (local versions)
+          versioning = versioningConfig;
+          # Watch for changes using inotify
+          fsWatcherEnabled = true;
+          # Rescan interval in seconds (fallback if inotify misses something)
+          rescanIntervalS = 3600;  # 1 hour
+          # Ignore permissions (mobile devices have different permission models)
+          ignorePerms = true;
+        };
+
+        # Pictures folder - bidirectional sync
+        "Pictures" = {
+          id = "pictures";
+          path = "/home/bogdan/Pictures";
+          devices = [ "Pixel 8a" ];
+          type = "sendreceive";
+          versioning = versioningConfig;
+          fsWatcherEnabled = true;
+          rescanIntervalS = 3600;
+          ignorePerms = true;
+        };
+      };
+    };
+  };
+
+  # Ensure syncthing service waits for SOPS to decrypt secrets
+  systemd.user.services.syncthing = {
+    Unit = {
+      After = [ "sops-nix.service" ];
+      Wants = [ "sops-nix.service" ];
+    };
+  };
+}

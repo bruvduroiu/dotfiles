@@ -16,6 +16,7 @@
     ../../services/wayland/hyprpaper.nix
     ../../services/mako.nix
     ../../services/podman.nix
+    ../../services/syncthing.nix
     ../../services/trayscale.nix
     ../../services/media/playerctl.nix
   ];

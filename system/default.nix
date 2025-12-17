@@ -29,7 +29,6 @@ let laptop = [
   ./services/power.nix
   ./services/rental-bot.nix
   ./services/restic.nix
-  ./services/syncthing.nix
 ];
 in {
   inherit laptop;

@@ -30,6 +30,9 @@
           users.bogdan.imports = homeImports."bogdan@framework13";
           extraSpecialArgs = specialArgs;
           backupFileExtension = ".hm-backup";
+          sharedModules = [
+            inputs.sops-nix.homeManagerModules.sops
+          ];
         };
       }
       ];

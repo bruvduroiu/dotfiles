@@ -111,14 +111,15 @@ in {
     ];
 
     # Syncthing pause/resume hooks
+    # Syncthing runs as user bogdan via home-manager, so we use sudo
     backupPrepareCommand = ''
       # Pause Syncthing to ensure file consistency
-      ${pkgs.syncthing}/bin/syncthing cli operations pause || true
+      ${pkgs.sudo}/bin/sudo -u bogdan ${pkgs.syncthing}/bin/syncthing cli operations pause || true
     '';
 
     backupCleanupCommand = ''
       # Resume Syncthing after backup (runs even on failure)
-      ${pkgs.syncthing}/bin/syncthing cli operations resume || true
+      ${pkgs.sudo}/bin/sudo -u bogdan ${pkgs.syncthing}/bin/syncthing cli operations resume || true
     '';
 
     # Schedule: daily at 02:00
