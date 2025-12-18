@@ -13,10 +13,11 @@ let
   framework13DeviceId = "U2HCYXA-75I4XWY-SNDJ6TQ-XKW36GG-USC5ZX2-VPOVYTZ-DX3ZS6E-X7JEAQZ";
 
   # Common versioning configuration
+  # Trashcan versioning moves deleted/replaced files to .stversions
   versioningConfig = {
-    type = "simple";
+    type = "trashcan";
     params = {
-      keep = "5";
+      cleanoutDays = "30";  # Keep deleted files for 30 days
     };
   };
 in {
@@ -74,14 +75,12 @@ in {
       };
 
       folders = {
-        # Documents folder - receive-only from Framework13
-        # Changes made on Steam Deck will NOT sync back to Framework13
-        "Documents" = {
-          id = "documents";
-          path = "/home/deck/Documents";
+        # Passwords folder - bidirectional sync with Framework13
+        "Passwords" = {
+          id = "passwords";
+          path = "/home/deck/Passwords";
           devices = [ "Framework13" ];
-          # Receive-only: Steam Deck receives updates but never sends changes back
-          type = "receiveonly";
+          type = "sendreceive";
           versioning = versioningConfig;
           fsWatcherEnabled = true;
           rescanIntervalS = 3600;

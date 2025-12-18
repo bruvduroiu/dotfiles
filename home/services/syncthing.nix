@@ -110,17 +110,32 @@ in {
           ignorePerms = true;
         };
 
-        # Pictures folder - bidirectional sync
-        # "Pictures" = {
-        #   id = "pictures";
-        #   path = "/home/bogdan/Pictures";
-        #   devices = [ "Pixel 8a" ];
-        #   type = "sendreceive";
-        #   versioning = versioningConfig;
-        #   fsWatcherEnabled = true;
-        #   rescanIntervalS = 3600;
-        #   ignorePerms = true;
-        # };
+        # Pictures folder - receive photos from iPhone
+        # NOTE: The folder ID must match what iOS Syncthing generates.
+        # Check the iPhone's Syncthing app for the actual folder ID and update here if different.
+        "Pictures" = {
+          id = "Photos";
+          path = "/home/bogdan/Pictures";
+          devices = [ "iPhone" ];
+          # Receive-only: Framework13 receives photos but doesn't push changes back
+          type = "receiveonly";
+          versioning = versioningConfig;
+          fsWatcherEnabled = true;
+          rescanIntervalS = 3600;
+          ignorePerms = true;
+        };
+
+        # Passwords folder - sync across all devices
+        "Passwords" = {
+          id = "passwords";
+          path = "/home/bogdan/Passwords";
+          devices = [ "Pixel 8a" "iPhone" "Steam Deck" ];
+          type = "sendreceive";
+          versioning = versioningConfig;
+          fsWatcherEnabled = true;
+          rescanIntervalS = 3600;
+          ignorePerms = true;
+        };
 
         # Steam game recordings from Steam Deck - receive-only
         "Steam Recordings" = {
