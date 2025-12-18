@@ -18,6 +18,7 @@ let laptop = [
   ./programs/ranger.nix
   ./programs/timewarrior.nix
   ./programs/wireshark.nix
+  ./programs/kdeconnect.nix
 
   ./services/backlight.nix
   ./services/brightnessctl.nix
@@ -45,6 +46,7 @@ steamdeck = [
   ./nix
 
   ./programs
+  ./programs/kdeconnect.nix
 
   ./services/pipewire.nix
 ];

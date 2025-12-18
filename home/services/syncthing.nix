@@ -5,17 +5,16 @@ let
   secretsFile = "${self}/secrets/framework13/syncthing.yaml";
 
   # Device IDs - obtained from Syncthing on each device
-  # Pixel 8a GrapheneOS device ID
   pixelDeviceId = "5ZRXJPH-UF6W42O-F6X7T6X-PCUJVTR-ZJGRHYH-ZHKUJLO-WISVGNQ-744CAAX";
-  # Steam Deck device ID
   steamdeckDeviceId = "K2C4VNS-LC6JK3Y-INBSG3M-CKEHHXN-23OWLLF-KEGGS5C-GGIQIBO-Y3PHHQ6";
+  iphoneDeviceId = "HECSBOL-KJFXURK-HUUTKJR-522Y3BO-TDTGBTO-YVCSBFP-SVX66UJ-SSZANQL";
 
   # Common versioning configuration for 3-2-1 backup strategy
-  # Simple versioning keeps old versions for a configurable time
+  # Trashcan versioning moves deleted/replaced files to .stversions
   versioningConfig = {
-    type = "simple";
+    type = "trashcan";
     params = {
-      keep = "5";  # Keep 5 old versions of each file
+      cleanoutDays = "30";  # Keep deleted files for 30 days
     };
   };
 in {
@@ -85,15 +84,20 @@ in {
           autoAcceptFolders = false;
           addresses = [ "dynamic" ];
         };
+        "iPhone" = {
+          id = iphoneDeviceId;
+          autoAcceptFolders = false;
+          addresses = [ "dynamic" ];
+        };
       };
 
       # Folders to sync - matching restic backup paths
       folders = {
-        # Documents folder - bidirectional sync with Pixel, send-only to Steam Deck
+        # Documents folder - bidirectional sync with Pixel and iPhone, send-only to Steam Deck
         "Documents" = {
           id = "documents";
           path = "/home/bogdan/Documents";
-          devices = [ "Pixel 8a" "Steam Deck" ];
+          devices = [ "Pixel 8a" "iPhone" ];
           # Bidirectional sync (Steam Deck is configured as receive-only on its end)
           type = "sendreceive";
           # Versioning for 3-2-1 backup (local versions)
@@ -107,16 +111,16 @@ in {
         };
 
         # Pictures folder - bidirectional sync
-        "Pictures" = {
-          id = "pictures";
-          path = "/home/bogdan/Pictures";
-          devices = [ "Pixel 8a" ];
-          type = "sendreceive";
-          versioning = versioningConfig;
-          fsWatcherEnabled = true;
-          rescanIntervalS = 3600;
-          ignorePerms = true;
-        };
+        # "Pictures" = {
+        #   id = "pictures";
+        #   path = "/home/bogdan/Pictures";
+        #   devices = [ "Pixel 8a" ];
+        #   type = "sendreceive";
+        #   versioning = versioningConfig;
+        #   fsWatcherEnabled = true;
+        #   rescanIntervalS = 3600;
+        #   ignorePerms = true;
+        # };
 
         # Steam game recordings from Steam Deck - receive-only
         "Steam Recordings" = {

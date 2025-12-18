@@ -56,6 +56,8 @@ in
     ripdrag
 
     steam-recording-combine
+    
+    age-plugin-yubikey
   ];
 
   programs = {

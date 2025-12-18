@@ -113,6 +113,17 @@ let
     ];
   };
 
+  # Create a directory with all config files for the setup script
+  configFilesDir = pkgs.runCommand "minecraft-configs-${mcVersion}" {} ''
+    mkdir -p $out
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (path: value: ''
+      mkdir -p $out/$(dirname "${path}")
+      cat > $out/${path} << 'CONFIGEOF'
+${value.text}
+CONFIGEOF
+    '') allConfigFiles)}
+  '';
+
   # Setup script for mod installation
   setupMinecraftScript = pkgs.writeShellScriptBin "minecraft-setup" ''
     set -euo pipefail
@@ -121,6 +132,7 @@ let
     INSTANCE_NAME="${instanceName}"
     INSTANCE_DIR="$PRISM_DATA/instances/$INSTANCE_NAME"
     MODS_SRC="${modsDir}"
+    CONFIGS_SRC="${configFilesDir}"
 
     echo "============================================"
     echo "  Minecraft Declarative Setup"
@@ -177,6 +189,25 @@ let
       echo "  + $mod_name"
       cp -f "$mod" "$INSTANCE_DIR/.minecraft/mods/$mod_name"
       echo "$mod_name" >> "$MANAGED_MODS"
+    done
+
+    # === CONFIG FILES ===
+    # Install config files only if they don't exist (preserves user customizations)
+    echo ""
+    echo "Checking config files:"
+    configs_created=0
+    find "$CONFIGS_SRC" -type f | while read -r config_src; do
+      config_rel="''${config_src#$CONFIGS_SRC/}"
+      config_dest="$INSTANCE_DIR/.minecraft/$config_rel"
+      
+      if [ ! -f "$config_dest" ]; then
+        mkdir -p "$(dirname "$config_dest")"
+        cp "$config_src" "$config_dest"
+        echo "  + Created: $config_rel"
+        configs_created=$((configs_created + 1))
+      else
+        echo "  ~ Exists: $config_rel (preserving user settings)"
+      fi
     done
 
     # === SERVERS ===
@@ -249,13 +280,6 @@ in {
     };
   };
 
-  # Install all config files (mod configs + options.txt)
-  # Note: Prism Launcher stores instances in ~/.local/share/PrismLauncher, not ~/.config
-  xdg.dataFile = lib.mapAttrs' (path: value: {
-    name = "PrismLauncher/instances/${instanceName}/.minecraft/${path}";
-    value = {
-      inherit (value) text;
-      force = value.force or false;
-    };
-  }) allConfigFiles;
+  # Config files are now installed by the setup script (copy if not exists)
+  # This preserves user customizations made in-game
 }
