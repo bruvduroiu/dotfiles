@@ -1,8 +1,10 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports = [
     ./syncthing.nix
+    ../../programs/keepassxc.nix
+    ../../programs/games/minecraft
   ];
 
   home = {
