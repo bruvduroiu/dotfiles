@@ -2,14 +2,22 @@
 
 ## Why?
 
-- keeping sanity while managing packages between a Linux & MacOS machine
-- I like Nix
-- I want to manage my home directory from a single reproducible pipeline
+- A single repository that manages all my machines: Framework13, Steam Deck, other potential servers
+- Must be able to:
+    - apply configuration to any machine from my main Framework13 laptop
+    - encrypt and store secrets I might need here
+    - define common service definition and decide which machine gets which service / config
+- Must be able to manage home directory, dotfiles and `~/.config` via this repository
+    - dislike symlinking
 
 ## The current setup
 
 System Management: [NixOS](https://nixos.org/)
 - replacing all dotfile management with NixOS Home Manager
+
+Gaming System Management: [Jovian-NixOS](https://github.com/Jovian-Experiments/Jovian-NixOS)
+
+Syncthing for syncing all my devices
 
 Terminal Emulator: [Ghostty](https://ghostty.org/)
 - Zig-based terminal emulator
@@ -22,7 +30,11 @@ Shell: [fish](https://fishshell.com/)
 
 Text Editor: [neovim](https://neovim.io/)
 - vi-movements
-- great community, loads of plugins
+- great community, loads of completions
+
+Secrets Management: [sops-nix](https://github.com/Mic92/sops-nix)
+- easy to manage AGE keys
+- easy to integrate into my git repository (RIP me when we get quantum chips breaking encryption)
 
 Code Completion & Language Servers: Neovim LSP & [Mason](https://github.com/williamboman/mason.nvim)
 
