@@ -1073,8 +1073,8 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1765883495,
-        "narHash": "sha256-i4td4ZVeQ97gXBMsygplFT6ovkvQ3mPjMcudJmFfIh4=",
+        "lastModified": 1765893425,
+        "narHash": "sha256-Ug1jFO2dKlNnl6M37PYMdU7Ti2c81uLmD3bPwN3R2Vs=",
         "path": "/home/bogdan/development/scratch/591",
         "type": "path"
       },

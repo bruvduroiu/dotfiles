@@ -26,7 +26,7 @@
 
 let
   # Minecraft version configuration
-  mcVersion = "1.21.10";
+  mcVersion = "1.21.11";
   fabricLoaderVersion = "0.18.3";
   instanceName = "${mcVersion}";
 

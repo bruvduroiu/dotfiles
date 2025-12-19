@@ -19,10 +19,10 @@
   description = "Adds the best controller support to Minecraft Java Edition";
   homepage = "https://modrinth.com/mod/controlify";
 
-  # Mod file for Minecraft 1.21.10
+  # Mod file for Minecraft 1.21.11
   file = pkgs.fetchurl {
-    url = "https://cdn.modrinth.com/data/DOUdJVEm/versions/DsLQgNuV/controlify-2.4.4%2B1.21.10-fabric.jar";
-    sha512 = "c616b11d456050ad4c67f5d95225db731b613b91115c294bdf0ef31ef1e7774c6156d7d3a1e2d3bf1f4d5d19180f6dfcb1ac3bc2d4dcece337a22c397520a2e8";
+    url = "https://cdn.modrinth.com/data/DOUdJVEm/versions/4N7tPBpk/controlify-2.5.0%2B1.21.11-fabric.jar";
+    sha512 = "cba7986ff8519a6f99c206f46d7990fccb73d25b3120f99f01f2bdec6b4715826d27aff2f294a2536e01e95fbaf8466b33f107cc7e3e2368fab7ec6d83e7a69e";
     name = "controlify.jar";
   };
 
