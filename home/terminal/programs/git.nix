@@ -1,16 +1,16 @@
-{ config, ... }: let
-  cfg = config.programs.git;
-  key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJJSSumawcqD5McYyYcwPKuhKouMnR0Fy4B+lDhMAfuH bogdan@nixos";
-in {
+{ config, ... }:
+
+{
   programs.git = {
     enable = true;
 
     ignores = [ ".swp" ];
 
+    # GPG signing with master key (uses local key or YubiKey subkey automatically)
     signing = {
-      key = "${config.home.homeDirectory}/.ssh/id_ed25519";
+      key = "5CB2BEDC031471D8";
       signByDefault = true;
-      format = "ssh";
+      # format defaults to "openpgp" so we don't need to specify it
     };
 
     settings = {
@@ -28,12 +28,7 @@ in {
       diff.colorMoved = "default";
       merge.conflictStyle = "diff3";
 
-      gpg.ssh.allowedSignersFile = config.home.homeDirectory + "/" + config.xdg.configFile."git/allowed_signers".target;
       pull.rebase = true;
     };
   };
-
-  xdg.configFile."git/allowed_signers".text = ''
-    ${cfg.settings.user.email} namespaces="git" ${key}
-  '';
 }

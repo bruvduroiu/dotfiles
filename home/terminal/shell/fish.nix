@@ -20,6 +20,9 @@ in
         set -gx fzf_fd_opts "${fd_opts}"
         set -gx fzf_preview_dir_cmd "${pkgs.eza}/bin/eza ${eza_opts}"
         set -gx fzf_diff_highlighter "${pkgs.delta}/bin/delta ${delta_opts}"
+        
+        # GPG needs to know the TTY for pinentry
+        set -gx GPG_TTY (tty)
       '';
       shellAliases = {
         l = "ls -lah";
