@@ -6,11 +6,10 @@
 
     ignores = [ ".swp" ];
 
-    # GPG signing with master key (uses local key or YubiKey subkey automatically)
+    # GPG signing with local subkey (! suffix forces this specific key over YubiKey subkey)
     signing = {
-      key = "5CB2BEDC031471D8";
+      key = "E3D1D113ED046C36!";
       signByDefault = true;
-      # format defaults to "openpgp" so we don't need to specify it
     };
 
     settings = {
