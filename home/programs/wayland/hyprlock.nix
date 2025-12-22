@@ -16,6 +16,15 @@ in {
         no_fade_in = true;
       };
 
+      auth = {
+        fingerprint = {
+          enabled = true;
+          ready_message = "(Scan fingerprint to unlock)";
+          present_message = "Scanning fingerprint";
+          retry_delay = 250;
+        };
+      };
+
       animation = [
         "inputFieldDots, 1, 2, linear"
         "fadeIn, 0"

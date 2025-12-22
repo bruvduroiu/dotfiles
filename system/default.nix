@@ -31,6 +31,7 @@ let laptop = [
   ./services/rental-bot.nix
   ./services/restic.nix
   ./services/yubikey.nix
+  ./services/fprintd.nix
 ];
 
 # Steam Deck - minimal system modules
