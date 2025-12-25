@@ -5,7 +5,7 @@ let
   secretsFile = "${self}/secrets/framework13/syncthing.yaml";
 
   # Device IDs - obtained from Syncthing on each device
-  pixelDeviceId = "5ZRXJPH-UF6W42O-F6X7T6X-PCUJVTR-ZJGRHYH-ZHKUJLO-WISVGNQ-744CAAX";
+  pixelDeviceId = "EHS76NL-XYJS6IK-JQOJ35O-ZPGYXC3-7WNSC6S-ZEDAJH3-4JGALW2-WKC7CA4";
   steamdeckDeviceId = "K2C4VNS-LC6JK3Y-INBSG3M-CKEHHXN-23OWLLF-KEGGS5C-GGIQIBO-Y3PHHQ6";
   iphoneDeviceId = "HECSBOL-KJFXURK-HUUTKJR-522Y3BO-TDTGBTO-YVCSBFP-SVX66UJ-SSZANQL";
 
@@ -71,7 +71,7 @@ in {
 
       # Devices to sync with
       devices = {
-        "Pixel 8a" = {
+        "Pixel 10 Pro" = {
           id = pixelDeviceId;
           # Auto-accept folders shared by this device
           autoAcceptFolders = false;
@@ -97,7 +97,7 @@ in {
         "Documents" = {
           id = "documents";
           path = "/home/bogdan/Documents";
-          devices = [ "Pixel 8a" "iPhone" ];
+          devices = [ "Pixel 10 Pro" "iPhone" ];
           # Bidirectional sync (Steam Deck is configured as receive-only on its end)
           type = "sendreceive";
           # Versioning for 3-2-1 backup (local versions)
@@ -129,7 +129,7 @@ in {
         "Passwords" = {
           id = "passwords";
           path = "/home/bogdan/Passwords";
-          devices = [ "Pixel 8a" "iPhone" "Steam Deck" ];
+          devices = [ "Pixel 10 Pro" "iPhone" "Steam Deck" ];
           type = "sendreceive";
           versioning = versioningConfig;
           fsWatcherEnabled = true;

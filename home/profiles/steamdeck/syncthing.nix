@@ -5,8 +5,7 @@ let
   secretsFile = "${self}/secrets/steamdeck/syncthing.yaml";
 
   # Device IDs - obtained from Syncthing on each device
-  # Pixel 8a GrapheneOS device ID
-  pixelDeviceId = "5ZRXJPH-UF6W42O-F6X7T6X-PCUJVTR-ZJGRHYH-ZHKUJLO-WISVGNQ-744CAAX";
+  pixelDeviceId = "EHS76NL-XYJS6IK-JQOJ35O-ZPGYXC3-7WNSC6S-ZEDAJH3-4JGALW2-WKC7CA4";
   
   # Framework13 device ID - get this from Framework13's Syncthing
   # Run: syncthing cli show system | grep myID
