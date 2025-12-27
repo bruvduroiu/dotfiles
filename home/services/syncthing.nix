@@ -95,7 +95,7 @@ in {
       folders = {
         # Documents folder - bidirectional sync with Pixel and iPhone, send-only to Steam Deck
         "Documents" = {
-          id = "documents";
+          id = "docs";
           path = "/home/bogdan/Documents";
           devices = [ "Pixel 10 Pro" "iPhone" ];
           # Bidirectional sync (Steam Deck is configured as receive-only on its end)
@@ -159,5 +159,32 @@ in {
       After = [ "sops-nix.service" ];
       Wants = [ "sops-nix.service" ];
     };
+  };
+
+  # Syncthing ignore patterns - managed declaratively
+  # These files tell Syncthing which paths to exclude from syncing
+  #
+  # Strategy: .stignore files are NOT synced by Syncthing (by design).
+  # We use #include to reference a .stignore-common file that IS synced,
+  # allowing all devices to share the same ignore patterns.
+  # 
+  # On mobile devices (Pixel/iPhone), create a .stignore with:
+  #   #include .stignore-common
+  home.file = {
+    # Shared ignore patterns - this file IS synced to all devices
+    "Documents/.stignore-common".text = ''
+      // Shared ignore patterns for all devices
+      // This file is synced, then included by each device's .stignore
+      
+      // Obsidian configuration - managed by home-manager on Framework13
+      // Contains symlinks that can't sync to Android/iOS
+      **/.obsidian
+    '';
+
+    # Local .stignore that includes the shared patterns
+    "Documents/.stignore".text = ''
+      // Include shared ignore patterns (synced across devices)
+      #include .stignore-common
+    '';
   };
 }

@@ -1010,11 +1010,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1764928225,
-        "narHash": "sha256-dDHd8fTy/WbPKeLPZ0XmN1yzc2ZmxTmhb2J7yh2XU9U=",
+        "lastModified": 1766823458,
+        "narHash": "sha256-pHUiHJoOqZVCp5YhDo0gjlGksFNQ3Tv2ByJKlL6LUg0=",
         "owner": "nix-community",
         "repo": "NUR",
-        "rev": "8be6e4a35340260c56f6715a322b682c30455e6e",
+        "rev": "9575888cff3ca649fe2d46f72bbf02a01ca12b70",
         "type": "github"
       },
       "original": {
@@ -1073,8 +1073,8 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1765893425,
-        "narHash": "sha256-Ug1jFO2dKlNnl6M37PYMdU7Ti2c81uLmD3bPwN3R2Vs=",
+        "lastModified": 1766746566,
+        "narHash": "sha256-6/o60t1pFKKhQfJmbrU9jW7mBW+YfFuMj9rbp2Zm16Y=",
         "path": "/home/bogdan/development/scratch/591",
         "type": "path"
       },
