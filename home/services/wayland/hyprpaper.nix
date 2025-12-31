@@ -1,4 +1,4 @@
-{ pkgs, inputs, config, ... }:
+{ pkgs, inputs, ... }:
 
 let
   wallpaper = ../../wallpapers/a_fish_swimming_in_water.png;
@@ -8,8 +8,14 @@ in {
     package = inputs.hyprpaper.packages.${pkgs.system}.default;
 
     settings = {
-      preload = [ (builtins.toString wallpaper) ];
-      wallpaper = [",${builtins.toString wallpaper}"];
+      splash = false;
+
+      wallpaper = [
+        {
+          monitor = "";
+          path = "${wallpaper}";
+        }
+      ];
     };
   };
 }

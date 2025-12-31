@@ -2,8 +2,9 @@
 
 {
   services.greetd = let
+    hyprlandDesktop = "${config.programs.hyprland.package}/share/wayland-sessions/hyprland.desktop";
     session = {
-      command = "${lib.getExe config.programs.uwsm.package} start hyprland-uwsm.desktop";
+      command = "${lib.getExe config.programs.uwsm.package} start -eD Hyprland ${hyprlandDesktop}";
       user = "bogdan";
     };
   in {

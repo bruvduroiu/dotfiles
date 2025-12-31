@@ -28,6 +28,7 @@
         gh-actions-language-server = prev.callPackage "${self}/pkgs/gh-actions-language-server.nix" {};
         lightpanda = prev.callPackage "${self}/pkgs/lightpanda.nix" {};
         gomcp = prev.callPackage "${self}/pkgs/gomcp.nix" {};
+        icloudpd = prev.callPackage "${self}/pkgs/icloudpd.nix" {};
         opencode = prev.callPackage "${self}/pkgs/opencode.nix" {
           version = "1.0.167";
           hash = "sha256-I/VCHUCSnK0ePPtb0b9jeaf1OUpIYKuTPYOwNVRB9ic=";

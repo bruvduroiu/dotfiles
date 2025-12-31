@@ -1,0 +1,67 @@
+#!/system/bin/sh
+# Stop router
+
+echo "Stopping router..."
+
+# Kill DHCP server
+pkill -f "dnsmasq.*192.168.50" 2>/dev/null
+
+# Find VPN interface if exists
+VPN_IF=""
+for tun in tun0 tun1 tun2 tun3; do
+    if ip addr show "$tun" 2>/dev/null | grep -q "inet "; then
+        VPN_IF="$tun"
+        break
+    fi
+done
+
+# Remove FORWARD rules
+iptables -D FORWARD -i eth0 -j ACCEPT 2>/dev/null
+iptables -D FORWARD -o eth0 -j ACCEPT 2>/dev/null
+
+if [ -n "$VPN_IF" ]; then
+    iptables -D FORWARD -i eth0 -o "$VPN_IF" -j ACCEPT 2>/dev/null
+    iptables -D FORWARD -i "$VPN_IF" -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null
+fi
+
+# Remove NAT rules from tetherctrl chain
+iptables -t nat -D tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -j MASQUERADE 2>/dev/null
+iptables -t nat -D tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -o rmnet1 -j MASQUERADE 2>/dev/null
+iptables -t nat -D tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -o rmnet2 -j MASQUERADE 2>/dev/null
+
+if [ -n "$VPN_IF" ]; then
+    iptables -t nat -D tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -o "$VPN_IF" -j MASQUERADE 2>/dev/null
+fi
+
+# Remove old-style NAT rules (in case they exist)
+iptables -t nat -D POSTROUTING -s 192.168.50.0/24 -o rmnet1 -j MASQUERADE 2>/dev/null
+iptables -t nat -D POSTROUTING -s 192.168.50.0/24 -o rmnet2 -j MASQUERADE 2>/dev/null
+if [ -n "$VPN_IF" ]; then
+    iptables -t nat -D POSTROUTING -s 192.168.50.0/24 -o "$VPN_IF" -j MASQUERADE 2>/dev/null
+fi
+
+# Remove policy rules (both old and new style)
+ip rule del from 192.168.50.0/24 2>/dev/null
+ip rule del iif rmnet1 lookup main 2>/dev/null
+ip rule del iif rmnet2 lookup main 2>/dev/null
+
+if [ -n "$VPN_IF" ]; then
+    ip rule del iif "$VPN_IF" lookup main 2>/dev/null
+fi
+
+# Remove routes
+ip route del 192.168.50.0/24 dev eth0 table rmnet1 2>/dev/null
+ip route del 192.168.50.0/24 dev eth0 table rmnet2 2>/dev/null
+ip route del 192.168.50.0/24 dev eth0 table tun0 2>/dev/null
+ip route del 192.168.50.0/24 dev eth0 2>/dev/null
+
+# Flush eth0
+ip addr flush dev eth0 2>/dev/null
+
+# Re-enable reverse path filtering
+echo 1 > /proc/sys/net/ipv4/conf/all/rp_filter 2>/dev/null
+for iface in /proc/sys/net/ipv4/conf/*/rp_filter; do
+    echo 1 > "$iface" 2>/dev/null || true
+done
+
+echo "Stopped"

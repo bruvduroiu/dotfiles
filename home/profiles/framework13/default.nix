@@ -9,6 +9,7 @@
     ../../programs/wayland
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
+    ../../programs/icloudpd.nix
 
     # terminal emulators
     ../../terminal/emulators/ghostty.nix
@@ -19,6 +20,8 @@
     ../../services/syncthing.nix
     ../../services/trayscale.nix
     ../../services/media/playerctl.nix
+    ../../services/transmission.nix
+    ./qbittorrent.nix
   ];
 
   wayland.windowManager.hyprland.settings = {

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb shell \"su -c ''cat /proc/sys/net/ipv4/ip_forward''\")",
+      "Bash(nix-shell:*)"
+    ]
+  }
+}

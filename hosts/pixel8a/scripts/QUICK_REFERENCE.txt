@@ -1,0 +1,101 @@
+═══════════════════════════════════════════════════════════
+         PIXEL 8A VPN ROUTER - QUICK REFERENCE
+═══════════════════════════════════════════════════════════
+
+📱 START ROUTER (from adb shell as root)
+────────────────────────────────────────────────────────────
+  1. Enable Mullvad VPN in Android Settings
+  2. Plug in USB-C to Ethernet adapter
+  3. Run: /data/local/tmp/router-start
+
+  Expected output:
+  [1/6] IP forwarding...
+  [2/6] Finding upstream...
+      Primary: rmnet1 (100.x.x.x)
+  [3/6] Detecting VPN...
+      VPN found: tun0 (10.x.x.x)
+  [4/6] Configuring eth0...
+  [5/6] NAT and forwarding...
+  [6/6] DHCP...
+
+  === Router Ready ===
+  Mode: VPN (tun0)
+
+
+📊 CHECK STATUS
+────────────────────────────────────────────────────────────
+  /data/local/tmp/router-status
+
+
+🛑 STOP ROUTER
+────────────────────────────────────────────────────────────
+  /data/local/tmp/router-stop
+
+
+⚡ ONE-LINER (from laptop)
+────────────────────────────────────────────────────────────
+  adb shell "su -c '/data/local/tmp/router-start'"
+
+
+🌐 CLIENT CONFIGURATION (automatic via DHCP)
+────────────────────────────────────────────────────────────
+  IP Range:   192.168.50.100-200
+  Gateway:    192.168.50.1
+  DNS:        1.1.1.1, 8.8.8.8
+
+
+🔐 HOW IT WORKS
+────────────────────────────────────────────────────────────
+  Laptop → eth0 → NAT → VPN (tun0) → rmnet → Internet
+
+  All tethered traffic goes through Mullvad VPN
+  Carrier sees only encrypted VPN tunnel
+
+
+🚨 TROUBLESHOOTING
+────────────────────────────────────────────────────────────
+  Problem: "ERROR: No VPN detected!"
+  Fix:     Open Mullvad app → Connect
+           Then run router-start again
+
+  Problem: No internet on laptop
+  Fix:     Check VPN: ip addr show tun0
+           Restart VPN in Mullvad app
+           Restart router
+
+  Problem: Slow speeds
+  Fix:     Choose nearby Mullvad server in app
+
+
+📋 FILE LOCATIONS
+────────────────────────────────────────────────────────────
+  Scripts:     /data/local/tmp/router-*
+  DHCP leases: /data/local/tmp/dnsmasq.leases
+  PID file:    /data/local/tmp/dnsmasq.pid
+
+
+🔧 MANUAL CHECKS
+────────────────────────────────────────────────────────────
+  IP forwarding:  cat /proc/sys/net/ipv4/ip_forward
+                  (should be 1)
+
+  VPN interface:  ip addr show tun0
+                  (should show 10.x.x.x)
+
+  NAT rules:      iptables -t nat -L POSTROUTING -n -v
+                  (should show MASQUERADE to tun0)
+
+  DHCP:           cat /data/local/tmp/dnsmasq.leases
+                  (shows connected clients)
+
+
+💡 TIPS
+────────────────────────────────────────────────────────────
+  • Keep phone plugged in (routing + VPN = battery drain)
+  • Choose nearby Mullvad servers (lower latency)
+  • Use WireGuard protocol in Mullvad (faster)
+  • Enable "Always-on VPN" in Mullvad settings
+  • Don't enable "Block connections without VPN"
+
+
+═══════════════════════════════════════════════════════════

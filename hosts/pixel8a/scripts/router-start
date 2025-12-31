@@ -1,0 +1,207 @@
+#!/system/bin/sh
+# Travel router with VPN support
+# Pixel 8a
+
+echo "=== Pixel 8a Travel Router ==="
+
+# --- Step 1: IP forwarding ---
+echo "[1/7] IP forwarding..."
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+# Disable reverse path filtering (needed for VPN routing)
+echo 0 > /proc/sys/net/ipv4/conf/all/rp_filter
+for iface in /proc/sys/net/ipv4/conf/*/rp_filter; do
+    echo 0 > "$iface" 2>/dev/null || true
+done
+
+# --- Step 2: Find upstream (cellular) ---
+echo "[2/7] Finding upstream..."
+UPSTREAM=""
+UPSTREAM_IP=""
+
+if ip addr show rmnet1 2>/dev/null | grep -q "inet "; then
+    UPSTREAM="rmnet1"
+    UPSTREAM_IP=$(ip addr show rmnet1 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+    echo "    Primary: rmnet1 ($UPSTREAM_IP)"
+fi
+
+UPSTREAM2=""
+if ip addr show rmnet2 2>/dev/null | grep -q "inet "; then
+    if [ -z "$UPSTREAM" ]; then
+        UPSTREAM="rmnet2"
+        UPSTREAM_IP=$(ip addr show rmnet2 | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+        echo "    Primary: rmnet2 ($UPSTREAM_IP)"
+    else
+        UPSTREAM2="rmnet2"
+        echo "    Secondary: rmnet2"
+    fi
+fi
+
+[ -z "$UPSTREAM" ] && echo "ERROR: No 5G!" && exit 1
+
+# --- Step 3: Detect VPN interface ---
+echo "[3/7] Detecting VPN..."
+VPN_IF=""
+VPN_IP=""
+
+# Look for tun interface (Android VPN creates tun0, tun1, etc.)
+for tun in tun0 tun1 tun2 tun3; do
+    if ip addr show "$tun" 2>/dev/null | grep -q "inet "; then
+        VPN_IF="$tun"
+        VPN_IP=$(ip addr show "$tun" | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+        echo "    VPN found: $VPN_IF ($VPN_IP)"
+        break
+    fi
+done
+
+if [ -z "$VPN_IF" ]; then
+    echo "    WARNING: No VPN detected!"
+    echo "    Traffic will go direct (not stealthy!)"
+    echo "    To use VPN: Enable Mullvad in Android Settings first"
+    USE_VPN=0
+else
+    USE_VPN=1
+fi
+
+# --- Step 4: Configure eth0 (downstream LAN) ---
+echo "[4/7] Configuring eth0..."
+ip link show eth0 >/dev/null 2>&1 || { echo "ERROR: No eth0!"; exit 1; }
+
+ip addr flush dev eth0 2>/dev/null
+ip addr add 192.168.50.1/24 dev eth0
+ip link set eth0 up
+echo "    eth0 = 192.168.50.1/24"
+
+# --- Step 5: NAT and FORWARD rules ---
+echo "[5/7] NAT and forwarding..."
+
+# Remove any existing Android tethering NAT rules for our subnet
+iptables -t nat -D tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -j MASQUERADE 2>/dev/null || true
+iptables -t nat -D tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -o rmnet1 -j MASQUERADE 2>/dev/null || true
+iptables -t nat -D tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -o rmnet2 -j MASQUERADE 2>/dev/null || true
+
+if [ "$USE_VPN" -eq 1 ]; then
+    # Add NAT rule to Android's tetherctrl chain (higher priority than direct POSTROUTING)
+    if ! iptables -t nat -C tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -o "$VPN_IF" -j MASQUERADE 2>/dev/null; then
+        iptables -t nat -I tetherctrl_nat_POSTROUTING 1 -s 192.168.50.0/24 -o "$VPN_IF" -j MASQUERADE
+        echo "    NAT: 192.168.50.0/24 -> $VPN_IF (in tetherctrl)"
+    fi
+
+    # Forward rules
+    if ! iptables -C FORWARD -i eth0 -o "$VPN_IF" -j ACCEPT 2>/dev/null; then
+        iptables -I FORWARD 1 -i eth0 -o "$VPN_IF" -j ACCEPT
+    fi
+
+    if ! iptables -C FORWARD -i "$VPN_IF" -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT 2>/dev/null; then
+        iptables -I FORWARD 2 -i "$VPN_IF" -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+    fi
+    echo "    Forward: eth0 <-> $VPN_IF"
+else
+    # No VPN: use Android's default tethering
+    if ! iptables -t nat -C tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -o "$UPSTREAM" -j MASQUERADE 2>/dev/null; then
+        iptables -t nat -I tetherctrl_nat_POSTROUTING 1 -s 192.168.50.0/24 -o "$UPSTREAM" -j MASQUERADE
+        echo "    NAT: 192.168.50.0/24 -> $UPSTREAM (in tetherctrl)"
+    fi
+
+    if [ -n "$UPSTREAM2" ]; then
+        if ! iptables -t nat -C tetherctrl_nat_POSTROUTING -s 192.168.50.0/24 -o "$UPSTREAM2" -j MASQUERADE 2>/dev/null; then
+            iptables -t nat -I tetherctrl_nat_POSTROUTING 1 -s 192.168.50.0/24 -o "$UPSTREAM2" -j MASQUERADE
+        fi
+    fi
+
+    # Forward rules
+    if ! iptables -C FORWARD -i eth0 -j ACCEPT 2>/dev/null; then
+        iptables -I FORWARD 1 -i eth0 -j ACCEPT
+    fi
+
+    if ! iptables -C FORWARD -o eth0 -j ACCEPT 2>/dev/null; then
+        iptables -I FORWARD 2 -o eth0 -j ACCEPT
+    fi
+    echo "    Forward: eth0 <-> all"
+fi
+
+# --- Step 6: Policy Routing (CRITICAL) ---
+echo "[6/7] Policy routing..."
+
+if [ "$USE_VPN" -eq 1 ]; then
+    # For VPN mode, route eth0 traffic to tun0 table with higher priority
+    # This bypasses Android's UID-based VPN routing
+    ip rule del from 192.168.50.0/24 2>/dev/null
+    ip rule add from 192.168.50.0/24 lookup tun0 priority 9000
+    echo "    Outbound: from 192.168.50.0/24 -> table tun0"
+
+    # Inbound: traffic from VPN should use main table to find eth0
+    ip rule del iif "$VPN_IF" lookup main 2>/dev/null
+    ip rule add iif "$VPN_IF" lookup main priority 9100
+    echo "    Inbound: iif $VPN_IF -> lookup main"
+else
+    # Find the upstream routing table
+    UPSTREAM_TABLE=""
+    for tbl in $(ip rule show 2>/dev/null | grep "lookup" | awk '{print $NF}' | sort -u); do
+        if ip route show table "$tbl" 2>/dev/null | grep -q "default dev $UPSTREAM"; then
+            UPSTREAM_TABLE="$tbl"
+            break
+        fi
+    done
+
+    if [ -n "$UPSTREAM_TABLE" ]; then
+        # Outbound: traffic FROM 192.168.50.0/24 uses upstream table
+        ip rule del from 192.168.50.0/24 2>/dev/null
+        ip rule add from 192.168.50.0/24 lookup "$UPSTREAM_TABLE" priority 100
+        echo "    Outbound: from 192.168.50.0/24 -> table $UPSTREAM_TABLE"
+
+        # Add route for 192.168.50.0/24 in upstream table
+        ip route del 192.168.50.0/24 dev eth0 table "$UPSTREAM_TABLE" 2>/dev/null
+        ip route add 192.168.50.0/24 dev eth0 table "$UPSTREAM_TABLE"
+        echo "    Added: 192.168.50.0/24 via eth0 in table $UPSTREAM_TABLE"
+    fi
+
+    # Inbound: traffic from rmnet should use main table
+    ip rule del iif "$UPSTREAM" lookup main 2>/dev/null
+    ip rule add iif "$UPSTREAM" lookup main priority 200
+    echo "    Inbound: iif $UPSTREAM -> lookup main"
+
+    if [ -n "$UPSTREAM2" ]; then
+        ip rule del iif "$UPSTREAM2" lookup main 2>/dev/null
+        ip rule add iif "$UPSTREAM2" lookup main priority 201
+        echo "    Inbound: iif $UPSTREAM2 -> lookup main"
+    fi
+fi
+
+# Main table should have eth0 route
+ip route del 192.168.50.0/24 dev eth0 2>/dev/null
+ip route add 192.168.50.0/24 dev eth0 2>/dev/null
+echo "    Main table: 192.168.50.0/24 via eth0"
+
+# --- Step 7: DHCP ---
+echo "[7/7] DHCP..."
+
+pkill -f "dnsmasq.*192.168.50" 2>/dev/null
+sleep 1
+
+mkdir -p /data/local/tmp
+/system/bin/dnsmasq \
+    --interface=eth0 \
+    --bind-interfaces \
+    --except-interface=lo \
+    --dhcp-range=192.168.50.100,192.168.50.200,255.255.255.0,12h \
+    --dhcp-option=3,192.168.50.1 \
+    --dhcp-option=6,1.1.1.1,8.8.8.8 \
+    --dhcp-leasefile=/data/local/tmp/dnsmasq.leases \
+    --pid-file=/data/local/tmp/dnsmasq.pid \
+    --no-resolv \
+    --no-hosts
+
+pgrep -f "dnsmasq.*192.168.50" >/dev/null && echo "    DHCP started" || echo "    DHCP FAILED"
+
+echo ""
+echo "=== Router Ready ==="
+if [ "$USE_VPN" -eq 1 ]; then
+    echo "Mode: VPN ($VPN_IF)"
+    echo "Strategy: tetherctrl NAT + priority routing to tun0 table"
+else
+    echo "Mode: DIRECT (no VPN)"
+fi
+echo "LAN: eth0 (192.168.50.1/24)"
+echo "Upstream: $UPSTREAM ($UPSTREAM_IP)"
+echo ""

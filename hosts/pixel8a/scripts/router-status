@@ -1,0 +1,53 @@
+#!/system/bin/sh
+echo "=== ROUTER STATUS ==="
+echo ""
+
+# IP Forwarding
+echo "[IP Forward] $(cat /proc/sys/net/ipv4/ip_forward)"
+echo ""
+
+# Upstream interfaces
+echo "[Upstream]"
+for iface in rmnet1 rmnet2; do
+    if ip addr show "$iface" 2>/dev/null | grep -q "inet "; then
+        ip addr show "$iface" | grep "inet "
+    fi
+done
+echo ""
+
+# VPN interface
+echo "[VPN]"
+VPN_FOUND=0
+for tun in tun0 tun1 tun2 tun3; do
+    if ip addr show "$tun" 2>/dev/null | grep -q "inet "; then
+        ip addr show "$tun" | grep "inet "
+        VPN_FOUND=1
+        break
+    fi
+done
+[ "$VPN_FOUND" -eq 0 ] && echo "No VPN active"
+echo ""
+
+# Downstream interface
+echo "[Downstream]"
+ip addr show eth0 2>/dev/null | grep "inet " || echo "eth0 not configured"
+echo ""
+
+# NAT Rules
+echo "[NAT]"
+iptables -t nat -L POSTROUTING -n -v 2>/dev/null | grep -E "MASQ|pkts" | head -5
+echo ""
+
+# Forward Rules
+echo "[Forward]"
+iptables -L FORWARD -n -v 2>/dev/null | head -7
+echo ""
+
+# DHCP
+echo "[DHCP]"
+pgrep -a dnsmasq 2>/dev/null | grep 192.168.50 || echo "Not running"
+echo ""
+
+# Leases
+echo "[Leases]"
+cat /data/local/tmp/dnsmasq.leases 2>/dev/null || echo "None"

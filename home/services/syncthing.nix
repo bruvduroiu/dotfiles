@@ -97,7 +97,7 @@ in {
         "Documents" = {
           id = "docs";
           path = "/home/bogdan/Documents";
-          devices = [ "Pixel 10 Pro" "iPhone" ];
+          devices = [ "Pixel 10 Pro" ];
           # Bidirectional sync (Steam Deck is configured as receive-only on its end)
           type = "sendreceive";
           # Versioning for 3-2-1 backup (local versions)
@@ -107,21 +107,6 @@ in {
           # Rescan interval in seconds (fallback if inotify misses something)
           rescanIntervalS = 3600;  # 1 hour
           # Ignore permissions (mobile devices have different permission models)
-          ignorePerms = true;
-        };
-
-        # Pictures folder - receive photos from iPhone
-        # NOTE: The folder ID must match what iOS Syncthing generates.
-        # Check the iPhone's Syncthing app for the actual folder ID and update here if different.
-        "Pictures" = {
-          id = "Photos";
-          path = "/home/bogdan/Pictures";
-          devices = [ "iPhone" ];
-          # Receive-only: Framework13 receives photos but doesn't push changes back
-          type = "receiveonly";
-          versioning = versioningConfig;
-          fsWatcherEnabled = true;
-          rescanIntervalS = 3600;
           ignorePerms = true;
         };
 

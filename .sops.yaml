@@ -3,6 +3,7 @@
 keys:
   - &framework13 age1hd4y0v9k4ng3xkmprgvvnxzm6wh72k9lrr2smjerwkkn7q5j4ers2e83wf
   - &steamdeck age1vc06cssvpwyc8m97yylevnm608z32um2cx4khjl2qt3nrmhqh57srkvcnt
+  - &pixel8a age1PLACEHOLDER_GENERATE_ON_DEVICE
   # Future hosts:
   # - &zimaboard age1...
 
@@ -22,6 +23,11 @@ creation_rules:
   - path_regex: secrets/steamdeck/.*\.(yaml|json|env|ini)$
     age:
       - *steamdeck
+
+  # Pixel 8a travel router secrets
+  - path_regex: secrets/pixel8a/.*\.(yaml|json|env|ini)$
+    age:
+      - *pixel8a
 
   # Future: ZimaBoard-specific secrets
   # - path_regex: secrets/zimaboard/.*\.(yaml|json|env|ini)$
