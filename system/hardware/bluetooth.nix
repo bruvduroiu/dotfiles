@@ -9,4 +9,15 @@
         };
       };
     };
+    
+    # Ensure bluetooth is unblocked on boot
+    systemd.services.bluetooth-unblock = { 
+      description = "Unblock Bluetooth at boot";
+      wantedBy = [ "bluetooth.service" ];
+      before = [ "bluetooth.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.util-linux}/bin/rfkill unblock bluetooth";
+      };
+    };
   }

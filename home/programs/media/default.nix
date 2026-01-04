@@ -15,6 +15,7 @@
 
     # videos
     celluloid
+    grayjay
 
     # torrents
     transmission_4-gtk
