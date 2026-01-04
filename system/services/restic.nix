@@ -74,7 +74,6 @@ in {
       "/home/bogdan/Documents"
       "/home/bogdan/Pictures"
       "/home/bogdan/Passwords"
-      "/home/bogdan/password.kdbx"
       # Add more paths as needed:
       # "/home/bogdan/.local/share/keyrings"
     ];
