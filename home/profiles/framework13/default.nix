@@ -22,6 +22,7 @@
     ../../services/media/playerctl.nix
     ../../services/transmission.nix
     ./qbittorrent.nix
+    ./tailsnitch.nix
   ];
 
   wayland.windowManager.hyprland.settings = {
