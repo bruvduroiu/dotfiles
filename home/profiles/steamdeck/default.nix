@@ -5,7 +5,6 @@
     ./syncthing.nix
     ../../programs/keepassxc.nix
     ../../programs/games/minecraft
-    ../../services/transmission.nix
     ./qbittorrent.nix
   ];
 

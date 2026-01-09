@@ -28,6 +28,9 @@
 
       # ts
       prettierd
+
+      # html template formatters
+      djlint
     ];
   };
 

@@ -3,6 +3,7 @@ local options = {
 		lua = { "stylua" },
 		css = { "prettier" },
 		html = { "prettier" },
+		htmlhugo = { "djlint" },
 		python = { "ruff_format", "ruff_fix", "ruff_organize_imports" },
 		tf = { "tflint", "terraform-ls" },
 		go = { "goimports", "gofmt" },
@@ -10,9 +11,14 @@ local options = {
 		templ = { "templ" },
 		javascript = { "prettierd" },
 		typescript = { "prettierd" },
-    typescriptReact = { "prettierd" },
-    yaml = { "gh-actions-language-server" },
+		typescriptReact = { "prettierd" },
+		yaml = { "gh-actions-language-server" },
 		zig = { "zls" },
+	},
+	formatters = {
+		djlint = {
+			prepend_args = { "--profile", "golang", "--indent", "2", "--preserve-blank-lines" },
+		},
 	},
 
 	format_on_save = {

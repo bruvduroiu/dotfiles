@@ -20,7 +20,6 @@
     ../../services/syncthing.nix
     ../../services/trayscale.nix
     ../../services/media/playerctl.nix
-    ../../services/transmission.nix
     ./qbittorrent.nix
     ./tailsnitch.nix
   ];

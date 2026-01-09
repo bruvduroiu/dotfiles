@@ -275,5 +275,10 @@ return {
       "folke/snacks.nvim", -- optional
       "nvim-telescope/telescope.nvim", -- optional
     },
-  }
+  },
+  {
+    "phelipetls/vim-hugo",
+    -- Load early to enable filetype detection for Hugo templates
+    lazy = false,
+  },
 }
