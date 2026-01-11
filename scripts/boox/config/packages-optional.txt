@@ -1,0 +1,20 @@
+# Optional Removal - User preference, might break minor features
+# Only remove these if you don't use the functionality
+
+# Onyx apps (keep if you use them)
+com.onyx.calculator           # Calculator app
+com.onyx.clock                # Clock/alarm app
+com.onyx.dict                 # Dictionary app
+com.onyx.gallery              # Image gallery
+com.onyx.musicplayer          # Music player
+com.onyx.voicerecorder        # Voice recorder
+com.onyx.floatingbutton       # Floating navigation button
+
+# Google services (remove if you want minimal Google)
+# WARNING: Some apps depend on these
+# com.google.android.gms      # Google Play Services - many apps need this
+# com.google.android.gsf      # Google Services Framework
+# com.android.vending         # Play Store
+
+# Chrome (remove if using alternative browser)
+# org.chromium.chrome         # Chrome browser

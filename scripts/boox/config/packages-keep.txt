@@ -1,0 +1,34 @@
+# NEVER REMOVE - Core system and essential functionality
+# Removing these WILL break your device
+
+# Core Android
+android
+com.android.systemui
+com.android.settings
+com.android.shell
+com.android.providers.settings
+com.android.providers.media
+com.android.providers.media.module
+com.android.externalstorage
+com.android.packageinstaller
+com.android.permissioncontroller
+
+# Essential Onyx (e-ink and core functionality)
+com.onyx                      # Core Onyx framework
+com.onyx.android.note         # Note-taking (core feature)
+com.onyx.kreader              # E-book reader (core feature)
+com.onyx.latinime             # Input method
+com.onyx.kime                 # Input method (Korean?)
+com.onyx.tscalibration        # Touchscreen calibration
+com.onyx.android.onyxotaservice  # OTA updates (keep for firmware)
+
+# Essential Qualcomm (hardware drivers)
+com.qualcomm.qti.gpudrivers.lito.api30
+com.qualcomm.qti.dynamicddsservice
+com.qualcomm.timeservice
+com.qualcomm.qti.poweroffalarm
+com.qualcomm.qti.powersavemode
+
+# User-installed apps we want to keep
+com.termux
+com.topjohnwu.magisk

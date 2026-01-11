@@ -10,6 +10,11 @@
           overlays = [ ];
           config = { };
         };
+
+        # Boox eReader management shell
+        devShells.boox = import ./shell.nix {
+          inherit pkgs inputs;
+        };
       };
 
       imports = [

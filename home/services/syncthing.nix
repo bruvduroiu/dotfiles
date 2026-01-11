@@ -8,6 +8,7 @@ let
   pixelDeviceId = "EHS76NL-XYJS6IK-JQOJ35O-ZPGYXC3-7WNSC6S-ZEDAJH3-4JGALW2-WKC7CA4";
   steamdeckDeviceId = "K2C4VNS-LC6JK3Y-INBSG3M-CKEHHXN-23OWLLF-KEGGS5C-GGIQIBO-Y3PHHQ6";
   iphoneDeviceId = "HECSBOL-KJFXURK-HUUTKJR-522Y3BO-TDTGBTO-YVCSBFP-SVX66UJ-SSZANQL";
+  booxDeviceId = "SBYZ3UR-RBMS2SX-WRFFGOZ-5XNJIRH-TOMNMVG-55DEFJZ-UFH3I2V-XET4AQM";
 
   # Common versioning configuration for 3-2-1 backup strategy
   # Trashcan versioning moves deleted/replaced files to .stversions
@@ -89,6 +90,11 @@ in {
           autoAcceptFolders = false;
           addresses = [ "dynamic" ];
         };
+        "Boox Go Color 7" = {
+          id = booxDeviceId;
+          autoAcceptFolders = false;
+          addresses = [ "dynamic" ];
+        };
       };
 
       # Folders to sync - matching restic backup paths
@@ -134,6 +140,18 @@ in {
           rescanIntervalS = 3600;
           ignorePerms = true;
         };
+
+        # Books folder - bidirectional sync with Boox eReader only
+        "Books" = {
+          id = "books";
+          path = "/home/bogdan/Documents/Personal/Books";
+          devices = [ "Boox Go Color 7" ];
+          type = "sendreceive";
+          versioning = versioningConfig;
+          fsWatcherEnabled = true;
+          rescanIntervalS = 3600;
+          ignorePerms = true;
+        };
       };
     };
   };
@@ -170,6 +188,14 @@ in {
     "Documents/.stignore".text = ''
       // Include shared ignore patterns (synced across devices)
       #include .stignore-common
+    '';
+
+    # Books folder - ignore Boox-specific .sdr directories
+    # These contain reading progress/annotations specific to the Boox device
+    "Documents/Personal/Books/.stignore".text = ''
+      // Ignore Boox eReader metadata directories
+      // .sdr folders contain annotations, reading progress, and device-specific data
+      **/*.sdr
     '';
   };
 }
