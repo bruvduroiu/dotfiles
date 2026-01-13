@@ -6,6 +6,7 @@
     ../../programs/keepassxc.nix
     ../../programs/games/minecraft
     ./qbittorrent.nix
+    ./media.nix
   ];
 
   home = {

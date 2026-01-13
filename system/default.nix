@@ -11,6 +11,7 @@ let laptop = [
   ./network
   ./network/tailscale.nix
   ./network/syncthing.nix
+  ./network/qbittorrent.nix
 
   ./nix
 
@@ -44,6 +45,7 @@ steamdeck = [
 
   ./network
   ./network/tailscale.nix
+  ./network/qbittorrent.nix
 
   ./nix
 
