@@ -45,8 +45,12 @@ in
   # Boot optimizations for gaming
   boot.kernelParams = [ "amd_pstate=active" ];
 
-  # Enable flakes
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  # Enable flakes and trust deck user for remote deployments
+  nix.settings = {
+    experimental-features = [ "nix-command" "flakes" ];
+    # Allow deck user to copy unsigned store paths from remote machines
+    trusted-users = [ "root" "deck" ];
+  };
 
   # Allow unfree packages (Steam, etc.)
   nixpkgs.config.allowUnfree = true;

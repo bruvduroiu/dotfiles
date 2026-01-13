@@ -106,10 +106,8 @@
     };
 
     # Steam Deck support via Jovian-NixOS
-    jovian-nixos = {
-      url = "github:Jovian-Experiments/Jovian-NixOS";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    # Note: Don't override nixpkgs to ensure cache hits for pre-built binaries
+    jovian-nixos.url = "github:Jovian-Experiments/Jovian-NixOS";
 
     # Minecraft declarative mod management
     nix-minecraft = {
