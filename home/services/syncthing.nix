@@ -85,11 +85,6 @@ in {
           autoAcceptFolders = false;
           addresses = [ "dynamic" ];
         };
-        "iPhone" = {
-          id = iphoneDeviceId;
-          autoAcceptFolders = false;
-          addresses = [ "dynamic" ];
-        };
         "Boox Go Color 7" = {
           id = booxDeviceId;
           autoAcceptFolders = false;
@@ -99,7 +94,7 @@ in {
 
       # Folders to sync - matching restic backup paths
       folders = {
-        # Documents folder - bidirectional sync with Pixel and iPhone, send-only to Steam Deck
+        # Documents folder - bidirectional sync with Pixel, send-only to Steam Deck
         "Documents" = {
           id = "docs";
           path = "/home/bogdan/Documents";
@@ -120,7 +115,7 @@ in {
         "Passwords" = {
           id = "passwords";
           path = "/home/bogdan/Passwords";
-          devices = [ "Pixel 10 Pro" "iPhone" "Steam Deck" ];
+          devices = [ "Pixel 10 Pro" "Steam Deck" ];
           type = "sendreceive";
           versioning = versioningConfig;
           fsWatcherEnabled = true;
@@ -171,7 +166,7 @@ in {
   # We use #include to reference a .stignore-common file that IS synced,
   # allowing all devices to share the same ignore patterns.
   # 
-  # On mobile devices (Pixel/iPhone), create a .stignore with:
+  # On mobile devices (Pixel), create a .stignore with:
   #   #include .stignore-common
   home.file = {
     # Shared ignore patterns - this file IS synced to all devices
