@@ -10,6 +10,7 @@
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
     ../../programs/icloudpd.nix
+    ../../programs/gpg.nix
 
     # terminal emulators
     ../../terminal/emulators/ghostty.nix
@@ -17,6 +18,7 @@
     ../../services/wayland/hyprpaper.nix
     ../../services/mako.nix
     ../../services/podman.nix
+    ../../services/gpg.nix
     ../../services/syncthing.nix
     ../../services/trayscale.nix
     ../../services/media/playerctl.nix

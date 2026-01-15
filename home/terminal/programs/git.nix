@@ -6,9 +6,9 @@
 
     ignores = [ ".swp" ];
 
-    # GPG signing with local subkey (! suffix forces this specific key over YubiKey subkey)
+    # GPG signing with YubiKey (master key - auto-selects signing subkey from inserted YubiKey)
     signing = {
-      key = "E3D1D113ED046C36!";
+      key = "0x785150ECAABF7352";
       signByDefault = true;
     };
 
