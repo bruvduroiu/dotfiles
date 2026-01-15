@@ -1,8 +1,11 @@
 # SOPS configuration for encrypting secrets
 # See: https://github.com/getsops/sops
 keys:
+  # Host keys (software)
   - &framework13 age1hd4y0v9k4ng3xkmprgvvnxzm6wh72k9lrr2smjerwkkn7q5j4ers2e83wf
   - &steamdeck age1vc06cssvpwyc8m97yylevnm608z32um2cx4khjl2qt3nrmhqh57srkvcnt
+  # YubiKey keys (hardware)
+  - &yubikey2 age1yubikey1qtcszjwrrzad359vj5tqyc7p8pkdnds9g8tchcf0rpnfude3cuxd55kmtnh
   # Future hosts:
   # - &zimaboard age1...
 
@@ -11,12 +14,13 @@ creation_rules:
   - path_regex: secrets/common/.*\.(yaml|json|env|ini)$
     age:
       - *framework13
-      # Add more host keys here as they are added
+      - *yubikey2
 
   # Framework13-specific secrets
   - path_regex: secrets/framework13/.*\.(yaml|json|env|ini)$
     age:
       - *framework13
+      - *yubikey2
 
   # Steam Deck-specific secrets
   - path_regex: secrets/steamdeck/.*\.(yaml|json|env|ini)$
