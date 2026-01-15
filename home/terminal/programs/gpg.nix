@@ -38,7 +38,14 @@
     maxCacheTtl = 7200;
     # Use Qt pinentry for GUI prompts (works with vim-fugitive on Hyprland)
     pinentryPackage = pkgs.pinentry-qt;
-    # Enable SSH support if you want to use GPG for SSH auth later
-    # enableSshSupport = true;
+    # Enable SSH support via GPG agent (uses YubiKey for SSH auth)
+    enableSshSupport = true;
+    # Cache SSH keys for 1 hour
+    defaultCacheTtlSsh = 3600;
+    # YubiKey authentication subkey keygrips for SSH
+    sshKeys = [
+      "3748A17C69FBACA0259B66B6795BA123A88EEED5" # YubiKey 2 (5C NFC) auth key
+      "21A566C9A90665240DDDEDC731690605AC8794C6" # YubiKey 1 (NEO) auth key
+    ];
   };
 }
