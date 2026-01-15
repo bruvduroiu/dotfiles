@@ -5,7 +5,7 @@ keys:
   - &framework13 age1hd4y0v9k4ng3xkmprgvvnxzm6wh72k9lrr2smjerwkkn7q5j4ers2e83wf
   - &steamdeck age1vc06cssvpwyc8m97yylevnm608z32um2cx4khjl2qt3nrmhqh57srkvcnt
   # YubiKey keys (hardware)
-  - &yubikey2 age1yubikey1qtcszjwrrzad359vj5tqyc7p8pkdnds9g8tchcf0rpnfude3cuxd55kmtnh
+  - &yubikey2 age1yubikey1qd47xas9v304svawpqex2s0xpaa0yfmla6vsssq65tn4ey4zaxk9u7zwjcq
   # Future hosts:
   # - &zimaboard age1...
 
