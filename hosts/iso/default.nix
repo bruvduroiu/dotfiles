@@ -25,37 +25,15 @@
   services.desktopManager.gnome.enable = lib.mkForce false;
   services.displayManager.defaultSession = lib.mkForce null;
 
-  # Hyprland desktop environment
-  programs.hyprland = {
-    enable = true;
-    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-    portalPackage = inputs.hyprland.packages.${pkgs.system}.xdg-desktop-portal-hyprland;
-  };
+  # Greetd configuration for ISO (uses shared module with different user)
+  desktop.greetd.user = "nixos";
 
-  # Auto-login to Hyprland for the live user
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = "${pkgs.tuigreet}/bin/tuigreet --time --remember --cmd 'uwsm start hyprland-uwsm.desktop'";
-        user = "greeter";
-      };
-      # Auto-login for live environment
-      initial_session = {
-        command = "uwsm start hyprland-uwsm.desktop";
-        user = "nixos";
-      };
-    };
-  };
-
-  # UWSM for proper Hyprland session management
-  programs.uwsm = {
-    enable = true;
-    waylandCompositors.hyprland = {
-      binPath = "/run/current-system/sw/bin/Hyprland";
-      prettyName = "Hyprland";
-      comment = "Hyprland compositor managed by UWSM";
-    };
+  # YubiKey configuration for ISO user
+  # The identity string is NOT a secret - it just tells age which YubiKey slot to use
+  # The private key never leaves the YubiKey hardware
+  security.yubikey = {
+    user = "nixos";
+    identity = "AGE-PLUGIN-YUBIKEY-1LV5W7QVZFC7RZDQ6KZZEW";
   };
 
   # Live user configuration (nixos is the default live user)
@@ -101,6 +79,7 @@
   systemd.services.sshd.wantedBy = lib.mkForce [ "multi-user.target" ];
 
   # Essential packages for live environment (minimized for ISO size)
+  # Note: networkmanagerapplet now comes from system/network module
   environment.systemPackages = with pkgs; [
     # System utilities
     git
@@ -113,7 +92,6 @@
     ntfs3g
 
     # Network tools
-    networkmanagerapplet
     wget
     curl
 

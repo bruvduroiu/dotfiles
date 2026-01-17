@@ -3,7 +3,7 @@
 let
   secretsFile = "${self}/secrets/framework13/rental-bot.yaml";
 in {
-  # sops secrets configuration (age.keyFile set in yubikey.nix)
+  # sops secrets configuration (age.keyFile set in system/core/sops.nix)
   sops = {
     secrets.telegram_bot_token.sopsFile = secretsFile;
     secrets.telegram_user_id.sopsFile = secretsFile;

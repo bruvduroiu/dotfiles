@@ -3,6 +3,7 @@
 {
   imports = [
     ./users.nix
+    ./sops.nix
   ];
 
   documentation.dev.enable = true;

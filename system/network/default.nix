@@ -1,6 +1,9 @@
 { config, lib, pkgs, ... }:
 
 {
+  # Network manager applet for system tray
+  environment.systemPackages = [ pkgs.networkmanagerapplet ];
+
   networking = {
     networkmanager = {
       enable = true;

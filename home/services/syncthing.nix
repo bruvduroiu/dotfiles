@@ -65,7 +65,7 @@ in {
         # Automatically upgrade syncthing
         autoUpgradeIntervalH = 0;  # Disabled - managed by Nix
         # Crash reporting
-        crashReportingEnabled = false;
+        crashReportingEnabled = true;
         # Start browser on startup
         startBrowser = false;
       };
