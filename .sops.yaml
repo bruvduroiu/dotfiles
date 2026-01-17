@@ -22,6 +22,11 @@ creation_rules:
       - *framework13
       - *yubikey2
 
+  # ISO-specific secrets (YubiKey-only, portable across machines)
+  - path_regex: secrets/iso/.*\.(yaml|json|env|ini)$
+    age:
+      - *yubikey2
+
   # Steam Deck-specific secrets
   - path_regex: secrets/steamdeck/.*\.(yaml|json|env|ini)$
     age:

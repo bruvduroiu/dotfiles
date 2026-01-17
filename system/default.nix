@@ -35,6 +35,35 @@ let laptop = [
   ./services/fprintd.nix
 ];
 
+# Live ISO - portable system with most Framework13 functionality
+# Boots into Hyprland with your familiar environment
+iso = [
+  ./core
+  # Note: boot.nix excluded - ISO uses its own boot configuration
+
+  # Hardware support (generic, works on most x86_64 machines)
+  ./hardware/graphics.nix
+  ./hardware/bluetooth.nix
+  ./hardware/uinput.nix
+
+  # Network (essential for live environment)
+  ./network
+  ./network/tailscale.nix      # Base Tailscale service
+  ./network/tailscale-iso.nix  # Auto-auth with sops-encrypted key
+
+  # Nix configuration
+  ./nix
+
+  # Programs and desktop
+  ./programs
+  ./programs/ranger.nix
+
+  # Services
+  ./services/pipewire.nix
+  ./services/power.nix
+  ./services/yubikey.nix  # For sops decryption with age-plugin-yubikey
+];
+
 # Steam Deck - minimal system modules
 # Hardware and Gaming Mode handled by Jovian-NixOS
 steamdeck = [
@@ -55,5 +84,5 @@ steamdeck = [
   ./services/pipewire.nix
 ];
 in {
-  inherit laptop steamdeck;
+  inherit laptop steamdeck iso;
 }

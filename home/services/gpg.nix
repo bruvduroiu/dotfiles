@@ -7,7 +7,7 @@
     defaultCacheTtl = 3600;
     maxCacheTtl = 7200;
     # Use Qt pinentry for GUI prompts (works with vim-fugitive on Hyprland)
-    pinentryPackage = pkgs.pinentry-qt;
+    pinentry.package = pkgs.pinentry-qt;
     # Enable SSH support via GPG agent (uses YubiKey for SSH auth)
     enableSshSupport = true;
     # Cache SSH keys for 1 hour

@@ -7,4 +7,9 @@
   "deck@steamdeck" = [
     ./steamdeck
   ];
+
+  "nixos@iso" = [
+    ./iso/base.nix
+    ./iso
+  ];
 }
