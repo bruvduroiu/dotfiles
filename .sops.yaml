@@ -2,10 +2,9 @@
 # See: https://github.com/getsops/sops
 keys:
   # Host keys (software)
-  - &framework13 age1hd4y0v9k4ng3xkmprgvvnxzm6wh72k9lrr2smjerwkkn7q5j4ers2e83wf
   - &steamdeck age1vc06cssvpwyc8m97yylevnm608z32um2cx4khjl2qt3nrmhqh57srkvcnt
   # YubiKey keys (hardware)
-  - &yubikey2 age1yubikey1qd47xas9v304svawpqex2s0xpaa0yfmla6vsssq65tn4ey4zaxk9u7zwjcq
+  - &yubikey age1yubikey1q2s30n0unchagz58dt2kmjr7d9p9y5c6qxyqy7d5e9g0vlrsmlmsq9p4pvw
   # Future hosts:
   # - &zimaboard age1...
 
@@ -13,19 +12,17 @@ creation_rules:
   # Common secrets - encrypted to all hosts
   - path_regex: secrets/common/.*\.(yaml|json|env|ini)$
     age:
-      - *framework13
-      - *yubikey2
+      - *yubikey
 
   # Framework13-specific secrets
   - path_regex: secrets/framework13/.*\.(yaml|json|env|ini)$
     age:
-      - *framework13
-      - *yubikey2
+      - *yubikey
 
   # ISO-specific secrets (YubiKey-only, portable across machines)
   - path_regex: secrets/iso/.*\.(yaml|json|env|ini)$
     age:
-      - *yubikey2
+      - *yubikey
 
   # Steam Deck-specific secrets
   - path_regex: secrets/steamdeck/.*\.(yaml|json|env|ini)$

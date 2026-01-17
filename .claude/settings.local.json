@@ -1,11 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(adb shell \"su -c ''cat /proc/sys/net/ipv4/ip_forward''\")",
-      "Bash(nix-shell:*)",
       "Bash(openspec list:*)",
-      "Bash(mkdir:*)",
       "Bash(openspec validate:*)"
+    ],
+    "deny": [
+      "Read(./secrets/**)"
     ]
   }
 }
