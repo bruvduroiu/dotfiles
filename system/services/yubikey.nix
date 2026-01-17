@@ -23,9 +23,11 @@
     # Setup PCSC drivers symlink
     ${pkgs.runtimeShell} -c "mkdir -p /var/lib/pcsc && ln -sfn ${pkgs.ccid}/pcsc/drivers /var/lib/pcsc/drivers"
 
-    # Only start pcscd if not already running (preserves GPG scdaemon connections)
-    if ! ${pkgs.toybox}/bin/pgrep -x pcscd > /dev/null; then
-      ${pkgs.pcsclite}/bin/pcscd
+    # Only restart pcscd if socket file is missing (fresh boot or broken state)
+    # This preserves existing connections during normal rebuilds
+    if [ ! -S /run/pcscd/pcscd.comm ]; then
+      ${pkgs.systemd}/bin/systemctl restart pcscd.socket
+      ${pkgs.systemd}/bin/systemctl start pcscd.service
     fi
   '';
 
