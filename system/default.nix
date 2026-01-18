@@ -4,6 +4,7 @@
 # Inheritance structure:
 #   base → desktop → laptop
 #                  → iso
+#                  → phantom (ephemeral USB with impermanence)
 #   base → steamdeck (uses Jovian-NixOS for desktop)
 
 let
@@ -66,6 +67,22 @@ let
     ./services/yubikey.nix  # For sops decryption with age-plugin-yubikey
   ];
 
+  # Phantom USB - ephemeral system with impermanence
+  # Extends desktop with LUKS boot, impermanence, and paranoid security
+  # Root is tmpfs - only /persist survives reboot
+  phantom = desktop ++ [
+    ./phantom/boot.nix           # Portable EFI boot with LUKS/FIDO2
+    ./phantom/hardware.nix       # Universal hardware support
+    ./phantom/impermanence.nix   # Ephemeral root with selective persistence
+    ./phantom/paranoid.nix       # Memory scrub, tailscale logout on shutdown
+    ./phantom/tailscale.nix      # Boot-time auto-connect (key on /persist)
+    ./phantom/user.nix           # bogdan user with YubiKey auth
+    ./phantom/packages.nix       # Portable hacking station tools
+
+    ./network/tailscale.nix      # Base Tailscale service
+    ./services/yubikey.nix       # For runtime sops decryption
+  ];
+
   # Steam Deck - minimal system modules
   # Hardware and Gaming Mode handled by Jovian-NixOS
   # Does not extend desktop (uses Jovian's Plasma/Gaming Mode)
@@ -83,5 +100,5 @@ let
   ];
 
 in {
-  inherit laptop steamdeck iso;
+  inherit laptop steamdeck iso phantom;
 }

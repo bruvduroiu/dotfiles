@@ -28,13 +28,8 @@
   # Greetd configuration for ISO (uses shared module with different user)
   desktop.greetd.user = "nixos";
 
-  # YubiKey configuration for ISO user
-  # The identity string is NOT a secret - it just tells age which YubiKey slot to use
-  # The private key never leaves the YubiKey hardware
-  security.yubikey = {
-    user = "nixos";
-    identity = "AGE-PLUGIN-YUBIKEY-1LV5W7QVZFC7RZDQ6KZZEW";
-  };
+  # Note: YubiKey identity for age-plugin-yubikey is configured in .sops.yaml
+  # and used by the tailscale.nix home-manager module for runtime secret decryption
 
   # Live user configuration (nixos is the default live user)
   # The installer CD module already creates this user, so we extend it

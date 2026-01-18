@@ -12,4 +12,9 @@
     ./iso/base.nix
     ./iso
   ];
+
+  "bogdan@phantom" = [
+    ../.
+    ./phantom
+  ];
 }

@@ -105,6 +105,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Declarative disk partitioning (for phantom USB)
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # Ephemeral root with selective persistence (for phantom USB)
+    impermanence.url = "github:nix-community/impermanence";
+
     # Steam Deck support via Jovian-NixOS
     # Note: Don't override nixpkgs to ensure cache hits for pre-built binaries
     jovian-nixos.url = "github:Jovian-Experiments/Jovian-NixOS";

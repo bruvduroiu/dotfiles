@@ -7,7 +7,7 @@
     homeImports = import "${self}/home/profiles";
     mod = "${self}/system";
 
-    inherit (import mod) laptop steamdeck iso;
+    inherit (import mod) laptop steamdeck iso phantom;
 
     specialArgs = { inherit inputs self;};
   in {
@@ -87,6 +87,37 @@
         {
           home-manager = {
             users.nixos.imports = homeImports."nixos@iso";
+            extraSpecialArgs = specialArgs;
+            backupFileExtension = ".hm-backup";
+            sharedModules = [
+              inputs.sops-nix.homeManagerModules.sops
+            ];
+          };
+        }
+      ];
+    };
+
+    # Phantom USB - ephemeral NixOS that leaves no trace
+    # LUKS-encrypted, impermanent root, Tailscale auto-connect
+    phantom = nixosSystem {
+      inherit specialArgs;
+      modules = phantom ++ [
+        ./phantom
+
+        "${mod}/programs/hyprland"
+
+        # Declarative disk partitioning
+        inputs.disko.nixosModules.disko
+
+        # Home Manager (stable, follows nixpkgs)
+        inputs.home-manager.nixosModules.home-manager
+
+        # Secrets management (for runtime YubiKey-based decryption)
+        inputs.sops-nix.nixosModules.sops
+
+        {
+          home-manager = {
+            users.bogdan.imports = homeImports."bogdan@phantom";
             extraSpecialArgs = specialArgs;
             backupFileExtension = ".hm-backup";
             sharedModules = [
