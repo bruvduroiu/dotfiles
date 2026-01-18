@@ -49,6 +49,8 @@
 
     openapi-tui.url = "github:zaghaghi/openapi-tui";
 
+    elephant.url = "github:abenz1267/elephant";
+
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -93,7 +95,10 @@
         systems.follows = "hyprland/systems";
       };
     };
-    walker.url = "github:abenz1267/walker";
+    walker = {
+      url = "github:abenz1267/walker";
+      inputs.elephant.follows = "elephant";
+    };
     yazi.url = "github:sxyazi/yazi";
 
     # Services
