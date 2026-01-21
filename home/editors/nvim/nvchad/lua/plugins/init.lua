@@ -57,6 +57,22 @@ return {
 	},
 	{ "tpope/vim-rhubarb", opts = { enabled = true } },
 	{
+		"nicolasgb/jj.nvim",
+		version = "*",
+		cmd = { "J" },
+		keys = {
+			{ "<leader>jj", "<cmd>J status<cr>", desc = "Jujutsu status" },
+			{ "<leader>jl", "<cmd>J log<cr>", desc = "Jujutsu log" },
+			{ "<leader>jd", "<cmd>J describe<cr>", desc = "Jujutsu describe" },
+			{ "<leader>jn", "<cmd>J new<cr>", desc = "Jujutsu new change" },
+			{ "<leader>je", "<cmd>J edit<cr>", desc = "Jujutsu edit" },
+			{ "<leader>jp", "<cmd>J git push<cr>", desc = "Jujutsu push" },
+		},
+		config = function()
+			require("jj").setup({})
+		end,
+	},
+	{
 		"folke/zen-mode.nvim",
 		cmd = "ZenMode",
 		opts = {

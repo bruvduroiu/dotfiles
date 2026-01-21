@@ -14,6 +14,7 @@
     ./fzf.nix
     ./gdu.nix
     ./git.nix
+    ./jj.nix
     ./k9s.nix
     ./opencode
     ./openspec.nix
