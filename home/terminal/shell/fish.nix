@@ -20,9 +20,12 @@ in
         set -gx fzf_fd_opts "${fd_opts}"
         set -gx fzf_preview_dir_cmd "${pkgs.eza}/bin/eza ${eza_opts}"
         set -gx fzf_diff_highlighter "${pkgs.delta}/bin/delta ${delta_opts}"
-        
+
         # GPG needs to know the TTY for pinentry
         set -gx GPG_TTY (tty)
+
+        # Alt+O to open last command output in $EDITOR
+        bind \eo edit-output
       '';
       shellAliases = {
         l = "ls -lah";
@@ -86,6 +89,13 @@ in
           git branch --merged | \
             command grep -vE  '^\*|^\s*(master|main|develop)\s*$' | \
             command xargs -n 1 git branch -d
+        '';
+        edit-output = ''
+          set -l last_cmd (history --max=1)
+          set -l tmpfile (mktemp)
+          eval $last_cmd > $tmpfile 2>&1
+          eval $EDITOR $tmpfile
+          rm $tmpfile
         '';
       };
     };
