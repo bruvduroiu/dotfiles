@@ -45,6 +45,7 @@ let
     ./programs/timewarrior.nix
     ./programs/wireshark.nix
     ./programs/kdeconnect.nix
+    ./programs/devenv.nix
 
     ./services/backlight.nix
     ./services/brightnessctl.nix
