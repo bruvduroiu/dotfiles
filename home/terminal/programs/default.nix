@@ -7,7 +7,6 @@
     ./btop.nix
     ./claude
     ./cli.nix
-    ./crush.nix
     ./delta.nix
     ./eza.nix
     ./fd.nix
@@ -16,7 +15,6 @@
     ./git.nix
     ./jj.nix
     ./k9s.nix
-    ./opencode
     ./openspec.nix
     ./stui.nix
     ./xdg.nix

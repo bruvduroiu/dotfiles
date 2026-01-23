@@ -6,6 +6,7 @@ in
 {
   imports = [
     ./hardware-configuration.nix
+    ./transmission.nix
   ];
 
   # Steam Deck hardware support via Jovian-NixOS

@@ -21,7 +21,6 @@
     ../../services/syncthing.nix
     ../../services/trayscale.nix
     ../../services/media/playerctl.nix
-    ./qbittorrent.nix
   ];
 
   wayland.windowManager.hyprland.settings = {

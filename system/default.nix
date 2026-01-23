@@ -40,7 +40,7 @@ let
 
     ./network/tailscale.nix
     ./network/syncthing.nix
-    ./network/qbittorrent.nix
+    ./network/transmission.nix
 
     ./programs/timewarrior.nix
     ./programs/wireshark.nix
@@ -93,7 +93,7 @@ let
     ./hardware/bluetooth.nix
 
     ./network/tailscale.nix
-    ./network/qbittorrent.nix
+    ./network/transmission.nix
 
     ./programs/kdeconnect.nix
 
