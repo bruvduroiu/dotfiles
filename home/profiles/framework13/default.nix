@@ -9,7 +9,6 @@
     ../../programs/wayland
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
-    ../../programs/icloudpd.nix
     ../../programs/gpg.nix
 
     # terminal emulators
@@ -23,7 +22,6 @@
     ../../services/trayscale.nix
     ../../services/media/playerctl.nix
     ./qbittorrent.nix
-    ./tailsnitch.nix
   ];
 
   wayland.windowManager.hyprland.settings = {

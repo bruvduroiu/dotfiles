@@ -9,6 +9,7 @@
     ./development.nix
     ./media
     ./media/rss
+    ./media/audacious
   ];
 
   programs.rssguard.enable = true;

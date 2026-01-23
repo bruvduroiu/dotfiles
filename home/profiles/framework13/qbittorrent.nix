@@ -47,6 +47,9 @@ in {
             cat > "$CONFIG_FILE" << 'EOF'
 [Preferences]
 WebUI\Port=9091
+
+[BitTorrent]
+Session\Port=6881
 EOF
           fi
 
