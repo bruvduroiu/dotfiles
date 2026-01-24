@@ -11,7 +11,7 @@
           config = { };
         };
 
-        # Boox eReader management shell
+        # Boox eReader and Android device management shell
         devShells.boox = import ./shell.nix {
           inherit pkgs inputs;
         };

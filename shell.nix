@@ -500,7 +500,7 @@ let
     rm -f payload.bin
     success "Done!"
   '';
-in 
+in
 pkgs.mkShell {
   name = "boox";
   packages = [

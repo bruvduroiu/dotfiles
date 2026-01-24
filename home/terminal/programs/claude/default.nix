@@ -1,26 +1,83 @@
 { config, pkgs, inputs, ... }:
 
 {
-  # Install Claude Code
-  home.packages = with pkgs; [
-    claude-code
-  ];
+  programs.claude-code = {
+    enable = true;
 
-  # Deploy user settings to ~/.claude/settings.json
-  home.file.".claude/settings.json".source = ./settings.json;
+    # MCP servers configuration — Nix store paths resolved at build time
+    mcpServers = {
+      playwright = {
+        type = "stdio";
+        command = "${pkgs.playwright-mcp}/bin/mcp-server-playwright";
+        args = [
+          "--executable-path"
+          "${pkgs.ungoogled-chromium}/bin/chromium"
+        ];
+      };
+      deepwiki = {
+        type = "http";
+        url = "https://mcp.deepwiki.com/mcp";
+      };
+    };
 
-  # Deploy MCP configuration to ~/.claude/mcp.json
-  home.file.".claude/mcp.json" = {
-    text = builtins.readFile ./mcp.json;
-    # Substitute Nix store paths for MCP servers
-    onChange = ''
-      ${pkgs.gnused}/bin/sed -i \
-        -e 's|"mcp-server-playwright"|"${pkgs.playwright-mcp}/bin/mcp-server-playwright"|g' \
-        -e 's|"mcp-server-sequential-thinking"|"${pkgs.mcp-server-sequential-thinking}/bin/mcp-server-sequential-thinking"|g' \
-        ${config.xdg.configHome}/.claude/mcp.json
-    '';
+    # Settings
+    settings = {
+      enabledPlugins = {
+        "superpowers@superpowers-marketplace" = true;
+        "frontend-design@claude-plugins-official" = true;
+        "gopls-lsp@claude-plugins-official" = true;
+        "typescript-lsp@claude-plugins-official" = true;
+        "pyright-lsp@claude-plugins-official" = true;
+      };
+      extraKnownMarketplaces = {
+        superpowers-marketplace = {
+          source = {
+            source = "github";
+            repo = "obra/superpowers-marketplace";
+          };
+        };
+      };
+      permissions = {
+        allow = [
+          "Bash(git status)"
+          "Bash(git diff:*)"
+          "Bash(git log:*)"
+          "Bash(npm run lint)"
+          "Bash(npm run test:*)"
+          "Bash(cargo build)"
+          "Bash(cargo test)"
+          "Bash(nix build:*)"
+          "Bash(nix develop:*)"
+          "Read(~/.config/fish/**)"
+          "Read(~/.config/nvim/**)"
+        ];
+        ask = [
+          "Bash(git push:*)"
+          "Bash(git commit:*)"
+          "Bash(rm -rf:*)"
+          "Bash(cargo publish:*)"
+          "Bash(npm publish:*)"
+          "WebFetch(domain:*)"
+          "Bash(curl:*)"
+        ];
+        deny = [
+          "Read(./.env)"
+          "Read(./.env.*)"
+          "Read(./secrets/**)"
+          "Read(~/.aws/**)"
+          "Read(~/.ssh/**)"
+          "Bash(wget:*)"
+        ];
+        defaultMode = "default";
+      };
+      env = {
+        SHELL = "fish";
+        API_TIMEOUT_MS = "3000000";
+        NIX_ENVIRONMENT = "true";
+      };
+      includeCoAuthoredBy = true;
+      cleanupPeriodDays = 30;
+      outputStyle = "Explanatory";
+    };
   };
-
-  # Deploy CLAUDE.md with systematic thinking framework
-  home.file.".claude/CLAUDE.md".source = ./CLAUDE.md;
 }

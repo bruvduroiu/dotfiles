@@ -3,8 +3,8 @@
     windowrule = [
       # Tags
       "tag +browser, match:class ^([Ff]irefox|org.mozilla.firefox|[Ff]irefox-esr|[Ff]irefox-bin)$"
-      "tag +browser, match:class ^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$"
-      "tag +browser, match:class ^([Cc]hromium)$"
+      "tag +chromium, match:class ^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$"
+      "tag +chromium, match:class ^([Cc]hromium)$"
       "tag +terminal, match:class ^(com.mitchellh.ghostty)$"
       "tag +email, match:class ^([Tt]hunderbird)$"
       "tag +im-work, match:class ^([Ss]lack)$"
@@ -29,6 +29,7 @@
       "workspace special:notes, match:class ^(obsidian)$"
 
       "workspace 1, match:tag browser"
+      "workspace 4, match:tag chromium"
 
       "opacity 1 1, match:initial_title ^Picture-in-Picture$"
       "float on, match:tag pip"

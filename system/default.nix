@@ -49,6 +49,7 @@ let
 
     ./services/backlight.nix
     ./services/brightnessctl.nix
+    ./services/clamav.nix
     ./services/kanata
     ./services/opensnitch.nix
     ./services/podman.nix
