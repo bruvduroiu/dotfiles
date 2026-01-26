@@ -5,12 +5,13 @@
       "tag +browser, match:class ^([Ff]irefox|org.mozilla.firefox|[Ff]irefox-esr|[Ff]irefox-bin)$"
       "tag +chromium, match:class ^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$"
       "tag +chromium, match:class ^([Cc]hromium)$"
+      "tag +chromium, match:class ^([Cc]hromium-browser)$"
       "tag +terminal, match:class ^(com.mitchellh.ghostty)$"
       "tag +email, match:class ^([Tt]hunderbird)$"
       "tag +im-work, match:class ^([Ss]lack)$"
       "tag +im, match:class ^([Dd]iscord)$"
-      "tag +im, match:class ^([Ww]hatsapp-for-linux)$"
       "tag +im, match:class ^(org.telegram.desktop)$"
+      "tag +im, match:class ^([Ss]ignal)$"
       "tag +file-manager, match:class ^([Tt]hunar|org.gnome.Nautilus)$"
       "tag +pip, match:class ^(firefox)$, match:title ^(Picture-in-Picture)$"
       "tag +passwd, match:class ^(org.keepassxc.KeePassXC)$"
@@ -30,6 +31,9 @@
 
       "workspace 1, match:tag browser"
       "workspace 4, match:tag chromium"
+
+      "float off, match:title ^(Grayjay)$"
+      "workspace 4, match:title ^(Grayjay)$"
 
       "opacity 1 1, match:initial_title ^Picture-in-Picture$"
       "float on, match:tag pip"

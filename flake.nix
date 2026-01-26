@@ -12,7 +12,7 @@
         };
 
         # Boox eReader and Android device management shell
-        devShells.boox = import ./shell.nix {
+        devShells.default = import ./shell.nix {
           inherit pkgs inputs;
         };
       };
