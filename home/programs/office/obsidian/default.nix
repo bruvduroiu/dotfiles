@@ -1,6 +1,9 @@
 { pkgs, ... }:
 
 {
+  # Scripts, templates, and bases are stored here as version-controlled backup.
+  # They live in the vault directly (synced via Syncthing).
+
   programs.obsidian = {
     enable = true;
     package = pkgs.obsidian;
@@ -10,7 +13,7 @@
         target = "Documents/Keep";
         settings = {
           communityPlugins = [
-            { 
+            {
               pkg = pkgs.callPackage ./plugins/templater { };
               settings = {
                 trigger_on_file_creation = true;
@@ -20,6 +23,7 @@
                 shell_path = "fish";
                 command_palette = true;
                 templates_folder = "9 - Templates";
+                user_scripts_folder = "9 - Scripts";
               };
             }
             { 
