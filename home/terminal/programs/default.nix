@@ -8,6 +8,7 @@
     ./claude
     ./cli.nix
     ./delta.nix
+    ./direnv.nix
     ./eza.nix
     ./fd.nix
     ./fzf.nix
