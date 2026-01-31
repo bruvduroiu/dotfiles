@@ -26,14 +26,7 @@
           config.allowUnfree = true;
         }).keymapp;
         gh-actions-language-server = prev.callPackage "${self}/pkgs/gh-actions-language-server.nix" {};
-        lightpanda = prev.callPackage "${self}/pkgs/lightpanda.nix" {};
-        gomcp = prev.callPackage "${self}/pkgs/gomcp.nix" {};
-        icloudpd = prev.callPackage "${self}/pkgs/icloudpd.nix" {};
         tailsnitch = prev.callPackage "${self}/pkgs/tailsnitch.nix" {};
-        opencode = prev.callPackage "${self}/pkgs/opencode.nix" {
-          version = "1.0.167";
-          hash = "sha256-I/VCHUCSnK0ePPtb0b9jeaf1OUpIYKuTPYOwNVRB9ic=";
-        };
         podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman;
         podman-compose = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman-compose;
         obsidian = (import inputs.nixpkgs-unstable.outPath {

@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(openspec list:*)",
-      "Bash(openspec validate:*)"
+      "Bash(openspec validate:*)",
+      "Bash(nmcli device:*)",
+      "Bash(nmcli connection show:*)",
+      "Bash(iw dev:*)"
     ],
     "deny": [
       "Read(./secrets/**)"
