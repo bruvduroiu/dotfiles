@@ -19,6 +19,11 @@
     enableZshIntegration = config.programs.zsh.enable;
     shellWrapperName = "y";
 
+    plugins = {
+      duckdb = pkgs.yaziPlugins.duckdb;
+    };
+  
+
     settings = {
       manager = {
         layout = [1 4 3];
@@ -36,6 +41,75 @@
         max_width = 600;
         max_height = 900;
         cache_dir = config.xdg.cacheHome;
+      };
+
+      plugin = {
+        prepend_previewers = [
+          {
+            name = "*.csv";
+            run = "duckdb";
+          }
+          {
+            name = "*.tsv";
+            run = "duckdb";
+          }
+          {
+            name = "*.json";
+            run = "bat";
+          }
+          {
+            name = "*.parquet";
+            run = "duckdb";
+          }
+          {
+            name = "*.txt";
+            run = "bat";
+          }
+          {
+            name = "*.xlsx";
+            run = "duckdb";
+          }
+          {
+            name = "*.db";
+            run = "duckdb";
+          }
+          {
+            name = "*.duckdb";
+            run = "duckdb";
+          }
+        ];
+        prepend_preloaders = [
+          {
+            name = "*.csv";
+            run = "duckdb";
+            multi = false;
+          }
+          {
+            name = "*.tsv";
+            run = "duckdb";
+            multi = false;
+          }
+          {
+            name = "*.json";
+            run = "bat";
+            multi = false;
+          }
+          {
+            name = "*.parquet";
+            run = "duckdb";
+            multi = false;
+          }
+          {
+            name = "*.txt";
+            run = "bat";
+            multi = false;
+          }
+          {
+            name = "*.xlsx";
+            run = "duckdb";
+            multi = false;
+          }
+        ];
       };
     };
 
