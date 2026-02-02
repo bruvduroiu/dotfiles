@@ -5,5 +5,6 @@
     telegram-desktop
     discord-ptb
     signal-desktop
+    element-desktop
   ];
 }
