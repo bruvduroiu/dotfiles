@@ -10,6 +10,7 @@
     glow
     exiftool
     duckdb
+    mediainfo
   ];
 
   programs.yazi = {
@@ -50,7 +51,7 @@
           duckdb = map (type: {
             run = "duckdb";
             url = "*.${type}";
-          }) ["csv" "tsv" "json" "parquet" "txt" "xlsx" "db" "duckdb"];
+          }) ["csv" "tsv" "parquet" "xlsx" "db" "duckdb"];
         in [
           {
             mime = "{audio,video,image}/*";
@@ -67,7 +68,7 @@
             run = "duckdb";
             url = "*.${type}";
             multi = false;
-          }) ["csv" "tsv" "json" "parquet" "txt" "xlsx"];
+          }) ["csv" "tsv" "parquet" "xlsx"];
         in [
           {
             mime = "{audio,video,image}/*";

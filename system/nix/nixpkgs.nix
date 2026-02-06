@@ -16,10 +16,7 @@
           // {
             colors = import "${self}/lib/colors" prev.lib;
           };
-        claude-code = (import inputs.nixpkgs-unstable.outPath {
-          system = prev.system;
-          config.allowUnfree = true;
-        }).claude-code;
+        claude-code = prev.callPackage "${self}/pkgs/claude.nix" {};
         terraform-mcp-server = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.terraform-mcp-server;
         keymapp = (import inputs.nixpkgs-unstable.outPath {
           system = prev.system;
