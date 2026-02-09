@@ -4,6 +4,7 @@
   imageViewer = ["org.gnome.Loupe"];
   videoPlayer = ["io.github.celluloid_player.Celluloid"];
   audioPlayer = ["io.bassi.Amberol"];
+  officeEditor = ["onlyoffice-desktopeditors.desktop"];
 
   xdgAssociations = type: program: list:
     builtins.listToAttrs (map (e: {
@@ -27,6 +28,18 @@
       "x-extension-xhtml"
       "xhtml+xml"
     ]);
+  office = 
+    (xdgAssociations "application" officeEditor [
+      "vnd.openxmlformats-officedocument.wordprocessingml.document"
+      "vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "vnd.openxmlformats-officedocument.presentationml.presentation"
+      "vnd.oasis.opendocument.text"
+      "vnd.oasis.opendocument.spreadsheet"
+      "vnd.oasis.opendocument.presentation"
+      "msword"
+      "vnd.ms-excel"
+      "vnd.ms-powerpoint"
+    ]);
 
   # XDG MIME types
   associations = builtins.mapAttrs (_: v: (map (e: "${e}.desktop") v)) ({
@@ -44,6 +57,7 @@
     audio
     browserTypes
     text
+    office
     applicationText
   );
 in 

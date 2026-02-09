@@ -12,6 +12,7 @@
     libreoffice
     onlyoffice-desktopeditors
     papers
+    gnucash
     pinta
     slack
     thunderbird

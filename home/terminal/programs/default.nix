@@ -18,6 +18,7 @@
     ./k9s.nix
     ./openspec.nix
     ./stui.nix
+    ./tabiew.nix
     ./xdg.nix
     ./yazi
   ];
