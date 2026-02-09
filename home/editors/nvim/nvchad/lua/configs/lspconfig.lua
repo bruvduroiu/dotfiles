@@ -45,6 +45,9 @@ local servers = {
 local on_attach = function(client, bufnr)
 	configs.on_attach(client, bufnr)
 	client.server_capabilities.documentFormattingProvider = true
+	-- Use Trouble for references instead of Telescope (persistent split for browsing)
+	vim.keymap.set("n", "gr", "<cmd>Trouble lsp_references toggle<cr>",
+		{ buffer = bufnr, desc = "References (Trouble)" })
 end
 
 for name, opts in pairs(servers) do
