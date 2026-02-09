@@ -50,6 +50,7 @@ return {
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
 		branch = "main",
+		lazy = false,
 		dependencies = { "nvim-treesitter/nvim-treesitter" },
 		config = function()
 			require("configs.treesitter-textobjects")
