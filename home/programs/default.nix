@@ -5,6 +5,7 @@
     ./wayland
     ./messaging.nix
     ./office
+    ./hister.nix
     ./development.nix
     ./media
     ./media/rss
