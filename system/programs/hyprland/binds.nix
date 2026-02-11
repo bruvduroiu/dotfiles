@@ -79,6 +79,10 @@ in {
       # screen
       ", Print, exec, ${runOnce "grimblast"} --notify copysave screen"
 
+      # screen recording (toggle)
+      "$mod, Print, exec, wf-recorder-toggle"
+      "$mod SHIFT, Print, exec, wf-recorder-toggle area"
+
       # special workspace
       "$mod, grave, togglespecialworkspace, term"
       "$mod SHIFT, grave, movetoworkspace, special:term"

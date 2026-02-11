@@ -6,6 +6,7 @@
     ./waybar
     ./hyprlock.nix
     ./hypridle.nix
+    ./wf-recorder.nix
   ];
 
   home.packages = with pkgs; [
