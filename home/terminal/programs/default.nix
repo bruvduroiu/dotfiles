@@ -25,5 +25,6 @@
 
   home.packages = with pkgs; [
     mods
+    uber-receipts
   ];
 }

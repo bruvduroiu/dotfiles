@@ -1,5 +1,8 @@
 {
   imports = [
+    # theme
+    ../../theme
+
     # editors
     ../../editors/nvim
 

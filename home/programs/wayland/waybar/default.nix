@@ -1,9 +1,130 @@
 { config, ... }:
 
-{
+let
+  c = config.lib.stylix.colors.withHashtag;
+  isDark = config.stylix.polarity == "dark";
+  bgAlpha = if isDark then "0.6" else "0.85";
+  hoverAlpha = if isDark then "0.9" else "0.95";
+in {
   programs.waybar = {
     enable = true;
-    style = (builtins.readFile ./style.css);
+    style = ''
+      @define-color foreground ${if isDark then c.base05 else c.base00};
+      @define-color foreground-inactive ${if isDark then c.base04 else c.base03};
+      @define-color background ${if isDark then c.base00 else c.base04};
+      @define-color color9 ${c.base0E};
+
+      * {
+        font-family: JetBrainsMono Nerd Font;
+        font-size: 17px;
+        padding: 0;
+        margin: 0;
+      }
+
+      window#waybar {
+        all: unset;
+        color: @foreground;
+      }
+
+      .modules-left,
+      .modules-center,
+      .modules-right {
+        color: @foreground;
+        background: alpha(@background, ${bgAlpha});
+        margin: 5px 10px;
+        padding: 0 5px;
+        border-radius: 15px;
+      }
+      .modules-left {
+        padding: 0 5px;
+      }
+      .modules-center {
+        padding: 0 10px;
+        margin: 5 0 5 0;
+      }
+
+      #clock,
+      #battery,
+      #cpu,
+      #memory,
+      #disk,
+      #temperature,
+      #backlight,
+      #network,
+      #pulseaudio,
+      #wireplumber,
+      #custom-media,
+      #tray,
+      #mode,
+      #idle_inhibitor,
+      #scratchpad,
+      #power-profiles-daemon,
+      #language,
+      #mpd {
+        padding: 0 10px;
+        border-radius: 15px;
+      }
+
+      #clock:hover,
+      #battery:hover,
+      #cpu:hover,
+      #memory:hover,
+      #disk:hover,
+      #temperature:hover,
+      #backlight:hover,
+      #network:hover,
+      #pulseaudio:hover,
+      #wireplumber:hover,
+      #custom-media:hover,
+      #tray:hover,
+      #mode:hover,
+      #idle_inhibitor:hover,
+      #scratchpad:hover,
+      #power-profiles-daemon:hover,
+      #language:hover,
+      #mpd:hover {
+        background: alpha(@background, ${hoverAlpha});
+      }
+
+      #workspaces {
+        padding: 0px 5px;
+      }
+
+      #workspaces button {
+        all: unset;
+        padding: 0px 5px;
+        color: alpha(@color9, 0.4);
+        transition: all 0.2s ease;
+      }
+
+      #workspaces button:hover {
+        color: alpha(@color9, 0.7);
+        border: none;
+        text-shadow: 0px 0px 1.5px alpha(@color9, 0.5);
+        transition: all 1s ease;
+      }
+      #workspaces button.active {
+        color: @color9;
+        border: none;
+        text-shadow: 0px 0px 2px alpha(@color9, 0.5);
+      }
+      #workspaces button.empty {
+        color: alpha(@foreground, 0.15);
+        border: none;
+        text-shadow: 0px 0px 1.5px alpha(@foreground, 0.1);
+      }
+      #workspaces button.empty:hover {
+        color: alpha(@foreground, 0.3);
+        border: none;
+        text-shadow: 0px 0px 1.5px alpha(@foreground, 0.3);
+        transition: all 1s ease;
+      }
+      #workspaces button.empty.active {
+        color: @color9;
+        border: none;
+        text-shadow: 0px 0px 2px alpha(@color9, 0.5);
+      }
+    '';
     settings = [{
       layer = "top";
       position = "top";

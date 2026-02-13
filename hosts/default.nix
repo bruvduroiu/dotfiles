@@ -22,6 +22,9 @@
       # Home Manager (stable, follows nixpkgs)
       inputs.home-manager.nixosModules.home-manager
 
+      # Theming (auto-injects into Home Manager via sharedModules)
+      inputs.stylix.nixosModules.stylix
+
       # Secrets management
       inputs.sops-nix.nixosModules.sops
 

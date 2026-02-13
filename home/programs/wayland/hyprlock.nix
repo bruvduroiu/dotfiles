@@ -1,8 +1,6 @@
-{ config, inputs, pkgs, ... }: 
+{ config, inputs, pkgs, lib, ... }:
 
-let
-  wallpaper = ../../wallpapers/a_fish_swimming_in_water.png;
-in {
+{
   programs.hyprlock = {
     enable = true;
 
@@ -30,14 +28,14 @@ in {
         "fadeIn, 0"
       ];
 
-      background = [
+      background = lib.mkForce [
         {
           monitor = "";
-          path = (builtins.toString wallpaper);
+          path = builtins.toString config.stylix.image;
         }
       ];
 
-      input-field = [
+      input-field = lib.mkForce [
         {
           monitor = "eDP-1";
 

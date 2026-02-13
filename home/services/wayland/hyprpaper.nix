@@ -1,8 +1,6 @@
-{ pkgs, inputs, ... }:
+{ config, pkgs, inputs, ... }:
 
-let
-  wallpaper = ../../wallpapers/a_fish_swimming_in_water.png;
-in {
+{
   services.hyprpaper = {
     enable = true;
     package = inputs.hyprpaper.packages.${pkgs.system}.default;
@@ -10,10 +8,12 @@ in {
     settings = {
       splash = false;
 
+      # Wallpaper follows config.stylix.image, which changes per NixOS specialisation.
+      # switch-to-configuration restarts hyprpaper with the correct wallpaper automatically.
       wallpaper = [
         {
           monitor = "";
-          path = "${wallpaper}";
+          path = builtins.toString config.stylix.image;
         }
       ];
     };

@@ -73,6 +73,9 @@ in {
       "$mod SHIFT, SPACE, layoutmsg, orientationnext"
       "$mod CTRL SHIFT, SPACE, layoutmsg, orientationprev"
 
+      # theme toggle
+      "$mod, F5, exec, theme-switch"
+
       # screenshot
       # area
       "SHIFT, Print, exec, ${runOnce "grimblast"} --notify copysave area"

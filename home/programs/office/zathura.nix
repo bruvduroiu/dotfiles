@@ -1,13 +1,12 @@
-{ pkgs, ... }: 
+{ lib, ... }:
 
 {
   programs.zathura = {
     enable = true;
     options = {
-      recolor-lightcolor = "rgba(0,0,0,0)";
-      default-bg = "rgba(0,0,0,0.7)";
+      recolor-lightcolor = lib.mkForce "rgba(0,0,0,0)";
+      default-bg = lib.mkForce "rgba(0,0,0,0.7)";
 
-      font = "Inter 12";
       selection-notification = true;
 
       selection-clipboard = "clipboard";
@@ -18,6 +17,5 @@
       scroll-step = "100";
       zoom-min = "10";
     };
-
   };
 }

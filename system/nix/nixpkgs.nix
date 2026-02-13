@@ -25,6 +25,7 @@
         gh-actions-language-server = prev.callPackage "${self}/pkgs/gh-actions-language-server.nix" {};
         tailsnitch = prev.callPackage "${self}/pkgs/tailsnitch.nix" {};
         tabiew = prev.callPackage "${self}/pkgs/tabiew.nix" {};
+        uber-receipts = prev.callPackage "${self}/pkgs/uber-receipts" {};
         hister = prev.callPackage "${self}/pkgs/hister.nix" {};
         podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman;
         podman-compose = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman-compose;
