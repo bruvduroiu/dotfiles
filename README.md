@@ -37,7 +37,10 @@ Secrets Management: [sops-nix](https://github.com/Mic92/sops-nix)
 - easy to integrate into my git repository (RIP me when we get quantum chips breaking encryption)
 
 Code Completion & Language Servers: Neovim LSP & [Mason](https://github.com/williamboman/mason.nvim)
+Colorscheme: [Rosé Pine](https://rosepinetheme.com/)
 
 ## Rice 米
 
-![rice](./assets/rice.png)
+![rice dark](./assets/rice.png)
+
+![rice light](./assets/rice_light.png)
