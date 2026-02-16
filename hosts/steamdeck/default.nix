@@ -15,6 +15,9 @@ in
       enable = true;
       user = "deck";
       stateDir = "/home/${mainUser}/.local/share/decky"; # Keep scoped to user
+      extraPackages = with pkgs; [
+        tailscale  # For Tailscale Control Decky plugin
+      ];
     };
     devices.steamdeck = {
       enable = true;

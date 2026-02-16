@@ -1,57 +1,65 @@
 { config, pkgs, ... }:
 
-{
-  # Media applications for Steam Deck TV setup
-  home.packages = with pkgs; [
-    # Jellyfin Media Player - Native Jellyfin client with controller support
-    jellyfin-media-player
-
-    # MPV - Lightweight video player (useful for direct file playback)
-    mpv
-  ];
-
-  # Configure MPV for controller-friendly operation
-  programs.mpv = {
-    enable = true;
-    config = {
-      # Better quality settings for TV viewing
-      profile = "gpu-hq";
-      vo = "gpu";
-      hwdec = "auto-safe";  # Hardware decoding for AMD GPU
-
-      # Controller-friendly UI
-      osd-level = 1;
-      osd-duration = 2500;
-      osd-font-size = 55;
-
-      # Fullscreen by default (good for TV)
-      fullscreen = true;
-
-      # Keep player open after file ends
-      keep-open = true;
-    };
-
-    bindings = {
-      # Steam Deck controller bindings
-      "GAMEPAD_DPAD_UP" = "seek 10";
-      "GAMEPAD_DPAD_DOWN" = "seek -10";
-      "GAMEPAD_DPAD_LEFT" = "seek -60";
-      "GAMEPAD_DPAD_RIGHT" = "seek 60";
-      "GAMEPAD_ACTION_DOWN" = "cycle pause";  # A button
-      "GAMEPAD_BACK" = "quit";  # Select button
-    };
+let
+  mediaPaths = {
+    torrents = "/home/deck/torrents";
   };
 
-  # XDG desktop entry for Jellyfin - steam-rom-manager can detect and add to Gaming Mode
+  # Pre-configure Kodi media sources so it's ready on first launch
+  kodiSources = pkgs.writeText "sources.xml" ''
+    <sources>
+      <video>
+        <default pathversion="1"></default>
+        <source>
+          <name>Torrents</name>
+          <path pathversion="1">${mediaPaths.torrents}/</path>
+          <allowsharing>true</allowsharing>
+        </source>
+      </video>
+      <music>
+        <default pathversion="1"></default>
+        <source>
+          <name>Torrents</name>
+          <path pathversion="1">${mediaPaths.torrents}/</path>
+          <allowsharing>true</allowsharing>
+        </source>
+      </music>
+    </sources>
+  '';
+
+  # Enable hardware acceleration and set Steam Deck-friendly defaults
+  kodiAdvancedSettings = pkgs.writeText "advancedsettings.xml" ''
+    <advancedsettings version="1.0">
+      <videoplayer>
+        <usestagingbuffer>true</usestagingbuffer>
+      </videoplayer>
+    </advancedsettings>
+  '';
+in
+{
+  home.packages = [
+    pkgs.kodi
+  ];
+
+  # Declarative Kodi configuration
+  home.file = {
+    ".kodi/userdata/sources.xml".source = kodiSources;
+    ".kodi/userdata/advancedsettings.xml".source = kodiAdvancedSettings;
+  };
+
+  # XDG desktop entry for Kodi - add to Steam via "Add a Non-Steam Game" in Desktop Mode
   xdg.desktopEntries = {
-    jellyfin-gamemode = {
-      name = "Jellyfin";
-      genericName = "Media Player";
-      comment = "Jellyfin Media Player for TV viewing";
-      exec = "${pkgs.jellyfin-media-player}/bin/jellyfinmediaplayer --fullscreen --tv";
-      icon = "com.github.iwalton3.jellyfin-media-player";
+    kodi-gamemode = {
+      name = "Kodi";
+      genericName = "Media Center";
+      comment = "Browse and play local media";
+      exec = "${pkgs.kodi}/bin/kodi --standalone";
+      icon = "kodi";
       categories = [ "AudioVideo" "Video" "Player" ];
       terminal = false;
+      settings = {
+        StartupWMClass = "Kodi";
+      };
     };
   };
 }
