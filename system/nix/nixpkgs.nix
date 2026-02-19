@@ -34,6 +34,14 @@
           system = prev.system;
           config.allowUnfree = true;
         }).obsidian;
+        zulip-term = prev.zulip-term.overrideAttrs (oldAttrs: {
+          src = prev.fetchFromGitHub {
+            owner = "zulip";
+            repo = "zulip-terminal";
+            rev = "6a799870eccc00d612e25ff881d18f4ff66d92fa";
+            hash = "sha256-saimbccJ5iJITs/Bw97bOkGrVcko1kAl61nlxNwBrms=";
+          };
+        });
        })
     ];
   };
