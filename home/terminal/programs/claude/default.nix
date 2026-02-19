@@ -18,6 +18,14 @@
         type = "http";
         url = "https://mcp.deepwiki.com/mcp";
       };
+      linear = {
+        type = "http";
+        url = "https://mcp.linear.app/mcp";
+      };
+      notion = {
+        type = "http";
+        url = "https://mcp.notion.com/mcp";
+      };
     };
 
     # Settings
