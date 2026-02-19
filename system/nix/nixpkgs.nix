@@ -29,6 +29,7 @@
         hister = prev.callPackage "${self}/pkgs/hister.nix" {};
         podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman;
         podman-compose = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman-compose;
+        librepods = prev.callPackage "${self}/pkgs/librepods.nix" {};
         obsidian = (import inputs.nixpkgs-unstable.outPath {
           system = prev.system;
           config.allowUnfree = true;

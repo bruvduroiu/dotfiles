@@ -9,6 +9,7 @@
 
     # audio
     amberol
+    librepods
 
     # images
     loupe
