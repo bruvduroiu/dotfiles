@@ -15,6 +15,7 @@
     gnucash
     pinta
     slack
+    zulip-term
     thunderbird
     xournalpp
   ];
