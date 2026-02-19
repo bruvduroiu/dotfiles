@@ -21,7 +21,7 @@
   services = {
     resolved = {
       enable = true;
-      settings.Resolve.DNSOverTLS = "opportunistic";
+      # dnsovertls = "opportunistic";
     };
   };
 }
