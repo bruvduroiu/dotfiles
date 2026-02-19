@@ -232,6 +232,14 @@ return {
     -- Load early to enable filetype detection for Hugo templates
     lazy = false,
   },
+  {
+    "junegunn/goyo.vim",
+    cmd = "Goyo"
+  },
+  {
+    "junegunn/limelight.vim",
+    cmd = "Limelight"
+  },
 	{
 		"ThePrimeagen/99",
 		config = function()

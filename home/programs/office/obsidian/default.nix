@@ -1,4 +1,7 @@
-{ pkgs, ... }:
+{ lib
+, pkgs
+, ... 
+}:
 
 {
   # Scripts, templates, and bases are stored here as version-controlled backup.
@@ -12,6 +15,9 @@
         enable = true;
         target = "Documents/Keep";
         settings = {
+          appearance = {
+            baseFontSize = lib.mkForce 16;
+          };
           communityPlugins = [
             {
               pkg = pkgs.callPackage ./plugins/templater { };
