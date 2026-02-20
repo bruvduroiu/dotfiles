@@ -64,10 +64,10 @@ ts.setup({
   defaults = vim.tbl_extend("error", compact, {
     sorting_strategy = "ascending",
     path_display = { "filename_first" },
-    file_ignore_patterns = { "node_modules", ".venv/", ".git/", "%.lock" },
+    file_ignore_patterns = { "node_modules", ".venv/", ".git/", "%.lock", "CLAUDE.md", "%AGENTS.md" },
     mappings = {
       i = {
-        ["<C-Space>"] = actions.to_fuzzy_refine,
+        ["<C-S>"] = actions.to_fuzzy_refine,
         ["<C-o>"] = layout_actions.toggle_preview,
       },
       n = {
