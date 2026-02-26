@@ -24,7 +24,10 @@
       "opacity 0.97 0.8, match:tag file-manager"
       "opacity 0.95 0.9, match:tag terminal"
 
+      "group set, match:tag im"
       "workspace special:chat, match:tag im"
+      "group set, match:tag im-work"
+      "group set, match:tag email"
       "workspace special:work, match:tag im-work"
       "workspace special:work, match:tag email"
       "workspace special:notes, match:class ^(obsidian)$"
@@ -51,6 +54,7 @@
 
       # Screen Sharing
       "no_screen_share on, match:tag im"
+      "no_screen_share on, match:tag im-work"
       "no_screen_share on, match:tag email"
       "no_screen_share on, match:tag passwd"
 
@@ -79,9 +83,10 @@
     ];
 
     workspace = [
-      "special:notes, layoutopt:orientation:center"
-      "special:notes, gapsout:40, gapsin:20, layoutopt:orientation:center"
-      "special:chat, gapsout:40, gapsin:10, layoutopt:orientation:center"
+      "1, layout:master, layoutopt:orientation:right"
+      "special:notes, gapsout:40, gapsin:20"
+      "special:chat, gapsout:40, gapsin:10"
+      "special:work, gapsout:40, gapsin:10"
     ];
   };
 }

@@ -27,17 +27,27 @@ in {
       "$mod Control ALT, Q, exit,"
       "$mod, Q, killactive,"
       "$mod SHIFT, ESCAPE, exec, systemctl suspend"
-      "$mod CTRL, ESCAPE, exec, "
       "$mod SHIFT CTRL, ESCAPE, exec, systemctl poweroff"
 
       # control tiling
       "$mod SHIFT, F, fullscreen,"
       "$mod, G, togglegroup,"
       "$mod, F, togglefloating,"
-      "$mod ALT, , resizeactive"
-      "$mod SHIFT, J, togglesplit, " # dwindle
+      "$mod, T, togglesplit," # dwindle
       "$mod SHIFT, P, pseudo, " # dwindle
-      "$mod SHIFT, C, centerwindow" # center
+      "$mod SHIFT, C, centerwindow"
+      "$mod, P, pin,"
+      "$mod, D, focusurgentorlast,"
+
+      # group navigation
+      "$mod, TAB, changegroupactive, f"
+      "$mod SHIFT, TAB, changegroupactive, b"
+
+      # move window out of group
+      "$mod CTRL, G, moveoutofgroup,"
+
+      # lock groups (prevent accidental add/remove)
+      "$mod ALT, G, lockgroups, toggle"
 
       # utilities
       "$mod, RETURN, exec, $terminal"
@@ -51,11 +61,11 @@ in {
       "$mod, k, movefocus, u"
       "$mod, j, movefocus, d"
 
-      # swap active window with the one next to it
-      "$mod SHIFT, h, swapwindow, l"
-      "$mod SHIFT, l, swapwindow, r"
-      "$mod SHIFT, k, swapwindow, u"
-      "$mod SHIFT, j, swapwindow, d"
+      # move window or group (swap tiled, merge/unmerge groups)
+      "$mod SHIFT, h, movewindoworgroup, l"
+      "$mod SHIFT, l, movewindoworgroup, r"
+      "$mod SHIFT, k, movewindoworgroup, u"
+      "$mod SHIFT, j, movewindoworgroup, d"
 
       # cycle workspaces
       "$mod, bracketleft, workspace, m-1"
@@ -98,6 +108,10 @@ in {
 
       "$mod, B, togglespecialworkspace, work"
       "$mod SHIFT, B, movetoworkspace, special:work"
+
+      # z-order management for floating windows
+      "$mod ALT, k, alterzorder, top"
+      "$mod ALT, j, alterzorder, bottom"
     ]
     ++ workspaces;
 
@@ -161,6 +175,43 @@ in {
     bind=,slash,submap,reset
 
     # will reset the submap, meaning end the current one and return to the global one
+    submap=reset
+
+    bind=$mod,V,submap,place
+
+    # snap floating windows to screen zones
+    submap=place
+
+    # halves
+    bind=,h,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 100% ; dispatch movewindowpixel exact 0 0"
+    bind=,l,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 100% ; dispatch movewindowpixel exact 50% 0"
+    bind=,k,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 100% 50% ; dispatch movewindowpixel exact 0 0"
+    bind=,j,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 100% 50% ; dispatch movewindowpixel exact 0 50%"
+
+    # center variants
+    bind=,c,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 70% 70% ; dispatch centerwindow"
+    bind=,f,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 95% 95% ; dispatch centerwindow"
+    bind=,m,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch centerwindow"
+
+    # quadrants
+    bind=,1,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch movewindowpixel exact 0 0"
+    bind=,2,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch movewindowpixel exact 50% 0"
+    bind=,3,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch movewindowpixel exact 0 50%"
+    bind=,4,exec,hyprctl --batch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch movewindowpixel exact 50% 50%"
+
+    # incremental move (repeatable)
+    binde=SHIFT,h,moveactive,-40 0
+    binde=SHIFT,l,moveactive,40 0
+    binde=SHIFT,k,moveactive,0 -40
+    binde=SHIFT,j,moveactive,0 40
+
+    # incremental resize (repeatable)
+    binde=,equal,resizeactive,40 40
+    binde=,minus,resizeactive,-40 -40
+
+    bind=,escape,submap,reset
+    bind=,RETURN,submap,reset
+
     submap=reset
   '';
 }

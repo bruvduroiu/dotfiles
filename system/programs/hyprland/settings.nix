@@ -1,6 +1,11 @@
 { config, pkgs, lib, ... }:
 
-{
+let
+  hasStylix = config ? lib && config.lib ? stylix;
+  c = lib.optionalAttrs hasStylix config.lib.stylix.colors;
+  active   = if hasStylix then "rgba(${c.base05}cc)" else "rgba(ffffffcc)";
+  inactive = if hasStylix then "rgba(${c.base04}44)" else "rgba(ffffff44)";
+in {
   programs.hyprland.settings = {
     "$mod" = "SUPER";
     "$menu" = "walker";
@@ -67,6 +72,10 @@
       };
     };
 
+    cursor = {
+      hide_on_key_press = true;
+    };
+
     master = {
       orientation = "center";
       slave_count_for_center_master = 2;
@@ -94,6 +103,29 @@
         natural_scroll = true;
         disable_while_typing = true;
       };
+    };
+
+    group = {
+      auto_group = true;
+
+      groupbar = {
+        enabled = true;
+        font_size = 10;
+        height = 18;
+        rounding = 0;
+        render_titles = true;
+        scrolling = true;
+
+        "col.active" = active;
+        "col.inactive" = inactive;
+        "col.locked_active" = active;
+        "col.locked_inactive" = inactive;
+      };
+
+      "col.border_active" = active;
+      "col.border_inactive" = inactive;
+      "col.border_locked_active" = active;
+      "col.border_locked_inactive" = inactive;
     };
 
     animations = {

@@ -2,3 +2,4 @@
 .DS_Store
 .opencode
 .secrets.env
+.playwright-mcp/
