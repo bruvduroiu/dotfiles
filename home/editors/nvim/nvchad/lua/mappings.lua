@@ -20,4 +20,3 @@ map("n", "<leader>co", builtin.git_branches, { desc = "Git branches" })
 map("n", "<leader>fu", "<cmd>Telescope undo<cr>", { desc = "Undo tree" })
 map("n", "<leader>fr", builtin.resume, { desc = "Resume last picker" })
 map("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
-
