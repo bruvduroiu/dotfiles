@@ -80,6 +80,12 @@
       "float on, match:class ^(scratchterm)$"
       "size 80% 80%, match:class ^(scratchterm)$"
       "center on, match:class ^(scratchterm)$"
+
+      # Smart borders: no border/rounding when only one tiled window
+      "border_size 0, match:float 0, match:workspace w[tv1]"
+      "rounding 0, match:float 0, match:workspace w[tv1]"
+      "border_size 0, match:float 0, match:workspace f[1]"
+      "rounding 0, match:float 0, match:workspace f[1]"
     ];
 
     workspace = [
@@ -87,6 +93,10 @@
       "special:notes, gapsout:40, gapsin:20"
       "special:chat, gapsout:40, gapsin:10"
       "special:work, gapsout:40, gapsin:10"
+
+      # Smart gaps: no gaps when only one tiled/fullscreen window
+      "w[tv1], gapsout:0, gapsin:0"
+      "f[1], gapsout:0, gapsin:0"
     ];
   };
 }

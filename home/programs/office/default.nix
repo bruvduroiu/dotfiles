@@ -6,6 +6,7 @@
     ./zathura.nix
     ./invoice.nix
     ./obsidian
+    ./thunderbird.nix
   ];
 
   home.packages = with pkgs; [
@@ -16,7 +17,6 @@
     pinta
     slack
     zulip-term
-    thunderbird
     xournalpp
   ];
 }

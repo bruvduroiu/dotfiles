@@ -36,7 +36,10 @@ in {
       gaps_in = 1;
       gaps_out = 0;
 
-      border_size = 0;
+      border_size = 1;
+
+      "col.active_border" = active;
+      "col.inactive_border" = inactive;
 
       # Set to true enable resizing windows by clicking and dragging on borders and gaps
       resize_on_border = false;
