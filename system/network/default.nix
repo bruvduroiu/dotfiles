@@ -1,27 +1,20 @@
 { config, lib, pkgs, ... }:
 
 {
-  # Network manager applet for system tray
-  environment.systemPackages = [ pkgs.networkmanagerapplet ];
-
   networking = {
+    nameservers = [ "9.9.9.9#dns.quad9.net" ];
+
     networkmanager = {
       enable = true;
       dns = "systemd-resolved";
+      wifi.powersave = true;
     };
-    
-    nameservers = [
-      "1.1.1.1"
-      "1.0.0.1"
-      "8.8.8.8"
-      "8.8.4.4"
-    ];
   };
 
   services = {
     resolved = {
       enable = true;
-      # dnsovertls = "opportunistic";
+      dnsovertls = "opportunistic";
     };
   };
 }
