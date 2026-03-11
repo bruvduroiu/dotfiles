@@ -14,8 +14,6 @@ in {
     "$browser" = "uwsm app -- firefox";
     "$webapp"  = "$browser --new-tab";
     env = [
-      "XCURSOR_THEME,rose-pine-hyprcursor"
-      "XCURSOR_SIZE,${toString 24}"
       "HYPRCURSOR_THEME,rose-pine-hyprcursor"
       "HYPRCURSOR_SIZE,${toString 24}"
       "GRIMBLAST_NO_CURSOR,1"

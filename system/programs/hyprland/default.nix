@@ -13,7 +13,6 @@
     pathsToLink = ["/share/icons"];
     systemPackages = [
       inputs.hyprland-contrib.packages.${pkgs.stdenv.hostPlatform.system}.grimblast
-      pkgs.rose-pine-hyprcursor
     ];
   };
 
