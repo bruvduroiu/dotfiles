@@ -76,20 +76,33 @@ in {
     };
 
     cursor = {
+      no_hardware_cursors = true;
       hide_on_key_press = true;
     };
 
     master = {
+      mfact = 0.60;
+      new_status = "slave";
+      new_on_top = false;
+      allow_small_split = true;
       orientation = "center";
       slave_count_for_center_master = 2;
       center_master_fallback = "left";
-      mfact = 0.70;
     };
 
     dwindle = {
       pseudotile = true;
       preserve_split = true;
       force_split = 2;
+      smart_split = true;
+    };
+
+    scrolling = {
+      column_width = 0.5;
+      fullscreen_on_one_column = true;
+      follow_focus = true;
+      wrap_focus = true;
+      explicit_column_widths = "0.333, 0.5, 0.667, 1.0";
     };
 
     misc = {

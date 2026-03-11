@@ -55,11 +55,13 @@ in {
       "$mod, SPACE, exec, $menu"
       "$mod Control, Q, exec, hyprlock"
 
-      # move focus
+      # move focus (h/l directional, j/k sequential — works in monocle)
       "$mod, h, movefocus, l"
       "$mod, l, movefocus, r"
       "$mod, k, movefocus, u"
       "$mod, j, movefocus, d"
+      "$mod, TAB, layoutmsg, cyclenext"
+      "$mod SHIFT, TAB, layoutmsg, cycleprev"
 
       # move window or group (swap tiled, merge/unmerge groups)
       "$mod SHIFT, h, movewindoworgroup, l"
@@ -79,9 +81,15 @@ in {
       "$mod SHIFT ALT, bracketleft, movecurrentworkspacetomonitor, l"
       "$mod SHIFT ALT, bracketright, movecurrentworkspacetomonitor, r"
 
-      # Cycle master orientation
+      # Master layout
+      "$mod CTRL, Return, layoutmsg, swapwithmaster master"  # promote to master
+      "$mod, equal, layoutmsg, mfact +0.05"                  # widen master
+      "$mod, minus, layoutmsg, mfact -0.05"                  # narrow master
       "$mod SHIFT, SPACE, layoutmsg, orientationnext"
       "$mod CTRL SHIFT, SPACE, layoutmsg, orientationprev"
+
+      # Scroll layout
+      "$mod, c, layoutmsg, focus"
 
       # theme toggle
       "$mod, F5, exec, theme-switch"

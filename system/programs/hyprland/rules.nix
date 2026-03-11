@@ -3,11 +3,11 @@
     windowrule = [
       # Tags
       "tag +browser, match:class ^([Ff]irefox|org.mozilla.firefox|[Ff]irefox-esr|[Ff]irefox-bin)$"
-      "tag +chromium, match:class ^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$"
-      "tag +chromium, match:class ^([Cc]hromium)$"
-      "tag +chromium, match:class ^([Cc]hromium-browser)$"
+      "tag +browser, match:class ^([Gg]oogle-chrome(-beta|-dev|-unstable)?)$"
+      "tag +browser, match:class ^([Cc]hromium)$"
+      "tag +browser, match:class ^([Cc]hromium-browser)$"
       "tag +terminal, match:class ^(com.mitchellh.ghostty)$"
-      "tag +email, match:class ^([Tt]hunderbird)$"
+      "tag +im-work, match:class ^([Tt]hunderbird)$"
       "tag +im-work, match:class ^([Ss]lack)$"
       "tag +im, match:class ^([Dd]iscord)$"
       "tag +im, match:class ^(org.telegram.desktop)$"
@@ -24,16 +24,11 @@
       "opacity 0.97 0.8, match:tag file-manager"
       "opacity 0.95 0.9, match:tag terminal"
 
-      "group set, match:tag im"
-      "workspace special:chat, match:tag im"
-      "group set, match:tag im-work"
-      "group set, match:tag email"
       "workspace special:work, match:tag im-work"
-      "workspace special:work, match:tag email"
-      "workspace special:notes, match:class ^(obsidian)$"
 
       "workspace 1, match:tag browser"
-      "workspace 4, match:tag chromium"
+      "workspace 1, match:class ^(obsidian)$"
+      "workspace 4, match:tag im"
 
       "float off, match:title ^(Grayjay)$"
       "workspace 4, match:title ^(Grayjay)$"
@@ -55,7 +50,6 @@
       # Screen Sharing
       "no_screen_share on, match:tag im"
       "no_screen_share on, match:tag im-work"
-      "no_screen_share on, match:tag email"
       "no_screen_share on, match:tag passwd"
 
       # Dialog windows - float+center
@@ -89,9 +83,16 @@
     ];
 
     workspace = [
-      "1, layout:master, layoutopt:orientation:right"
+      # Per-workspace layouts (0.54 native support)
+      # layout:<name> sets the engine; layoutopt:<key>:<value> passes options to it
+      "1, layout:scrolling"
+      "2, layout:dwindle"
+      "3, layout:dwindle"
+      "4, layout:scrolling"
+      "5, layout:scrolling"
+      "special:work, layout:scrolling"
+
       "special:notes, gapsout:40, gapsin:20"
-      "special:chat, gapsout:40, gapsin:10"
       "special:work, gapsout:40, gapsin:10"
 
       # Smart gaps: no gaps when only one tiled/fullscreen window
