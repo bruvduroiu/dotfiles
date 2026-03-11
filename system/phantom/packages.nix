@@ -25,7 +25,7 @@
     lshw
 
     # Screenshot/clipboard (Hyprland)
-    inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
+    inputs.hyprland-contrib.packages.${pkgs.stdenv.hostPlatform.system}.grimblast
     wl-clipboard
     slurp
     grim

@@ -17,9 +17,9 @@
             colors = import "${self}/lib/colors" prev.lib;
           };
         claude-code = prev.callPackage "${self}/pkgs/claude.nix" {};
-        terraform-mcp-server = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.terraform-mcp-server;
+        terraform-mcp-server = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.terraform-mcp-server;
         keymapp = (import inputs.nixpkgs-unstable.outPath {
-          system = prev.system;
+          system = prev.stdenv.hostPlatform.system;
           config.allowUnfree = true;
         }).keymapp;
         gh-actions-language-server = prev.callPackage "${self}/pkgs/gh-actions-language-server.nix" {};
@@ -27,11 +27,11 @@
         tabiew = prev.callPackage "${self}/pkgs/tabiew.nix" {};
         uber-receipts = prev.callPackage "${self}/pkgs/uber-receipts" {};
         hister = prev.callPackage "${self}/pkgs/hister.nix" {};
-        podman = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman;
-        podman-compose = inputs.nixpkgs-unstable.legacyPackages.${prev.system}.podman-compose;
+        podman = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.podman;
+        podman-compose = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.podman-compose;
         librepods = prev.callPackage "${self}/pkgs/librepods.nix" {};
         obsidian = (import inputs.nixpkgs-unstable.outPath {
-          system = prev.system;
+          system = prev.stdenv.hostPlatform.system;
           config.allowUnfree = true;
         }).obsidian;
         zulip-term = prev.zulip-term.overrideAttrs (oldAttrs: {

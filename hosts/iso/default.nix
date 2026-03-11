@@ -103,13 +103,13 @@
     age-plugin-yubikey
 
     # Screenshot and clipboard (for Hyprland)
-    inputs.hyprland-contrib.packages.${pkgs.system}.grimblast
+    inputs.hyprland-contrib.packages.${pkgs.stdenv.hostPlatform.system}.grimblast
     wl-clipboard
     slurp
     grim
 
     # File manager (yazi is terminal-based, much lighter than nautilus)
-    inputs.yazi.packages.${pkgs.system}.default
+    inputs.yazi.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # Browser - install via nix-shell when needed to save ~500MB
     # Run: nix-shell -p firefox
