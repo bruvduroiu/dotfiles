@@ -33,7 +33,7 @@ in {
       "$mod SHIFT, F, fullscreen,"
       "$mod, G, togglegroup,"
       "$mod, F, togglefloating,"
-      "$mod, T, togglesplit," # dwindle
+      "$mod, T, layoutmsg, togglesplit" # dwindle
       "$mod SHIFT, P, pseudo, " # dwindle
       "$mod SHIFT, C, centerwindow"
       "$mod, P, pin,"
