@@ -6,14 +6,7 @@
   services.transmission = {
     enable = true;
 
-    # Pin to 4.0.5 (tracker whitelist requirement — 4.0.6 is not whitelisted)
-    package = pkgs.transmission_4.overrideAttrs (old: rec {
-      version = "4.0.5";
-      src = pkgs.fetchurl {
-        url = "https://github.com/transmission/transmission/releases/download/${version}/transmission-${version}.tar.xz";
-        hash = "sha256-/Wj/EUpHkgAEPDDH5p26TBky9682ykxbXS7ctYZuY1c=";
-      };
-    });
+    package = pkgs.transmission_4;
 
     # Firewall
     openPeerPorts = true;   # Open peer port (TCP + UDP) for seeding
