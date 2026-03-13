@@ -144,6 +144,10 @@ in {
       "col.border_locked_inactive" = inactive;
     };
 
+    binds = {
+      window_direction_monitor_fallback = false;
+    };
+
     animations = {
       enabled = false;
     };
