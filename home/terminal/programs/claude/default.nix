@@ -6,14 +6,14 @@
 
     # MCP servers configuration — Nix store paths resolved at build time
     mcpServers = {
-      playwright = {
-        type = "stdio";
-        command = "${pkgs.playwright-mcp}/bin/mcp-server-playwright";
-        args = [
-          "--executable-path"
-          "${pkgs.ungoogled-chromium}/bin/chromium"
-        ];
-      };
+      # playwright = {
+      #   type = "stdio";
+      #   command = "${pkgs.playwright-mcp}/bin/mcp-server-playwright";
+      #   args = [
+      #     "--executable-path"
+      #     "${pkgs.ungoogled-chromium}/bin/chromium"
+      #   ];
+      # };
       deepwiki = {
         type = "http";
         url = "https://mcp.deepwiki.com/mcp";

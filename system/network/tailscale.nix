@@ -16,7 +16,10 @@
   services.tailscale = {
     enable = true;
     openFirewall = true;
-    extraUpFlags = [ "--operator=${config.users.users.bogdan.name}" ];
+    extraUpFlags = [
+      "--operator=${config.users.users.bogdan.name}"
+      "--accept-routes"
+    ];
   };
 
   systemd.services.tailscale-autoconnect = {
