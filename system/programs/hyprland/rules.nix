@@ -22,7 +22,6 @@
       # Opacity
       "opacity 1.0 0.97, match:tag *"
       "opacity 0.97 0.8, match:tag file-manager"
-      "opacity 0.95 0.9, match:tag terminal"
 
       "workspace special:work, match:tag im-work"
 

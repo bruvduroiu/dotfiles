@@ -6,6 +6,7 @@
     settings = {
       cursor-style = "block";
       mouse-hide-while-typing = true;
+      background-opacity = 0.8;
       background-blur = 10;
       unfocused-split-opacity = 0.9;
       window-padding-x = 0;

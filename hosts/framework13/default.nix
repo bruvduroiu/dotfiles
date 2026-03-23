@@ -24,7 +24,7 @@
       sizes.terminal = 13;
     };
 
-    opacity.terminal = 0.8;
+    opacity.terminal = 1.0;
   };
 
   # Light mode specialisation — switch via:
