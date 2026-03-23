@@ -49,8 +49,6 @@ in {
       #memory,
       #disk,
       #temperature,
-      #temperature.cpu,
-      #temperature.ddr,
       #backlight,
       #network,
       #pulseaudio,
@@ -73,8 +71,6 @@ in {
       #memory:hover,
       #disk:hover,
       #temperature:hover,
-      #temperature.cpu:hover,
-      #temperature.ddr:hover,
       #backlight:hover,
       #network:hover,
       #pulseaudio:hover,
@@ -137,7 +133,7 @@ in {
       margin = "0";
       modules-left = ["clock" "custom/timew" "custom/playerctl"];
       modules-center = ["hyprland/workspaces"];
-      modules-right = ["pulseaudio" "battery" "network" "group/hardware" "temperature#cpu" "temperature#ddr" "tray" "privacy"];
+      modules-right = ["pulseaudio" "battery" "network" "group/hardware" "temperature" "tray" "privacy"];
       "hyprland/workspaces" = {
         format = "{icon}";
         format-icons = {
@@ -265,20 +261,10 @@ in {
         on-click = "ghostty -e btop";
       };
 
-      "temperature#cpu" = {
-        hwmon-path = "/sys/class/hwmon/hwmon5/temp1_input";
+      temperature = {
         critical-threshold = 80;
         format = "{icon} {temperatureC}°C";
         format-icons = ["󱃃" "󰔏" "󱃂"];
-        tooltip-format = "CPU: {temperatureC}°C";
-        on-click = "ghostty -e s-tui";
-      };
-
-      "temperature#ddr" = {
-        hwmon-path = "/sys/class/hwmon/hwmon9/temp3_input";
-        critical-threshold = 55;
-        format = "󰘚 {temperatureC}°C";
-        tooltip-format = "DDR: {temperatureC}°C";
         on-click = "ghostty -e s-tui";
       };
 
