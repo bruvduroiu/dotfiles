@@ -54,6 +54,7 @@ in {
       #pulseaudio,
       #wireplumber,
       #custom-media,
+      #custom-gpu,
       #tray,
       #mode,
       #idle_inhibitor,
@@ -76,6 +77,7 @@ in {
       #pulseaudio:hover,
       #wireplumber:hover,
       #custom-media:hover,
+      #custom-gpu:hover,
       #tray:hover,
       #mode:hover,
       #idle_inhibitor:hover,
@@ -133,7 +135,7 @@ in {
       margin = "0";
       modules-left = ["clock" "custom/timew" "custom/playerctl"];
       modules-center = ["hyprland/workspaces"];
-      modules-right = ["pulseaudio" "battery" "network" "group/hardware" "temperature" "tray" "privacy"];
+      modules-right = ["pulseaudio" "battery" "network" "group/hardware" "custom/gpu" "temperature" "tray" "privacy"];
       "hyprland/workspaces" = {
         format = "{icon}";
         format-icons = {
@@ -325,6 +327,13 @@ in {
         format-icons = ["󰃞" "󰃟" "󰃠"];
         on-scroll-up = "brightnessctl set +5%";
         on-scroll-down = "brightnessctl set 5%-";
+      };
+
+      "custom/gpu" = {
+        format = "󰢮 {}%";
+        exec = "cat /sys/class/drm/card*/device/gpu_busy_percent";
+        interval = 2;
+        tooltip-format = "GPU utilization";
       };
 
       disk = {
