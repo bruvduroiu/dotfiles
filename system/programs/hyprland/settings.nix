@@ -105,6 +105,11 @@ in {
       explicit_column_widths = "0.333, 0.5, 0.667, 1.0";
     };
 
+    gesture = [
+      "3, left, dispatcher, layoutmsg, move +col"
+      "3, right, dispatcher, layoutmsg, move -col"
+    ];
+
     misc = {
       force_default_wallpaper = 0;
     };

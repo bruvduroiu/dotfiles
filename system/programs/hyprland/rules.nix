@@ -46,6 +46,12 @@
 
       "tile on, match:tag terminal"
 
+      # Scrolling layout column widths
+      "scrolling_width 0.333, match:class ^(obsidian)$"
+      "scrolling_width 0.5, match:tag terminal"
+      "scrolling_width 0.667, match:tag browser"
+      "scrolling_width 0.333, match:tag im-work"
+
       # Screen Sharing
       "no_screen_share on, match:tag im"
       "no_screen_share on, match:tag im-work"

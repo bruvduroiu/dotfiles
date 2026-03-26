@@ -83,13 +83,19 @@ in {
 
       # Master layout
       "$mod CTRL, Return, layoutmsg, swapwithmaster master"  # promote to master
-      "$mod, equal, layoutmsg, mfact +0.05"                  # widen master
-      "$mod, minus, layoutmsg, mfact -0.05"                  # narrow master
+
+      # Column resize (cycles through explicit_column_widths)
+      "$mod, equal, layoutmsg, colresize +conf"
+      "$mod, minus, layoutmsg, colresize -conf"
       "$mod SHIFT, SPACE, layoutmsg, orientationnext"
       "$mod CTRL SHIFT, SPACE, layoutmsg, orientationprev"
 
       # Scroll layout
-      "$mod, c, layoutmsg, focus"
+      "$mod, c, layoutmsg, fit active"
+      "$mod SHIFT, c, layoutmsg, fit visible"
+      "$mod CTRL, c, layoutmsg, fit all"
+      "$mod, period, layoutmsg, move +col"
+      "$mod, comma, layoutmsg, move -col"
 
       # theme toggle
       "$mod, F5, exec, theme-switch"
