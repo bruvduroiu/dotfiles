@@ -110,9 +110,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Services
-    rental-bot.url = "path:/home/bogdan/development/scratch/591";
-
     # Secrets management
     sops-nix = {
       url = "github:Mic92/sops-nix";

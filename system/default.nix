@@ -53,7 +53,6 @@ let
     ./services/kanata
     ./services/opensnitch.nix
     ./services/podman.nix
-    ./services/rental-bot.nix
     ./services/restic.nix
     ./services/yubikey.nix
     ./services/fprintd.nix
