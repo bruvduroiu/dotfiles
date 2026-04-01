@@ -34,6 +34,17 @@
           system = prev.stdenv.hostPlatform.system;
           config.allowUnfree = true;
         }).obsidian;
+        google-cloud-sdk = prev.google-cloud-sdk.overrideAttrs (oldAttrs: rec {
+          version = "563.0.0";
+          src = prev.fetchurl {
+            url = "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${version}-linux-x86_64.tar.gz";
+            hash = "sha256-LN5Bn5H6P2LtvRiEHsrawHB3LFLsHrqsmZh0Er1mzQE=";
+          };
+          installCheckPhase = ''
+            export HOME=$(mktemp -d)
+            $out/bin/gcloud version --format json | jq '."Google Cloud SDK"' | grep "${version}"
+          '';
+        });
         zulip-term = prev.zulip-term.overrideAttrs (oldAttrs: {
           src = prev.fetchFromGitHub {
             owner = "zulip";

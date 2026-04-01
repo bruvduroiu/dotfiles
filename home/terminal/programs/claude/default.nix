@@ -31,19 +31,19 @@
     # Settings
     settings = {
       enabledPlugins = {
-        "superpowers@superpowers-marketplace" = true;
+        # "superpowers@superpowers-marketplace" = true;
         "frontend-design@claude-plugins-official" = true;
         "gopls-lsp@claude-plugins-official" = true;
         "typescript-lsp@claude-plugins-official" = true;
         "pyright-lsp@claude-plugins-official" = true;
       };
       extraKnownMarketplaces = {
-        superpowers-marketplace = {
-          source = {
-            source = "github";
-            repo = "obra/superpowers-marketplace";
-          };
-        };
+        # superpowers-marketplace = {
+        #   source = {
+        #     source = "github";
+        #     repo = "obra/superpowers-marketplace";
+        #   };
+        # };
       };
       permissions = {
         allow = [
