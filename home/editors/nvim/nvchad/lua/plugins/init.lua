@@ -58,7 +58,7 @@ return {
 	},
 	{
 		"tpope/vim-fugitive",
-		cmd = { "Git", "G", "Gdiffsplit", "Gvdiffsplit", "Gwrite", "Gread", "Ggrep", "GMove", "GDelete", "GBrowse" },
+		cmd = { "Git", "G", "Gdiffsplit", "Gvdiffsplit", "Gwrite", "Gread", "Ggrep", "GMove", "GDelete", "GBrowse", "Gstatus", "Gedit", "Glog" },
 		keys = {
 			{ "<leader>gs", "<cmd>vertical Git<cr>" },
 			{ "<leader>gb", "<cmd>Git blame<cr>" },

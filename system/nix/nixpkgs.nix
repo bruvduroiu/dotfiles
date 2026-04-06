@@ -27,6 +27,10 @@
         tabiew = prev.callPackage "${self}/pkgs/tabiew.nix" {};
         uber-receipts = prev.callPackage "${self}/pkgs/uber-receipts" {};
         hister = prev.callPackage "${self}/pkgs/hister.nix" {};
+        invoice = prev.callPackage "${self}/pkgs/invoice.nix" {
+          srcHash = "sha256-Qa7lTpRBB3m3GiK5mBkDMyg0InUqziUANf5Ds5XDnGg=";
+          vendorHash = "sha256-mLn9hN7hd3MPYx0STiwCL8pTTYtDlycVkSLUEq8NZOE=";
+        };
         podman = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.podman;
         podman-compose = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.podman-compose;
         librepods = prev.callPackage "${self}/pkgs/librepods.nix" {};
@@ -34,6 +38,10 @@
           system = prev.stdenv.hostPlatform.system;
           config.allowUnfree = true;
         }).obsidian;
+        sheets = prev.callPackage "${self}/pkgs/sheets.nix" {
+          srcHash = "sha256-sRJ1rqtxc4axAkVavxSR2afdvxCAjJdK2mBWnt+nzW0=";
+          vendorHash = "sha256-WWtAt0+W/ewLNuNgrqrgho5emntw3rZL9JTTbNo4GsI=";
+        };
         google-cloud-sdk = prev.google-cloud-sdk.overrideAttrs (oldAttrs: rec {
           version = "563.0.0";
           src = prev.fetchurl {
