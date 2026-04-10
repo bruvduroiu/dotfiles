@@ -6,6 +6,8 @@
     ./sops.nix
   ];
 
+  environment.variables.EDITOR = "nvim";
+
   documentation.dev.enable = true;
 
   i18n = {

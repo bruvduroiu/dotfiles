@@ -55,6 +55,14 @@
   # System configuration
   networking.hostName = "framework13";
 
+  # Prefer direct route to server VLAN over Tailscale when on home LAN.
+  # Priority 5200 is checked before Tailscale's table 52 lookup (~5250),
+  # so the DHCP-pushed route in main wins when at home. When away, main
+  # has no route and evaluation falls through to Tailscale.
+  networking.localCommands = ''
+    ${pkgs.iproute2}/bin/ip rule add to 10.0.20.0/24 lookup main priority 5200 2>/dev/null || true
+  '';
+
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
