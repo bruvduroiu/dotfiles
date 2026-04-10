@@ -3,3 +3,4 @@
 .opencode
 .secrets.env
 .playwright-mcp/
+tmp
