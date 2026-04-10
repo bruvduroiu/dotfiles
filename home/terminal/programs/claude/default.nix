@@ -1,8 +1,18 @@
 { config, pkgs, inputs, ... }:
 
 {
+  # Workaround: rulesDir not yet available in locked home-manager release-25.11
+  home.file.".claude/rules" = {
+    source = ./config/rules;
+    recursive = true;
+  };
+
   programs.claude-code = {
     enable = true;
+
+    agentsDir = ./config/agents;
+    skillsDir = ./config/skills;
+    hooksDir = ./config/hooks;
 
     # MCP servers configuration — Nix store paths resolved at build time
     mcpServers = {

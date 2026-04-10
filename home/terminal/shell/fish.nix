@@ -15,6 +15,11 @@ in
         { name = "hydro"; src = pkgs.fishPlugins.hydro.src; }
         { name = "fzf"; src = pkgs.fishPlugins.fzf.src; }
       ];
+      shellInit = ''
+        if test -f ${config.sops.secrets.openrouter_api_key.path}
+          set -gx OPENROUTER_API_KEY (cat ${config.sops.secrets.openrouter_api_key.path})
+        end
+      '';
       interactiveShellInit = ''
         fzf_configure_bindings --directory=\cp --processes=\co
         set -gx fzf_fd_opts "${fd_opts}"

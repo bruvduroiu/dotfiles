@@ -38,6 +38,7 @@
           system = prev.stdenv.hostPlatform.system;
           config.allowUnfree = true;
         }).obsidian;
+        opencode = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.opencode;
         sheets = prev.callPackage "${self}/pkgs/sheets.nix" {
           srcHash = "sha256-sRJ1rqtxc4axAkVavxSR2afdvxCAjJdK2mBWnt+nzW0=";
           vendorHash = "sha256-WWtAt0+W/ewLNuNgrqrgho5emntw3rZL9JTTbNo4GsI=";

@@ -16,6 +16,7 @@
     ./git.nix
     ./jj.nix
     ./k9s.nix
+    ./opencode
     ./openspec.nix
     ./stui.nix
     ./tabiew.nix

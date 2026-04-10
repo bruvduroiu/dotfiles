@@ -214,13 +214,6 @@ return {
 		opts = require("configs.edgy"),
 	},
   {
-    "supermaven-inc/supermaven-nvim",
-    event = "VeryLazy",
-    enabled = false,
-    opts = require("configs.supermaven"),
-  },
-
-  {
     "saghen/blink.cmp",
     dependencies = { "rafamadriz/friendly-snippets" },
     event = "VeryLazy",

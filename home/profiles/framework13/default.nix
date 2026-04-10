@@ -1,3 +1,5 @@
+{ self, config, ... }:
+
 {
   imports = [
     # theme
@@ -25,6 +27,11 @@
     ../../services/trayscale.nix
     ../../services/media/playerctl.nix
   ];
+
+  # SOPS secret for OpenRouter API key (used by nvim 99 plugin)
+  sops.secrets.openrouter_api_key = {
+    sopsFile = "${self}/secrets/common/api-keys.yaml";
+  };
 
   wayland.windowManager.hyprland.settings = {
     monitor = [
