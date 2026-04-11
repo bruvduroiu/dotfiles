@@ -183,8 +183,8 @@ local function build_provider()
 end
 
 _99.setup({
-  provider = build_provider(),
-  model = "z-ai/glm-5.1",
+  provider = _99.Providers.OpenCodeProvider,
+  model = "openrouter/z-ai/glm-5.1",
   logger = {
     level = _99.DEBUG,
     path = "/tmp/" .. basename .. ".99.debug",
