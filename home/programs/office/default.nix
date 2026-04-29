@@ -14,6 +14,7 @@
     onlyoffice-desktopeditors
     papers
     gnucash
+    gimp
     pinta
     slack
     sheets

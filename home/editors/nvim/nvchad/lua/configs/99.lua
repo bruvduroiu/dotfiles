@@ -182,12 +182,14 @@ local function build_provider()
   return OpenRouterProvider
 end
 
+local OpenRouterProvider = build_provider()
+
 _99.setup({
-  provider = _99.Providers.OpenCodeProvider,
-  model = "openrouter/z-ai/glm-5.1",
+  provider = OpenRouterProvider,
+  model = "deepseek/deepseek-v4-flash",
   logger = {
     level = _99.DEBUG,
-    path = "/tmp/" .. basename .. ".99.debug",
+    path = "./tmp/" .. basename .. ".99.debug",
     print_on_error = true,
   },
   tmp_dir = "./tmp",

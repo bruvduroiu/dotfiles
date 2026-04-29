@@ -1,6 +1,11 @@
 local configs = require("nvchad.configs.lspconfig")
 configs.defaults()
 
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+	focusable = false,
+	silent = true,
+})
+
 local servers = {
 	html = {},
 	cssls = {},
@@ -28,8 +33,7 @@ local servers = {
 					autoSearchPaths = true,
 					typeCheckingMode = "basic",
 				},
-				venvPath = vim.fn.getcwd() .. "/.venv",
-				pythonPath = vim.fn.getcwd() .. "/.venv/bin/python3",
+				pythonPath = vim.fn.exepath("python3"),
 			},
 		},
 	},

@@ -60,7 +60,7 @@ let
     for server in /run/user/$(id -u)/nvim.*.0 /tmp/nvim.*/0; do
       [ -S "$server" ] || continue
       nvim --server "$server" --remote-send \
-        "<cmd>lua vim.o.background='$nvim_bg'; local ok, _ = pcall(function() require('nvconfig').base46.theme = '$nvim_theme'; require('base46').load_all_highlights() end); vim.cmd('redraw!')<CR>" \
+        "<C-\><C-n>:lua vim.o.background='$nvim_bg'; pcall(function() require('nvconfig').base46.theme = '$nvim_theme'; require('base46').load_all_highlights() end); vim.cmd('redraw!')<CR>" \
         2>/dev/null || true
     done
 

@@ -11,6 +11,7 @@
     flyctl
     kubectl
     lazysql
+    sqlit-tui
     lazydocker
     lazyjournal
     opensnitch-ui

@@ -41,19 +41,32 @@
     # Settings
     settings = {
       enabledPlugins = {
-        # "superpowers@superpowers-marketplace" = true;
+        "caveman@caveman" = true;
+        "superpowers@superpowers-marketplace" = true;
         "frontend-design@claude-plugins-official" = true;
         "gopls-lsp@claude-plugins-official" = true;
         "typescript-lsp@claude-plugins-official" = true;
         "pyright-lsp@claude-plugins-official" = true;
       };
       extraKnownMarketplaces = {
-        # superpowers-marketplace = {
-        #   source = {
-        #     source = "github";
-        #     repo = "obra/superpowers-marketplace";
-        #   };
-        # };
+        claude-plugins-official = {
+          source = {
+            source = "git";
+            url = "https://github.com/anthropics/claude-plugins-official.git";
+          };
+        };
+        superpowers-marketplace = {
+          source = {
+            source = "github";
+            repo = "obra/superpowers-marketplace";
+          };
+        };
+        caveman = {
+          source = {
+            source = "github";
+            repo = "JuliusBrussee/caveman";
+          };
+        };
       };
       permissions = {
         allow = [
@@ -89,6 +102,11 @@
         defaultMode = "default";
       };
       env = {
+        ANTHROPIC_BASE_URL="https://openrouter.ai/api";
+        ANTHROPIC_AUTH_TOKEN="$OPENROUTER_API_KEY";
+        ANTHROPIC_API_KEY=""; # Important: Must be explicitly empty
+        ANTHROPIC_MODEL="deepseek/deepseek-v4-flash";
+        CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1;
         SHELL = "fish";
         API_TIMEOUT_MS = "3000000";
         NIX_ENVIRONMENT = "true";

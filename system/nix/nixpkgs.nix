@@ -43,6 +43,7 @@
           srcHash = "sha256-sRJ1rqtxc4axAkVavxSR2afdvxCAjJdK2mBWnt+nzW0=";
           vendorHash = "sha256-WWtAt0+W/ewLNuNgrqrgho5emntw3rZL9JTTbNo4GsI=";
         };
+        sqlit-tui = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.sqlit-tui;
         google-cloud-sdk = prev.google-cloud-sdk.overrideAttrs (oldAttrs: rec {
           version = "563.0.0";
           src = prev.fetchurl {

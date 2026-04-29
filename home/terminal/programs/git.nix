@@ -28,6 +28,8 @@
       merge.conflictStyle = "diff3";
 
       pull.rebase = true;
+
+      url."https://github.com/anthropics/".insteadOf = "ssh://git@github.com/anthropics/";
     };
   };
 }

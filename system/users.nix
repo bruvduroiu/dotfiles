@@ -7,7 +7,7 @@
     users.bogdan = {
       isNormalUser = true;
       description = "Bogdan";
-      extraGroups = [ "networkmanager" "wheel" "docker" ];
+      extraGroups = [ "networkmanager" "wheel" "docker" "podman" ];
     };
   };
 
