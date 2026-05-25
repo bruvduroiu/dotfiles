@@ -102,10 +102,13 @@
         defaultMode = "default";
       };
       env = {
-        ANTHROPIC_BASE_URL="https://openrouter.ai/api";
-        ANTHROPIC_AUTH_TOKEN="$OPENROUTER_API_KEY";
-        ANTHROPIC_API_KEY=""; # Important: Must be explicitly empty
-        ANTHROPIC_MODEL="deepseek/deepseek-v4-flash";
+        ANTHROPIC_BASE_URL = "https://api.deepseek.com/anthropic";
+        ANTHROPIC_MODEL = "deepseek-v4-pro[1m]";
+        ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-pro[1m]";
+        ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-pro[1m]";
+        ANTHROPIC_DEFAULT_HAIKU_MODEL = "deepseek-v4-flash";
+        CLAUDE_CODE_SUBAGENT_MODEL = "deepseek-v4-flash";
+        CLAUDE_CODE_EFFORT_LEVEL = "max";
         CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1;
         SHELL = "fish";
         API_TIMEOUT_MS = "3000000";

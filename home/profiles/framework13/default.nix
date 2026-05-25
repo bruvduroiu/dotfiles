@@ -33,15 +33,15 @@
     sopsFile = "${self}/secrets/common/api-keys.yaml";
   };
 
-  wayland.windowManager.hyprland.settings = {
-    monitor = [
-      "DP-4, 3840x2160@60.00, 0x0, 1"
-      "eDP-1, preferred, 3840x0, 1.5"
-    ];
+  sops.secrets.deepseek_api_key = {
+    sopsFile = "${self}/secrets/common/api-keys.yaml";
+  };
 
-    device = {
-      name = "pixa3854:00-093a:0274-touchpad";
-      natural_scroll = true;
-    };
+  # Datadog API keys (used by opencode dd-log tool)
+  sops.secrets.dd_api_key = {
+    sopsFile = "${self}/secrets/common/datadog.yaml";
+  };
+  sops.secrets.dd_app_key = {
+    sopsFile = "${self}/secrets/common/datadog.yaml";
   };
 }

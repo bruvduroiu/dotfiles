@@ -1,6 +1,5 @@
 { config
 , pkgs
-, lib
 , ... 
 }:
 
@@ -22,31 +21,82 @@ in
     package = pkgs.opencode;
 
     settings = {
+      enabled_providers = [ "deepseek" "openrouter" ];
+      provider = {
+        deepseek = {
+          options = {
+            apiKey = "{file:${config.sops.secrets.deepseek_api_key.path}}";
+          };
+        };
+        openrouter = {
+          options = {
+            apiKey = "{file:${config.sops.secrets.openrouter_api_key.path}}";
+          };
+        };
+      };
+      plugin = [ "superpowers@git+https://github.com/obra/superpowers.git" ];
       autoshare = false;
-      autoupdate = false;
-      model = "openrouter/z-ai/glm-5.1";
+      autoupdate = true;
+      model = "deepseek/deepseek-v4-pro";
+      # TODO: Migrate to programs.opencode.tools when home-manager supports it
+      # tools = {
+      #   dd-log = ./tools/dd-log.ts;
+      # };
+      permission = {
+        "*" = "allow";
+        "skill" = {
+          "*" = "allow";
+        };
+        "bash" = {
+          "*" = "allow";
+          "touch *" = "ask";
+          "mkdir *" = "ask";
+          "rm *" = "ask";
+          "cp *" = "ask";
+          "mv *" = "ask";
+          "dd *" = "ask";
+          "sudo *" = "ask";
+          "chmod *" = "ask";
+          "chown *" = "ask";
+          "curl *" = "ask";
+          "wget *" = "ask";
+          "npm install *" = "ask";
+          "pip install *" = "ask";
+          "git push" = "ask";
+          "git reset --hard *" = "ask";
+          "git clean *" = "ask";
+          "reboot" = "ask";
+          "shutdown" = "ask";
+          "kill *" = "ask";
+          "killall *" = "ask";
+          "docker *" = "ask";
+          "mkfs *" = "ask";
+          "fdisk *" = "ask";
+          "parted *" = "ask";
+          "format *" = "ask";
+          "git branch -d *" = "ask";
+          "git branch -D *" = "ask";
+          "git rebase *" = "ask";
+          "npm run publish" = "ask";
+          "ssh *" = "ask";
+          "scp *" = "ask";
+          "nix *" = "ask";
+          "nixos-rebuild *" = "ask";
+        };
+        "doom_loop" = "ask";
+        "external_directory" = {
+          "/tmp/**" = "allow";
+        };
+      };
     };
 
     agents = {
       plan = ./agents/plan.md;
     };
+  };
 
-    # Waiting for home-manager to get these
-    # skills = {
-    #   superpowers-brainstorming = "${superpowersSrc}/skills/brainstorming";
-    #   superpowers-dispatching-parallel-agents = "${superpowersSrc}/skills/dispatching-parallel-agents";
-    #   superpowers-executing-plans = "${superpowersSrc}/skills/executing-plans";
-    #   superpowers-finishing-a-development-branch = "${superpowersSrc}/skills/finishing-a-development-branch";
-    #   superpowers-receiving-code-review = "${superpowersSrc}/skills/receiving-code-review";
-    #   superpowers-requesting-code-review = "${superpowersSrc}/skills/requesting-code-review";
-    #   superpowers-subagent-driven-development = "${superpowersSrc}/skills/subagent-driven-development";
-    #   superpowers-systematic-debugging = "${superpowersSrc}/skills/systematic-debugging";
-    #   superpowers-test-driven-development = "${superpowersSrc}/skills/test-driven-development";
-    #   superpowers-using-git-worktrees = "${superpowersSrc}/skills/using-git-worktrees";
-    #   superpowers-using-superpowers = "${superpowersSrc}/skills/using-superpowers";
-    #   superpowers-verification-before-completion = "${superpowersSrc}/skills/verification-before-completion";
-    #   superpowers-writing-plans = "${superpowersSrc}/skills/writing-plans";
-    #   superpowers-writing-skills = "${superpowersSrc}/skills/writing-skills";
-    # };
+  # TODO: Remove when programs.opencode.tools is available in home-manager
+  xdg.configFile = {
+    "opencode/tools/dd-log.ts".source = ./tools/dd-log.ts;
   };
 }

@@ -55,7 +55,7 @@ in {
       rounding = 0;
 
       shadow = {
-        enabled = true;
+        enabled = false;
         range = 4;
         render_power = 3;
         color = "rgba(00000055)";
@@ -63,7 +63,7 @@ in {
 
       # https://wiki.hyprland.org/Configuring/Variables/#blur
       blur = {
-        enabled = true;
+        enabled = false;
         size = 6;
         passes = 1;
         ignore_opacity = true;
@@ -76,7 +76,7 @@ in {
     };
 
     cursor = {
-      no_hardware_cursors = true;
+      no_hardware_cursors = false;
       hide_on_key_press = true;
     };
 
