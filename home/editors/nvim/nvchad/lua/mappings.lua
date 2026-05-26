@@ -1,7 +1,8 @@
 require("nvchad.mappings")
 
+
 -- Free <leader>h from NvChad's horizontal terminal so Harpoon can use it
-vim.keymap.del("n", "<leader>h")
+-- vim.keymap.del("n", "<leader>h") -- uncommented: use <leader>h for terminal
 
 local map = vim.keymap.set
 

@@ -112,9 +112,9 @@ return {
 			require("harpoon"):setup()
 		end,
 		keys = {
-			{ "<leader>a", function() require("harpoon"):list():add() end, desc = "Harpoon add" },
-			{ "<leader>h", function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, desc = "Harpoon menu" },
-			{ "<leader>H", function() require("harpoon"):list():clear() end, desc = "Harpoon clear all" },
+			{ "<leader>ha", function() require("harpoon"):list():add() end, desc = "Harpoon add" },
+			{ "<leader>hp", function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, desc = "Harpoon menu" },
+			{ "<leader>hH", function() require("harpoon"):list():clear() end, desc = "Harpoon clear all" },
 			{ "<leader>1", function() require("harpoon"):list():select(1) end, desc = "Harpoon 1" },
 			{ "<leader>2", function() require("harpoon"):list():select(2) end, desc = "Harpoon 2" },
 			{ "<leader>3", function() require("harpoon"):list():select(3) end, desc = "Harpoon 3" },
@@ -124,18 +124,16 @@ return {
 	{
 		"folke/trouble.nvim",
 		opts = {
-			auto_close = true,
-			auto_open = false,
+			auto_close = false,
+			auto_refresh = true,
+			auto_preview = false,
 			warn_no_results = false,
 			modes = {
-				lsp_document_symbols = {
-					win = { type = "split", relative = "win", position = "right", size = 0.30 },
-				},
 				diagnostics = {
-					win = { type = "split", relative = "win", position = "bottom", size = 0.30 },
+					auto_close = true, -- bottom panel closes when no diagnostics
 				},
+				lsp_document_symbols = {},
 				lsp = {
-					win = { type = "split", relative = "win", position = "bottom", size = 0.20 },
 					filter = {
 						any = {
 							ft = { "help", "markdown" },
@@ -147,9 +145,7 @@ return {
 						},
 					},
 				},
-				lsp_references = {
-					win = { type = "split", relative = "win", position = "bottom", size = 0.25 },
-				},
+				lsp_references = {},
 			},
 		},
 		cmd = "Trouble",
@@ -214,7 +210,11 @@ return {
 	{
 		"folke/edgy.nvim",
 		event = "VeryLazy",
-		enabled = false,
+		enabled = true,
+    init = function()
+      vim.opt.laststatus = 3
+      vim.opt.splitkeep = "screen"
+    end,
 		opts = require("configs.edgy"),
 	},
   {
@@ -236,18 +236,30 @@ return {
     -- Load early to enable filetype detection for Hugo templates
     lazy = false,
   },
-	{
-		"ThePrimeagen/99",
-		dependencies = { { "saghen/blink.compat", version = "2.*" } },
-		keys = {
-			{ "<leader>9v", function() require("99").visual() end, mode = "v", desc = "99 visual replace" },
-			{ "<leader>9x", function() require("99").stop_all_requests() end, mode = "n", desc = "99 stop all requests" },
-			{ "<leader>9s", function() require("99").search() end, mode = "n", desc = "99 search" },
-			{ "<leader>9m", function() require("99.extensions.telescope").select_model() end, mode = "n", desc = "99 select model" },
-			{ "<leader>9p", function() require("99.extensions.telescope").select_provider() end, mode = "n", desc = "99 select provider" },
-		},
-		config = function()
-			require("configs.99")
-		end,
-	},
+  {
+    "lewis6991/gitsigns.nvim",
+    -- NvChad includes gitsigns by default; override its opts
+    opts = require("configs.gitsigns"),
+  },
+  {
+    "nvim-neotest/neotest",
+    dependencies = {
+      "nvim-neotest/nvim-nio",
+      "nvim-lua/plenary.nvim",
+      "antoinemadec/FixCursorHold.nvim",
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-neotest/neotest-go",
+      "nvim-neotest/neotest-python",
+      "marilari88/neotest-vitest"
+    },
+    lazy = false,
+    config = function()
+      require("configs.neotest")()
+    end,
+  },
+  {
+    "kosayoda/nvim-lightbulb",
+    event = "LspAttach",
+    opts = require("configs.lightbulb"),
+  },
 }

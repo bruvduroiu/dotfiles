@@ -22,6 +22,9 @@
       # tools
       go
 
+      # test runner
+      python3Packages.pytest
+
       # nix
       nixfmt-rfc-style
       nil
