@@ -51,7 +51,6 @@ let
     ./services/brightnessctl.nix
     ./services/clamav.nix
     ./services/kanata
-    ./services/opensnitch.nix
     ./services/podman.nix
     ./services/restic.nix
     ./services/yubikey.nix
