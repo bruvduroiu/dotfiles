@@ -24,6 +24,10 @@
       #     "${pkgs.ungoogled-chromium}/bin/chromium"
       #   ];
       # };
+      datadog = {
+        type = "http";
+        url = "https://mcp.datadoghq.eu/api/unstable/mcp-server/mcp?toolsets=all";
+      };
       deepwiki = {
         type = "http";
         url = "https://mcp.deepwiki.com/mcp";

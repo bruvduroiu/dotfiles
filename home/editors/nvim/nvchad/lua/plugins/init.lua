@@ -61,7 +61,6 @@ return {
 		cmd = { "Git", "G", "Gdiffsplit", "Gvdiffsplit", "Gwrite", "Gread", "Ggrep", "GMove", "GDelete", "GBrowse", "Gstatus", "Gedit", "Glog" },
 		keys = {
 			{ "<leader>gs", "<cmd>vertical Git<cr>" },
-			{ "<leader>gb", "<cmd>Git blame<cr>" },
 			desc = "Open Fugitive",
 		},
 		dependencies = {
@@ -113,7 +112,7 @@ return {
 		end,
 		keys = {
 			{ "<leader>ha", function() require("harpoon"):list():add() end, desc = "Harpoon add" },
-			{ "<leader>hp", function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, desc = "Harpoon menu" },
+			{ "<leader>hm", function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, desc = "Harpoon menu" },
 			{ "<leader>hH", function() require("harpoon"):list():clear() end, desc = "Harpoon clear all" },
 			{ "<leader>1", function() require("harpoon"):list():select(1) end, desc = "Harpoon 1" },
 			{ "<leader>2", function() require("harpoon"):list():select(2) end, desc = "Harpoon 2" },

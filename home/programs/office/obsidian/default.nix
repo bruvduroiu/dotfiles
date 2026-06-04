@@ -46,6 +46,15 @@
           ];
         };
       };
+      Blog = {
+        enable = true;
+        target = "development/bruvduroiu/website/content";
+        settings = {
+          appearance = {
+            baseFontSize = lib.mkForce 16;
+          };
+        };
+      };
     };
 
     defaultSettings = {
