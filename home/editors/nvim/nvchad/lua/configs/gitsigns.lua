@@ -8,6 +8,11 @@ return {
     untracked = { text = "┆" },
   },
   signcolumn = true,
+  -- Open hunk qflist in the native quickfix (ft=qf → edgy bottom panel),
+  -- not Trouble. Gitsigns auto-enables this whenever trouble.nvim is installed
+  -- (defaults to pcall(require,'trouble')), which routed setqflist to the
+  -- right-side Trouble panel instead of the bottom qf rule in edgy.lua.
+  trouble = false,
   numhl = true,
   linehl = false,
   word_diff = false,
@@ -62,6 +67,10 @@ return {
       end
     end, { desc = "Previous hunk" })
 
+    -- Jump to first/last hunk in buffer (review sweeps)
+    map("n", "]G", function() gs.nav_hunk("last") end, { desc = "Last hunk" })
+    map("n", "[G", function() gs.nav_hunk("first") end, { desc = "First hunk" })
+
     -- Actions
     map("n", "<leader>gb", gs.blame, { desc = "Blame" })
     map("n", "<leader>hs", gs.stage_hunk, { desc = "Stage hunk" })
@@ -80,6 +89,11 @@ return {
     map("n", "<leader>hQ", function() gs.setqflist("all") end, { desc = "Hunks as qflist (all)" })
     map("n", "<leader>hq", gs.setqflist, { desc = "Hunks as qflist (buffer)" })
     map("n", "<leader>hu", gs.toggle_deleted, { desc = "Toggle deleted" })
+
+    -- Cross-file review: fuzzy hunk list across all dirty files
+    map("n", "<leader>hh", function()
+      require("configs.telescope").hunks_picker()
+    end, { desc = "All dirty hunks (telescope)" })
 
     -- Text object
     map({ "o", "x" }, "ih", gs.select_hunk, { desc = "Select hunk inner" })

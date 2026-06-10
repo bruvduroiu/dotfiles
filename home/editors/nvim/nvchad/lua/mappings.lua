@@ -21,3 +21,15 @@ map("n", "<leader>co", builtin.git_branches, { desc = "Git branches" })
 map("n", "<leader>fu", "<cmd>Telescope undo<cr>", { desc = "Undo tree" })
 map("n", "<leader>fr", builtin.resume, { desc = "Resume last picker" })
 map("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
+
+-- Code review: jump between dirty hunks across files
+local hunks_picker = require("configs.telescope").hunks_picker
+map("n", "<leader>gh", hunks_picker, { desc = "Git hunks vs HEAD" })
+map("n", "<leader>gH", function()
+  vim.ui.input({ prompt = "Review against base: ", default = "origin/HEAD" }, function(base)
+    if base and base ~= "" then
+      hunks_picker({ base = base })
+    end
+  end)
+end, { desc = "Git hunks vs base…" })
+map("n", "<leader>gf", builtin.git_status, { desc = "Changed files (git status)" })

@@ -91,6 +91,10 @@ ts.setup({
       },
     },
     git_branches = compact,
+    -- Big preview for reviewing changed files, but start hidden ('o' toggles it)
+    git_status = vim.tbl_extend("force", fullscreen, {
+      preview = { hide_on_startup = true },
+    }),
   },
   extensions = {
     undo = vim.tbl_extend("force", fullscreen, {
@@ -113,3 +117,104 @@ ts.setup({
 
 ts.load_extension("fzf")
 ts.load_extension("undo")
+
+-- ── Cross-file hunk picker ────────────────────────────────────────────────
+-- Flat, fuzzy-searchable list of every hunk dirty vs a base (default HEAD),
+-- with a diff previewer. Built by parsing `git diff` directly rather than
+-- gitsigns.get_hunks(), so it never races the async buffer attach and works
+-- on files that aren't open yet.
+local function parse_git_hunks(base)
+  base = base or "HEAD"
+  -- List form → no shell, so fish quoting can't interfere.
+  local lines = vim.fn.systemlist({ "git", "--no-pager", "diff", "--no-color", "-U3", base })
+  if vim.v.shell_error ~= 0 then
+    return {}
+  end
+
+  local results, cur_file, cur = {}, nil, nil
+  local function flush()
+    if cur then
+      table.insert(results, cur)
+      cur = nil
+    end
+  end
+
+  for _, line in ipairs(lines) do
+    if line:sub(1, 11) == "diff --git " then
+      flush() -- new file boundary: close out the previous file's last hunk
+    elseif line:sub(1, 6) == "+++ b/" then
+      local p = line:sub(7)
+      if p ~= "/dev/null" then
+        cur_file = p
+      end
+    elseif line:sub(1, 2) == "@@" then
+      flush()
+      local nstart = tonumber(line:match("^@@ %-%d+,?%d* %+(%d+)"))
+      cur = {
+        file = cur_file,
+        lnum = nstart or 1,
+        section = line:match("@@.-@@%s?(.*)") or "",
+        lines = { line },
+        adds = 0,
+        dels = 0,
+      }
+    elseif cur then
+      local c = line:sub(1, 1)
+      if c == "+" then
+        cur.adds = cur.adds + 1
+      elseif c == "-" then
+        cur.dels = cur.dels + 1
+      end
+      if c ~= "\\" then -- skip "\ No newline at end of file"
+        table.insert(cur.lines, line)
+      end
+    end
+  end
+  flush()
+  return results
+end
+
+local function hunks_picker(opts)
+  opts = opts or {}
+  local pickers = require("telescope.pickers")
+  local finders = require("telescope.finders")
+  local previewers = require("telescope.previewers")
+  local conf = require("telescope.config").values
+
+  local hunks = parse_git_hunks(opts.base)
+  if vim.tbl_isempty(hunks) then
+    vim.notify("No dirty hunks vs " .. (opts.base or "HEAD"), vim.log.levels.INFO)
+    return
+  end
+
+  pickers
+    .new(fullscreen, {
+      prompt_title = "Git Hunks (" .. (opts.base or "HEAD") .. ")",
+      finder = finders.new_table({
+        results = hunks,
+        entry_maker = function(e)
+          return {
+            value = e,
+            -- filename + lnum make the default select action jump straight to the hunk
+            filename = e.file,
+            lnum = e.lnum,
+            ordinal = e.file .. " " .. e.section,
+            display = string.format("%s:%d  +%d -%d  %s", e.file, e.lnum, e.adds, e.dels, e.section),
+          }
+        end,
+      }),
+      sorter = conf.generic_sorter({}),
+      previewer = previewers.new_buffer_previewer({
+        title = "Hunk Diff",
+        define_preview = function(self, entry)
+          vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, entry.value.lines)
+          vim.bo[self.state.bufnr].filetype = "diff"
+        end,
+      }),
+    })
+    :find()
+end
+
+return {
+  hunks_picker = hunks_picker,
+}

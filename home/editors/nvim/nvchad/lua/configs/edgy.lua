@@ -18,7 +18,7 @@ return {
 			end,
 		},
 		{ ft = "neotest-output-panel", size = { height = 0.3 } },
-		{ ft = "DiffviewFileHistory", size = { height = 0.3 } },
+		{ ft = "qf", title = "Quickfix", size = { height = 0.3 } },
 	},
 
 	right = {
