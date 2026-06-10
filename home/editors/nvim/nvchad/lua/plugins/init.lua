@@ -1,21 +1,21 @@
 return {
-  { "hrsh7th/nvim-cmp", enabled = false },
+	{ "hrsh7th/nvim-cmp", enabled = false },
 	{
 		"stevearc/conform.nvim",
 		event = "BufWritePre", -- uncomment for format on save
 		opts = require("configs.conform"),
 	},
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = {
-      { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-      "debugloop/telescope-undo.nvim",
-    },
-    config = function()
-      dofile(vim.g.base46_cache .. "telescope")
-      require("configs.telescope")
-    end,
-  },
+	{
+		"nvim-telescope/telescope.nvim",
+		dependencies = {
+			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+			"debugloop/telescope-undo.nvim",
+		},
+		config = function()
+			dofile(vim.g.base46_cache .. "telescope")
+			require("configs.telescope")
+		end,
+	},
 
 	-- These are some examples, uncomment them if you want to see them work!
 	{
@@ -59,7 +59,21 @@ return {
 	},
 	{
 		"tpope/vim-fugitive",
-		cmd = { "Git", "G", "Gdiffsplit", "Gvdiffsplit", "Gwrite", "Gread", "Ggrep", "GMove", "GDelete", "GBrowse", "Gstatus", "Gedit", "Glog" },
+		cmd = {
+			"Git",
+			"G",
+			"Gdiffsplit",
+			"Gvdiffsplit",
+			"Gwrite",
+			"Gread",
+			"Ggrep",
+			"GMove",
+			"GDelete",
+			"GBrowse",
+			"Gstatus",
+			"Gedit",
+			"Glog",
+		},
 		keys = {
 			{ "<leader>gs", "<cmd>vertical Git<cr>" },
 			desc = "Open Fugitive",
@@ -69,32 +83,6 @@ return {
 		},
 	},
 	"tpope/vim-rhubarb",
-	{
-		"sindrets/diffview.nvim",
-		dependencies = { "nvim-lua/plenary.nvim" },
-		cmd = {
-			"DiffviewOpen",
-			"DiffviewClose",
-			"DiffviewToggleFiles",
-			"DiffviewFocusFiles",
-			"DiffviewRefresh",
-			"DiffviewFileHistory",
-		},
-		keys = {
-			{ "<leader>gdd", "<cmd>DiffviewOpen<cr>", desc = "Review uncommitted (Changes + Staged)" },
-			{ "<leader>gdm", "<cmd>DiffviewOpen main...HEAD<cr>", desc = "Diff branch vs main" },
-			{ "<leader>gds", "<cmd>DiffviewOpen --staged<cr>", desc = "Diff staged changes" },
-			{ "<leader>gdh", "<cmd>DiffviewFileHistory --follow %<cr>", desc = "File history (current file)" },
-			{ "<leader>gdh", ":DiffviewFileHistory<cr>", mode = "x", desc = "History of selected lines" },
-			{ "<leader>gdH", "<cmd>DiffviewFileHistory<cr>", desc = "File history (branch/repo)" },
-			{ "<leader>gdb", "<cmd>DiffviewFileHistory --range=main..HEAD<cr>", desc = "Branch commits vs main" },
-			{ "<leader>gdc", "<cmd>DiffviewClose<cr>", desc = "Close diffview" },
-			{ "<leader>gdr", "<cmd>DiffviewRefresh<cr>", desc = "Refresh diffview" },
-		},
-		config = function()
-			require("diffview").setup(require("configs.diffview"))
-		end,
-	},
 	{
 		"nicolasgb/jj.nvim",
 		version = "*",
@@ -119,17 +107,17 @@ return {
 		},
 		opts = {
 			plugins = {
-        twilight = { enabled = false },
+				twilight = { enabled = false },
 			},
 		},
 	},
-  {
-    "folke/twilight.nvim",
-    keys = {
-      { "<leader>tz", "<cmd>Twilight<cr>", desc = "Toggle Twilight" },
-    },
-    opts = { }
-  },
+	{
+		"folke/twilight.nvim",
+		keys = {
+			{ "<leader>tz", "<cmd>Twilight<cr>", desc = "Toggle Twilight" },
+		},
+		opts = {},
+	},
 	{
 		"ThePrimeagen/harpoon",
 		branch = "harpoon2",
@@ -138,13 +126,55 @@ return {
 			require("harpoon"):setup()
 		end,
 		keys = {
-			{ "<leader>ha", function() require("harpoon"):list():add() end, desc = "Harpoon add" },
-			{ "<leader>hm", function() require("harpoon").ui:toggle_quick_menu(require("harpoon"):list()) end, desc = "Harpoon menu" },
-			{ "<leader>hH", function() require("harpoon"):list():clear() end, desc = "Harpoon clear all" },
-			{ "<leader>1", function() require("harpoon"):list():select(1) end, desc = "Harpoon 1" },
-			{ "<leader>2", function() require("harpoon"):list():select(2) end, desc = "Harpoon 2" },
-			{ "<leader>3", function() require("harpoon"):list():select(3) end, desc = "Harpoon 3" },
-			{ "<leader>4", function() require("harpoon"):list():select(4) end, desc = "Harpoon 4" },
+			{
+				"<leader>ha",
+				function()
+					require("harpoon"):list():add()
+				end,
+				desc = "Harpoon add",
+			},
+			{
+				"<leader>hm",
+				function()
+					require("harpoon").ui:toggle_quick_menu(require("harpoon"):list())
+				end,
+				desc = "Harpoon menu",
+			},
+			{
+				"<leader>hH",
+				function()
+					require("harpoon"):list():clear()
+				end,
+				desc = "Harpoon clear all",
+			},
+			{
+				"<leader>1",
+				function()
+					require("harpoon"):list():select(1)
+				end,
+				desc = "Harpoon 1",
+			},
+			{
+				"<leader>2",
+				function()
+					require("harpoon"):list():select(2)
+				end,
+				desc = "Harpoon 2",
+			},
+			{
+				"<leader>3",
+				function()
+					require("harpoon"):list():select(3)
+				end,
+				desc = "Harpoon 3",
+			},
+			{
+				"<leader>4",
+				function()
+					require("harpoon"):list():select(4)
+				end,
+				desc = "Harpoon 4",
+			},
 		},
 	},
 	{
@@ -164,9 +194,19 @@ return {
 						any = {
 							ft = { "help", "markdown" },
 							kind = {
-								"Class", "Constructor", "Enum", "Field", "Function",
-								"Interface", "Method", "Module", "Namespace", "Package",
-								"Property", "Struct", "Trait",
+								"Class",
+								"Constructor",
+								"Enum",
+								"Field",
+								"Function",
+								"Interface",
+								"Method",
+								"Module",
+								"Namespace",
+								"Package",
+								"Property",
+								"Struct",
+								"Trait",
 							},
 						},
 					},
@@ -208,10 +248,10 @@ return {
 				lsp_doc_border = true, -- add a border to hover docs and signature help
 			},
 		},
-    dependencies = {
-      "MunifTanjim/nui.nvim",
-      { "rcarriga/nvim-notify", opts = { background_colour = "#000000" } },
-    }
+		dependencies = {
+			"MunifTanjim/nui.nvim",
+			{ "rcarriga/nvim-notify", opts = { background_colour = "#000000" } },
+		},
 	},
 	{
 		"gfontenot/vim-xcode",
@@ -237,55 +277,55 @@ return {
 		"folke/edgy.nvim",
 		event = "VeryLazy",
 		enabled = true,
-    init = function()
-      vim.opt.laststatus = 3
-      vim.opt.splitkeep = "screen"
-    end,
+		init = function()
+			vim.opt.laststatus = 3
+			vim.opt.splitkeep = "screen"
+		end,
 		opts = require("configs.edgy"),
 	},
-  {
-    "saghen/blink.cmp",
-    dependencies = { "rafamadriz/friendly-snippets" },
-    event = "VeryLazy",
-    version = "*",
-    opts = require("configs.blink"),
-  },
-  {
-    "cuducos/yaml.nvim",
-    ft = { "yaml" },
-    dependencies = {
-      "nvim-telescope/telescope.nvim",
-    },
-  },
-  {
-    "phelipetls/vim-hugo",
-    -- Load early to enable filetype detection for Hugo templates
-    lazy = false,
-  },
-  {
-    "lewis6991/gitsigns.nvim",
-    -- NvChad includes gitsigns by default; override its opts
-    opts = require("configs.gitsigns"),
-  },
-  {
-    "nvim-neotest/neotest",
-    dependencies = {
-      "nvim-neotest/nvim-nio",
-      "nvim-lua/plenary.nvim",
-      "antoinemadec/FixCursorHold.nvim",
-      "nvim-treesitter/nvim-treesitter",
-      "nvim-neotest/neotest-go",
-      "nvim-neotest/neotest-python",
-      "marilari88/neotest-vitest"
-    },
-    lazy = false,
-    config = function()
-      require("configs.neotest")()
-    end,
-  },
-  {
-    "kosayoda/nvim-lightbulb",
-    event = "LspAttach",
-    opts = require("configs.lightbulb"),
-  },
+	{
+		"saghen/blink.cmp",
+		dependencies = { "rafamadriz/friendly-snippets" },
+		event = "VeryLazy",
+		version = "*",
+		opts = require("configs.blink"),
+	},
+	{
+		"cuducos/yaml.nvim",
+		ft = { "yaml" },
+		dependencies = {
+			"nvim-telescope/telescope.nvim",
+		},
+	},
+	{
+		"phelipetls/vim-hugo",
+		-- Load early to enable filetype detection for Hugo templates
+		lazy = false,
+	},
+	{
+		"lewis6991/gitsigns.nvim",
+		-- NvChad includes gitsigns by default; override its opts
+		opts = require("configs.gitsigns"),
+	},
+	{
+		"nvim-neotest/neotest",
+		dependencies = {
+			"nvim-neotest/nvim-nio",
+			"nvim-lua/plenary.nvim",
+			"antoinemadec/FixCursorHold.nvim",
+			"nvim-treesitter/nvim-treesitter",
+			"nvim-neotest/neotest-go",
+			"nvim-neotest/neotest-python",
+			"marilari88/neotest-vitest",
+		},
+		lazy = false,
+		config = function()
+			require("configs.neotest")()
+		end,
+	},
+	{
+		"kosayoda/nvim-lightbulb",
+		event = "LspAttach",
+		opts = require("configs.lightbulb"),
+	},
 }
