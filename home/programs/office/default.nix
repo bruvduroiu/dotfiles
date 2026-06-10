@@ -12,7 +12,6 @@
     invoice
     libreoffice
     onlyoffice-desktopeditors
-    papers
     gnucash
     gimp
     pinta

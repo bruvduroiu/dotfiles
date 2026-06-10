@@ -3,27 +3,40 @@
   stdenv,
   fetchurl,
   autoPatchelfHook,
+  makeWrapper,
+  # Language servers spawned from $PATH by the *-lsp Claude Code plugins.
+  # The plugins ship no binaries of their own — they shell out to these.
+  nodejs,
+  typescript,
+  typescript-language-server,
+  gopls,
+  go,
+  pyright,
 }:
 let
-  version = "2.1.33";
+  version = "2.1.170";
+
+  # Servers the typescript-lsp / gopls-lsp / pyright-lsp plugins expect on PATH.
+  # nodejs backs the JS-based servers; `typescript` provides tsserver; `go`
+  # lets gopls run `go list` for full analysis.
+  lspServers = [
+    typescript-language-server
+    typescript
+    gopls
+    go
+    pyright
+    nodejs
+  ];
 
   # Platform-specific binary info from manifest.json
   platforms = {
     "x86_64-linux" = {
       platform = "linux-x64";
-      hash = "sha256-yGVZMfNf6WPPACqnuiwhSXCFB0i/HaUkD5eUDC/Yg1w=";
+      hash = "sha256-hJ4AcnegRCqydXDT49bUN4dQeUZZDo3RlH5aObcIH54=";
     };
     "aarch64-linux" = {
       platform = "linux-arm64";
-      hash = "sha256-fvYn5nAuCFXQD0TvmBjyPguWVks+lBc/LsJE/PZZkHs=";
-    };
-    "x86_64-darwin" = {
-      platform = "darwin-x64";
-      hash = "sha256-6BkBKtcIhUx4e1Pi8pF/IJASHyMyelDuiVDugo++rhg=";
-    };
-    "aarch64-darwin" = {
-      platform = "darwin-arm64";
-      hash = "sha256-QWegdXiZqUumCrfYFfaHSi27cJntuBjq9bRE7R9BLt0=";
+      hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     };
   };
 
@@ -42,8 +55,9 @@ stdenv.mkDerivation {
   # Don't try to unpack - it's a single binary
   dontUnpack = true;
 
-  # Linux needs autoPatchelfHook to fix the interpreter
-  nativeBuildInputs = lib.optionals stdenv.isLinux [ autoPatchelfHook ];
+  # Linux needs autoPatchelfHook to fix the interpreter;
+  # makeWrapper puts the LSP servers on claude's PATH.
+  nativeBuildInputs = [ makeWrapper ] ++ lib.optionals stdenv.isLinux [ autoPatchelfHook ];
 
   # autoPatchelfHook needs these for dynamic linking
   buildInputs = lib.optionals stdenv.isLinux [
@@ -56,6 +70,13 @@ stdenv.mkDerivation {
     install -D -m755 $src $out/bin/claude
 
     runHook postInstall
+  '';
+
+  # Suffix the language servers so a project-local copy still takes precedence,
+  # but Claude Code's *-lsp plugins always find a server to spawn.
+  postInstall = ''
+    wrapProgram $out/bin/claude \
+      --suffix PATH : ${lib.makeBinPath lspServers}
   '';
 
   # Skip fixup phases that don't apply to pre-built binaries

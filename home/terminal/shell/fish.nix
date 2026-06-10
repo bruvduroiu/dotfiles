@@ -21,7 +21,6 @@ in
         end
         if test -f ${config.sops.secrets.deepseek_api_key.path}
           set -gx DEEPSEEK_API_KEY (cat ${config.sops.secrets.deepseek_api_key.path})
-          set -gx ANTHROPIC_AUTH_TOKEN (cat ${config.sops.secrets.deepseek_api_key.path})
         end
       '';
       interactiveShellInit = ''
