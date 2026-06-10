@@ -1,6 +1,10 @@
 local configs = require("nvchad.configs.lspconfig")
 configs.defaults()
 
+-- Noice has lsp.signature.enabled = false, so signature_help uses the default
+-- vim.lsp handler. focusable = false is REQUIRED: without it the cursor jumps
+-- into the floating signature window on trigger. The :checkhealth noice warning
+-- "signature_help is not configured to be handled by Noice" is expected here.
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
 	focusable = false,
 	silent = true,

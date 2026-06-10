@@ -37,6 +37,7 @@ return {
 				"python",
 				"typescript",
 				"go",
+				"zig",
 				"terraform",
 				"markdown",
 				"markdown_inline",
@@ -68,6 +69,32 @@ return {
 		},
 	},
 	"tpope/vim-rhubarb",
+	{
+		"sindrets/diffview.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		cmd = {
+			"DiffviewOpen",
+			"DiffviewClose",
+			"DiffviewToggleFiles",
+			"DiffviewFocusFiles",
+			"DiffviewRefresh",
+			"DiffviewFileHistory",
+		},
+		keys = {
+			{ "<leader>gdd", "<cmd>DiffviewOpen<cr>", desc = "Review uncommitted (Changes + Staged)" },
+			{ "<leader>gdm", "<cmd>DiffviewOpen main...HEAD<cr>", desc = "Diff branch vs main" },
+			{ "<leader>gds", "<cmd>DiffviewOpen --staged<cr>", desc = "Diff staged changes" },
+			{ "<leader>gdh", "<cmd>DiffviewFileHistory --follow %<cr>", desc = "File history (current file)" },
+			{ "<leader>gdh", ":DiffviewFileHistory<cr>", mode = "x", desc = "History of selected lines" },
+			{ "<leader>gdH", "<cmd>DiffviewFileHistory<cr>", desc = "File history (branch/repo)" },
+			{ "<leader>gdb", "<cmd>DiffviewFileHistory --range=main..HEAD<cr>", desc = "Branch commits vs main" },
+			{ "<leader>gdc", "<cmd>DiffviewClose<cr>", desc = "Close diffview" },
+			{ "<leader>gdr", "<cmd>DiffviewRefresh<cr>", desc = "Refresh diffview" },
+		},
+		config = function()
+			require("diffview").setup(require("configs.diffview"))
+		end,
+	},
 	{
 		"nicolasgb/jj.nvim",
 		version = "*",

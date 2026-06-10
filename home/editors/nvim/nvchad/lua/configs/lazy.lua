@@ -4,6 +4,10 @@ return {
 
   lockfile = vim.fn.stdpath("data") .. "/lazy-lock.json",
 
+  -- NixOS can't run lazy's hererocks/luarocks installer (sandboxed store);
+  -- no plugins here need it, so disable to silence the healthcheck error.
+  rocks = { enabled = false },
+
   ui = {
     icons = {
       ft = "",

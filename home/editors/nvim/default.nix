@@ -29,6 +29,10 @@
       nixfmt-rfc-style
       nil
 
+      # lua (lua_ls is enabled by NvChad defaults)
+      lua-language-server
+      stylua
+
       # ts
       prettierd
 
