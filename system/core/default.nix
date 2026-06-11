@@ -55,6 +55,11 @@
             DarkTheme = "rose-pine-moon";
             UseDarkTheme = true;
           };
+          # Layout override only works on KDE/GNOME; on Hyprland it just
+          # triggers the "Wayland Diagnose" notification at boot. Layouts
+          # already match manually (kb_layout above).
+          addons.wayland.globalSection."Allow Overriding System XKB Settings" =
+            "False";
         };
 
         # Leaves QT_IM_MODULE/GTK_IM_MODULE unset so Qt apps use native
