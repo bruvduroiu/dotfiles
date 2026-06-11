@@ -16,20 +16,27 @@ in {
     env = [
       "HYPRCURSOR_THEME,rose-pine-hyprcursor"
       "HYPRCURSOR_SIZE,${toString 24}"
-      "GRIMBLAST_NO_CURSOR,1"
     ];
 
     exec-once = [
       # Finalize startup
       "uwsm finalize"
-      "walker --gapplication-service"
-      "nm-applet --indicator"
-      "waybar"
-      "wl-paste --type text --watch cliphist store"
-      "wl-paste --type image --watch cliphist store"
+      # walker is NOT started here: home-manager's walker.service owns it.
+      # Launching it from exec-once too races the unit for the GApplication
+      # dbus name and crash-loops whichever loses.
+      # No nm-applet / tray applets: waybar has no tray module; network is
+      # handled via the network module (click -> nmtui).
+      "uwsm app -- waybar"
+      "uwsm app -- wl-paste --type text --watch cliphist store"
+      "uwsm app -- wl-paste --type image --watch cliphist store"
       "hyprlock"
-      "mako"
+      "uwsm app -- mako"
       "fcitx5 -d --replace"
+
+      # boot straight into the ws1 notes layout (rules give firefox 0.667 /
+      # obsidian 0.333 columns); silent = no focus steal during startup
+      "[workspace 1 silent] uwsm app -- firefox"
+      "[workspace 1 silent] uwsm app -- obsidian -disable-gpu"
     ];
 
     general = {
@@ -93,7 +100,9 @@ in {
     dwindle = {
       preserve_split = true;
       force_split = 2;
-      smart_split = true;
+      # smart_split picks split direction from cursor position, overriding
+      # force_split — mouse-dependent, so off for deterministic keyboard use
+      smart_split = false;
     };
 
     scrolling = {
@@ -111,9 +120,15 @@ in {
 
     misc = {
       force_default_wallpaper = 0;
+
+      # window swallowing: GUI launched from terminal replaces it until closed
+      enable_swallow = true;
+      swallow_regex = "^(com.mitchellh.ghostty)$";
     };
 
     input = {
+      # must match the fcitx input-method group (it can't push layouts to
+      # wlroots compositors — both sides must agree)
       kb_layout = "us";
 
       follow_mouse = 1;
@@ -150,6 +165,8 @@ in {
 
     binds = {
       window_direction_monitor_fallback = false;
+      # makes "workspace previous" a true back-and-forth toggle
+      allow_workspace_cycles = true;
     };
 
     animations = {

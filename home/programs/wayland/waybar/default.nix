@@ -55,15 +55,36 @@ in {
       #wireplumber,
       #custom-media,
       #custom-gpu,
-      #tray,
+      #custom-dnd,
+      #custom-fcitx,
       #mode,
       #idle_inhibitor,
       #scratchpad,
       #power-profiles-daemon,
       #language,
+      #window,
       #mpd {
         padding: 0 10px;
         border-radius: 15px;
+      }
+
+      #submap {
+        padding: 0 10px;
+        border-radius: 15px;
+        color: @color9;
+        font-style: italic;
+      }
+
+      #custom-dnd.dnd {
+        color: @color9;
+      }
+
+      #custom-fcitx.zh {
+        color: @color9;
+      }
+
+      #idle_inhibitor.activated {
+        color: @color9;
       }
 
       #clock:hover,
@@ -78,7 +99,6 @@ in {
       #wireplumber:hover,
       #custom-media:hover,
       #custom-gpu:hover,
-      #tray:hover,
       #mode:hover,
       #idle_inhibitor:hover,
       #scratchpad:hover,
@@ -133,19 +153,23 @@ in {
       height = 24;
       spacing = 5;
       margin = "0";
-      modules-left = ["clock" "custom/timew" "custom/playerctl"];
-      modules-center = ["hyprland/workspaces"];
-      modules-right = ["pulseaudio" "battery" "network" "group/hardware" "custom/gpu" "temperature" "tray" "privacy"];
+      modules-left = ["clock" "custom/timew" "custom/playerctl" "hyprland/window"];
+      modules-center = ["hyprland/submap" "hyprland/workspaces"];
+      modules-right = ["custom/fcitx" "pulseaudio" "battery" "power-profiles-daemon" "network" "group/hardware" "custom/gpu" "temperature" "idle_inhibitor" "custom/dnd" "privacy"];
       "hyprland/workspaces" = {
         format = "{icon}";
         format-icons = {
           "active" = "";
           "default" = "";
           "empty" = "";
+          # named special workspaces (waybar strips the "special:" prefix)
+          "chat" = "󰍩";
+          "work" = "󰒋";
         };
         on-click = "activate";
         icon-size = 10;
         sort-by-number= true;
+        show-special = true;
         persistent-workspaces = {
           "1" = [];
           "2" = [];
@@ -157,6 +181,33 @@ in {
 
       "hyprland/language" = {
         format = "{short}";
+      };
+
+      # visible only while a submap (resize/launch/place) is active
+      "hyprland/submap" = {
+        format = "󰌌 {}";
+        tooltip = false;
+      };
+
+      "hyprland/window" = {
+        format = "{title}";
+        max-length = 40;
+        separate-outputs = true;
+        rewrite = {
+          "(.*) — Mozilla Firefox" = "󰈹 $1";
+          "(.*) - Obsidian(.*)" = "󰠮 $1";
+        };
+      };
+
+      # mako do-not-disturb indicator; refreshed via RTMIN+9 from the toggle bind
+      "custom/dnd" = {
+        format = "{}";
+        return-type = "json";
+        exec = "makoctl mode | grep -qx dnd && printf '{\"text\":\"󰂛\",\"tooltip\":\"do not disturb\",\"class\":\"dnd\"}' || printf '{\"text\":\"󰂚\",\"tooltip\":\"notifications on\"}'";
+        interval = "once";
+        signal = 9;
+        on-click = "makoctl mode -t dnd; pkill -RTMIN+9 waybar";
+        on-click-right = "mako-history-menu";
       };
 
       "hyprland/mode" = {
@@ -293,19 +344,24 @@ in {
         on-click = "ghostty -e sudo nmtui";
       };
 
-      bluetooth = {
-        format = "\udb80\udcaf";
-        format-disabled = "\udb80\udcb2";
-        format-connected = "\udb80\udcb1";
-        tooltip-format = "{controller_alias}\t{controller_address}";
-        tooltip-format-connected = "{controller_alias}\t{controller_address}\n\n{device_enumerate}";
-        tooltip-format-enumerate-connected = "{device_alias}\t{device_address}";
+      power-profiles-daemon = {
+        format = "{icon}";
+        tooltip-format = "Power profile: {profile}\nDriver: {driver}";
+        tooltip = true;
+        format-icons = {
+          default = "󰗑";
+          performance = "󰓅";
+          balanced = "󰾅";
+          power-saver = "󰾆";
+        };
       };
 
       pulseaudio = {
         format = "{icon} {volume}%";
-        format-bluetooth = "󰂰 {volume}%";
-        format-bluetooth-muted = "󰂲 {icon}";
+        # no BT-specific look — the bluetooth module is the single
+        # bluetooth item (battery + bluetui); this one only does volume
+        format-bluetooth = "{icon} {volume}%";
+        format-bluetooth-muted = "󰝟";
         format-muted = "󰝟";
         format-icons = {
           headphone = "󰋋";
@@ -341,12 +397,6 @@ in {
         format = "󰋊 {percentage_used}%";
         path = "/";
         on-click = "ghostty -e gdu /";
-      };
-
-      tray = {
-        icon-size = 16;
-        spacing = 16;
-        show-passive-items = false;
       };
 
       privacy = {

@@ -32,13 +32,22 @@
         ];
 
         settings = {
+          globalOptions = {
+            # Per-program IM state: chat apps stay in chewing, terminals stay
+            # in English — switching focus doesn't drag the mode along.
+            Behavior.ShareInputState = "Program";
+          };
+
           inputMethod = {
             GroupOrder."0" = "Default";
             "Groups/0" = {
               Name = "Default";
-              "Default Layout" = "gb";
+              # Must match hyprland's input:kb_layout — fcitx can't push
+              # layouts to wlroots compositors, matching bypasses its key
+              # conversion (see fcitx wiki: Using Fcitx 5 on Wayland).
+              "Default Layout" = "us";
             };
-            "Groups/0/Items/0".Name = "keyboard-gb";
+            "Groups/0/Items/0".Name = "keyboard-us";
             "Groups/0/Items/1".Name = "chewing";
           };
           addons.classicui.globalSection = {
@@ -48,8 +57,12 @@
           };
         };
 
-        # waylandFrontend = true;
-
+        # Leaves QT_IM_MODULE/GTK_IM_MODULE unset so Qt apps use native
+        # wayland text-input-v3 and fcitx5 draws candidates server-side.
+        # With QT_IM_MODULE=fcitx, the in-process fcitx5-qt plugin segfaults
+        # Qt apps (FcitxCandidateWindow ctor) — killed Telegram on launch and
+        # hyprland-share-picker. GTK apps keep the dbus module via gtk.nix.
+        waylandFrontend = true;
       };
     };
   };

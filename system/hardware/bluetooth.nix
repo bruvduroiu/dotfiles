@@ -3,6 +3,9 @@
     hardware.bluetooth = {
       enable = true;
       powerOnBoot = true;
+      # battery reporting over GATT/HFP — waybar's
+      # format-connected-battery reads this
+      settings.General.Experimental = true;
       input = {
         General = {
           UserspaceHID = true;

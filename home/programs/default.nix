@@ -8,9 +8,7 @@
     ./hister.nix
     ./development.nix
     ./media
-    ./media/rss
     ./media/audacious
+    ./media/newsboat
   ];
-
-  programs.rssguard.enable = true;
 }

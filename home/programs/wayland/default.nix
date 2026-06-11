@@ -10,11 +10,16 @@
   ];
 
   home.packages = with pkgs; [
-    # screenshot
+    # screenshot: grim captures, satty annotates (wayland-native — no
+    # fractional-scale jank like flameshot's Qt overlay)
     grim
     slurp
+    satty
 
     wl-clipboard
+
+    # bluetooth TUI, opened from waybar's bluetooth module
+    bluetui
   ];
 
   home.sessionVariables = {

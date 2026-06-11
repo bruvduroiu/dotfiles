@@ -1,3 +1,5 @@
+{ lib, ... }:
+
 let
   workspaces = builtins.concatLists (builtins.genList (
     x: let
@@ -8,11 +10,18 @@ let
     in [
       "$mod, ${ws}, workspace, ${toString (x + 1)}"
       "$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
+      "$mod CTRL, ${ws}, movetoworkspacesilent, ${toString (x + 1)}"
     ]
   )
   10);
 
-  runOnce = program: "pgrep ${program} || uwsm app -- ${program}";
+  # vim-style window marks: one bind pair per letter inside the submaps
+  markLetters = lib.stringToCharacters "abcdefghijklmnopqrstuvwxyz";
+  markBinds = action:
+    lib.concatMapStrings (l: ''
+      bind=,${l},exec,hypr-mark ${action} ${l}
+      bind=,${l},submap,reset
+    '') markLetters;
 in {
   programs.hyprland.settings = {
     bindm = [
@@ -55,13 +64,28 @@ in {
       "$mod, SPACE, exec, $menu"
       "$mod Control, Q, exec, hyprlock"
 
+      # walker providers
+      "$mod CTRL, V, exec, walker -m clipboard"
+      "$mod, W, exec, walker -m windows"
+      "$mod CTRL, period, exec, walker -m symbols"
+      "$mod CTRL, N, exec, walker -m todo"
+
+      # keybind cheatsheet (live from hyprctl, never stale)
+      "$mod, slash, exec, hypr-binds-menu"
+
+      # notifications: do-not-disturb toggle + history control centre
+      "$mod SHIFT, D, exec, makoctl mode -t dnd; pkill -RTMIN+9 waybar"
+      "$mod CTRL, D, exec, mako-history-menu"
+
       # move focus (h/l directional, j/k sequential — works in monocle)
       "$mod, h, movefocus, l"
       "$mod, l, movefocus, r"
       "$mod, k, movefocus, u"
       "$mod, j, movefocus, d"
-      "$mod, TAB, layoutmsg, cyclenext"
-      "$mod SHIFT, TAB, layoutmsg, cycleprev"
+
+      # cycle windows in any layout ($mod TAB is reserved for group navigation)
+      "ALT, TAB, cyclenext,"
+      "ALT SHIFT, TAB, cyclenext, prev"
 
       # move window or group (swap tiled, merge/unmerge groups)
       "$mod SHIFT, h, movewindoworgroup, l"
@@ -72,6 +96,7 @@ in {
       # cycle workspaces
       "$mod, bracketleft, workspace, m-1"
       "$mod, bracketright, workspace, m+1"
+      "$mod, ESCAPE, workspace, previous"
 
       # cycle monitors
       "$mod SHIFT, bracketleft, focusmonitor, l"
@@ -100,24 +125,21 @@ in {
       # theme toggle
       "$mod, F5, exec, theme-switch"
 
-      # screenshot
-      # area
-      "SHIFT, Print, exec, ${runOnce "grimblast"} --notify copysave area"
-      # screen
-      ", Print, exec, ${runOnce "grimblast"} --notify copysave screen"
+      # screenshot (grim+satty; copy in the editor also saves)
+      # area, with annotation editor
+      "SHIFT, Print, exec, screenshot area"
+      # full screen straight to clipboard + file
+      ", Print, exec, screenshot full"
 
       # screen recording (toggle)
       "$mod, Print, exec, wf-recorder-toggle"
       "$mod SHIFT, Print, exec, wf-recorder-toggle area"
 
-      # special workspace
-      "$mod, grave, togglespecialworkspace, term"
-      "$mod SHIFT, grave, movetoworkspace, special:term"
-      
-      "$mod, N, togglespecialworkspace, notes"  # Quick notes/obsidian
-      "$mod SHIFT, N, movetoworkspace, special:notes"
+      # special workspaces
 
-      "$mod, M, togglespecialworkspace, chat"
+      # chat centre: spawns telegram+signal on first use ($mod N freed —
+      # notes/obsidian live on workspace 1 now)
+      "$mod, M, exec, chat-toggle"
       "$mod SHIFT, M, movetoworkspace, special:chat"
 
       "$mod, B, togglespecialworkspace, work"
@@ -171,10 +193,11 @@ in {
 
     bind=,A,exec,$webapp https://openrouter.ai/chat
     bind=,B,exec,$browser
-    bind=,C,exec,$webapp https://app.hey.com/calendar/weeks/"
+    bind=,C,exec,$webapp https://app.hey.com/calendar/weeks/
     bind=,D,exec,$terminal -e lazydocker
     bind=,E,exec,$webapp https://app.hey.com
     bind=,O,exec, uwsm app -- obsidian -disable-gpu
+    bind=,R,exec,$terminal -e newsboat
     bind=,slash,exec, uwsm app -- keepassxc
 
     bind=,escape,submap,reset
@@ -186,6 +209,7 @@ in {
     bind=,D,submap,reset
     bind=,E,submap,reset
     bind=,O,submap,reset
+    bind=,R,submap,reset
     bind=,slash,submap,reset
 
     # will reset the submap, meaning end the current one and return to the global one
@@ -226,6 +250,19 @@ in {
     bind=,escape,submap,reset
     bind=,RETURN,submap,reset
 
+    submap=reset
+
+    # vim-style window marks: $mod N <letter> sets, $mod ' <letter> jumps
+    bind=$mod,N,submap,mark
+    submap=mark
+    ${markBinds "set"}
+    bind=,escape,submap,reset
+    submap=reset
+
+    bind=$mod,apostrophe,submap,jump
+    submap=jump
+    ${markBinds "jump"}
+    bind=,escape,submap,reset
     submap=reset
   '';
 }

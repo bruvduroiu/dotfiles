@@ -18,9 +18,16 @@
         margin = 10;
         outer-margin = 20;
         max-icon-size = 32;
+        # history pool consumed by mako-history-menu ($mod CTRL D)
+        max-history = 100;
 
         "urgency=critical" = {
           default-timeout = 0;
+        };
+
+        # do-not-disturb: toggled via `makoctl mode -t dnd` (bind + waybar)
+        "mode=dnd" = {
+          invisible = 1;
         };
       };
     };

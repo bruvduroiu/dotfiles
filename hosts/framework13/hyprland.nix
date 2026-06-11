@@ -12,6 +12,16 @@
       "eDP-1, preferred, 3840x0, 1.3333, vrr, 1"
     ];
 
+    # Deep work on the external 4K, comms/overflow on the laptop panel.
+    # Hyprland reassigns automatically when DP-4 is unplugged.
+    workspace = [
+      "1, monitor:DP-4, default:true"
+      "2, monitor:DP-4"
+      "3, monitor:DP-4"
+      "4, monitor:eDP-1, default:true"
+      "5, monitor:eDP-1"
+    ];
+
     "device[pixa3854:00-093a:0274-touchpad]" = {
       accel_profile = "custom ${accelpoints}";
       scroll_points = accelpoints;
