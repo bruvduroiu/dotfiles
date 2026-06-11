@@ -4,10 +4,10 @@ return {
 
 	left = {
 		-- nvim-tree auto-detected by edgy
-		{ ft = "NvimTree", size = { height = 0.5, width = 0.2 } },
-		{ ft = "fugitive", size = { width = 0.2 } },
-		{ ft = "gitcommit", size = { width = 0.2 } },
-		{ ft = "DiffviewFiles", size = { width = 0.2 } },
+		{ ft = "NvimTree", size = { height = 0.5, width = 0.3 } },
+		{ ft = "fugitive", size = { width = 0.3 } },
+		{ ft = "gitcommit", size = { width = 0.3 } },
+		{ ft = "trouble", size = { width = 0.3 } },
 	},
 	bottom = {
 		{
@@ -22,7 +22,12 @@ return {
 	},
 
 	right = {
-		{ ft = "trouble", size = { width = 0.2 } },
-		{ ft = "neotest-summary", size = { width = 0.2 } },
+		{ ft = "neotest-summary", size = { width = 0.3 } },
+	},
+
+	options = {
+		left = { size = 35 },
+		bottom = { size = 20 },
+		right = { size = 35 },
 	},
 }
