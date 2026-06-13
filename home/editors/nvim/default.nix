@@ -22,6 +22,9 @@
       # tools
       go
 
+      # image.nvim — inline images in markdown via Ghostty's kitty graphics
+      imagemagick
+
       # test runner
       python3Packages.pytest
 
@@ -39,6 +42,10 @@
       # html template formatters
       djlint
     ];
+
+    # magick LuaRock — image.nvim's ImageMagick binding, placed on nvim's
+    # luajit package.path (avoids lazy.nvim's runtime luarocks bootstrap)
+    extraLuaPackages = ps: [ ps.magick ];
   };
 
   home.file."${config.xdg.configHome}/nvim" = {

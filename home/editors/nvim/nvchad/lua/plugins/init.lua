@@ -274,6 +274,33 @@ return {
 	},
 
 	{
+		-- inline images in markdown buffers (e.g. newsboat ,f full-text view).
+		-- Ghostty implements the kitty graphics protocol, so use that backend.
+		"3rd/image.nvim",
+		ft = { "markdown" },
+		opts = {
+			backend = "kitty",
+			processor = "magick_rock",
+			integrations = {
+				markdown = {
+					enabled = true,
+					-- render only the image on the cursor's line — one at a
+					-- time, so a stack of images never overlaps the text
+					only_render_image_at_cursor = true,
+					download_remote_images = true,
+				},
+			},
+			-- bound height so image.nvim reserves the same number of rows it
+			-- renders (mismatch is what makes images overlap the alt text)
+			max_width_window_percentage = 80,
+			max_height_window_percentage = 50,
+			-- repaint when other windows overlap, so scroll/wrap don't leave
+			-- the image stamped over text
+			window_overlap_clear_enabled = true,
+		},
+	},
+
+	{
 		"folke/edgy.nvim",
 		event = "VeryLazy",
 		enabled = true,
