@@ -22,6 +22,10 @@ in {
   # SOPS secrets configuration for Syncthing GUI authentication
   sops = {
     age.keyFile = "/home/bogdan/.config/sops/age/keys.txt";
+    # YubiKey is the sole recipient now; the activation service runs with a
+    # minimal PATH, so the plugin binary must be injected explicitly or the
+    # AGE-PLUGIN-YUBIKEY identity in keys.txt can't be resolved.
+    age.plugins = [ pkgs.age-plugin-yubikey ];
     secrets = {
       syncthing_gui_password = {
         sopsFile = secretsFile;

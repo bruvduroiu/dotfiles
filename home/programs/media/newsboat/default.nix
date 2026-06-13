@@ -16,7 +16,6 @@
     auto-reload yes
     reload-time 30
     reload-threads 8
-    prefetch-articles yes
     show-read-feeds no
     cleanup-on-quit yes
     datetime-format "%Y-%m-%d"

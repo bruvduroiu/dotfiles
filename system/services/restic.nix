@@ -56,6 +56,17 @@ in {
     };
   };
 
+  # The backup prepare/cleanup hooks run as the restic user but must pause
+  # bogdan's syncthing; allow exactly those two commands without password
+  security.sudo.extraRules = [{
+    users = [ "restic" ];
+    runAs = "bogdan";
+    commands = [
+      { command = "${pkgs.syncthing}/bin/syncthing cli operations pause"; options = [ "NOPASSWD" ]; }
+      { command = "${pkgs.syncthing}/bin/syncthing cli operations resume"; options = [ "NOPASSWD" ]; }
+    ];
+  }];
+
   # Restic backup configuration
   services.restic.backups.hetzner = {
     # Run as restic user with security wrapper
@@ -67,7 +78,7 @@ in {
     passwordFile = config.sops.secrets.restic_password.path;
 
     # Initialize repository if it doesn't exist
-    initialize = true;
+    initialize = false;
 
     # Paths to back up
     paths = [
@@ -114,12 +125,13 @@ in {
     # Syncthing runs as user bogdan via home-manager, so we use sudo
     backupPrepareCommand = ''
       # Pause Syncthing to ensure file consistency
-      ${pkgs.sudo}/bin/sudo -u bogdan ${pkgs.syncthing}/bin/syncthing cli operations pause || true
+      # Must use the setuid wrapper; the nix store sudo binary cannot elevate
+      /run/wrappers/bin/sudo -u bogdan ${pkgs.syncthing}/bin/syncthing cli operations pause || true
     '';
 
     backupCleanupCommand = ''
       # Resume Syncthing after backup (runs even on failure)
-      ${pkgs.sudo}/bin/sudo -u bogdan ${pkgs.syncthing}/bin/syncthing cli operations resume || true
+      /run/wrappers/bin/sudo -u bogdan ${pkgs.syncthing}/bin/syncthing cli operations resume || true
     '';
 
     # Schedule: daily at 02:00
