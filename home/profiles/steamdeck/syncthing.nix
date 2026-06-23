@@ -42,13 +42,15 @@ in {
     # The actual binding address (0.0.0.0:8384) is set via ExecStartPost below.
     guiAddress = "127.0.0.1:8384";
 
-    # GUI password from SOPS secrets
-    passwordFile = config.sops.secrets.syncthing_gui_password.path;
+    # GUI credentials from SOPS secrets
+    guiCredentials = {
+      username = "deck";
+      passwordFile = config.sops.secrets.syncthing_gui_password.path;
+    };
 
     settings = {
       gui = {
         theme = "dark";
-        user = "deck";
         # Note: address is set via systemd ExecStartPost below because
         # home-manager's syncthing module overwrites settings.gui.address
         # with guiAddress at the end of the init script.
