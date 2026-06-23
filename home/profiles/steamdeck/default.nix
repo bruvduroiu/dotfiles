@@ -5,6 +5,7 @@
     ./syncthing.nix
     ../../programs/keepassxc.nix
     ../../programs/games/minecraft
+    ../../programs/games/openrct2
     ./media.nix
   ];
 

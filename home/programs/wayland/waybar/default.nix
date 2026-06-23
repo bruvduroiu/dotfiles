@@ -153,7 +153,7 @@ in {
       height = 24;
       spacing = 5;
       margin = "0";
-      modules-left = ["clock" "custom/timew" "custom/playerctl" "hyprland/window"];
+      modules-left = ["clock" "custom/timew" "custom/playerctl"];
       modules-center = ["hyprland/submap" "hyprland/workspaces"];
       modules-right = ["custom/fcitx" "pulseaudio" "battery" "power-profiles-daemon" "network" "group/hardware" "custom/gpu" "temperature" "idle_inhibitor" "custom/dnd" "privacy"];
       "hyprland/workspaces" = {
