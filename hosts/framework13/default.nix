@@ -50,7 +50,7 @@
   ];
 
   boot = {
-    kernelPackages = lib.mkForce inputs.nixpkgs-unstable.legacyPackages.${pkgs.system}.linuxPackages_7_0;
+    kernelPackages = lib.mkForce inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.linuxPackages_7_0;
   };
 
   # System configuration
@@ -58,16 +58,6 @@
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  services = {
-    kanata.keyboards.io = {
-      config = builtins.readFile "${self}/system/services/kanata/main.kbd";
-      devices = [
-        "/dev/input/by-path/platform-AMDI0010:01-event"
-        "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
-      ];
-    };
-  };
 
   # Garbage collection
   nix.gc = {

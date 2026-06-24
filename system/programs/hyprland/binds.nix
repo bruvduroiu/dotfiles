@@ -137,9 +137,9 @@ in {
 
       # special workspaces
 
-      # chat centre: spawns telegram+signal on first use ($mod N freed —
-      # notes/obsidian live on workspace 1 now)
-      "$mod, M, exec, chat-toggle"
+      # chat centre: messengers (telegram/signal/discord) autostart and pin to
+      # special:chat via window rules; $mod M just toggles the workspace.
+      "$mod, M, togglespecialworkspace, chat"
       "$mod SHIFT, M, movetoworkspace, special:chat"
 
       "$mod, B, togglespecialworkspace, work"

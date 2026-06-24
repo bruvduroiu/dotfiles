@@ -44,8 +44,12 @@ in {
     # Access via: http://localhost:8384 or http://<tailscale-ip>:8384
     guiAddress = "0.0.0.0:8384";
 
-    # GUI password from SOPS secrets
-    passwordFile = config.sops.secrets.syncthing_gui_password.path;
+    # GUI credentials from SOPS secrets
+    # HM 26.05 removed the standalone `passwordFile`; use `guiCredentials`.
+    guiCredentials = {
+      username = "bogdan";
+      passwordFile = config.sops.secrets.syncthing_gui_password.path;
+    };
 
     settings = {
       gui = {

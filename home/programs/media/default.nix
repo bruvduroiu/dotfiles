@@ -5,7 +5,7 @@
     # audio control
     pulsemixer
     pwvucontrol
-    helvum
+    crosspipe # helvum removed in nixpkgs 26.05 (unmaintained); crosspipe is the successor
 
     # audio
     amberol

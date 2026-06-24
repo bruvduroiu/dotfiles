@@ -11,15 +11,6 @@
         extraDefCfg = "process-unmapped-keys yes";
         config = builtins.readFile (./. + "/main.kbd");
       };
-      appleMagicKeyboard = {
-        extraDefCfg = ''
-          linux-dev-names-include (
-            "Bogdan Buduroiu’s Keyboard"
-          )
-          process-unmapped-keys yes
-        '';
-        config = builtins.readFile (./. + "/main.kbd");
-      };
     };
   };
 }

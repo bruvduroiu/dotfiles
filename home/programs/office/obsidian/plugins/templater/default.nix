@@ -10,15 +10,15 @@ pkgs.buildNpmPackage rec {
     hash = "sha256-jFELX0gW0aLW/eY685hMBgrbECNMqg0zbumpF2q0HFk=";
   };
 
-  pnpmDeps = pkgs.pnpm.fetchDeps {
+  pnpmDeps = pkgs.fetchPnpmDeps {
     inherit pname version src;
-    fetcherVersion = 2;
-    hash = "sha256-FwqdZ9IoOUrgDJlaEpLvxEQYG2QJQ5imMOpoXgWjQSE=";
+    fetcherVersion = 3;
+    hash = "sha256-xI6Hz6UPgz+4B6w3cxVsTuYpgPwwpSkgWgdadPeR8XM=";
   };
 
-  nativeBuildInputs = with pkgs; [ nodejs ];
+  nativeBuildInputs = with pkgs; [ nodejs pnpm ]; # pnpmConfigHook needs pnpm on PATH (pnpm.configHook used to add it)
 
-  npmConfigHook = pkgs.pnpm.configHook;
+  npmConfigHook = pkgs.pnpmConfigHook;
   npmDeps = pnpmDeps;
 
   dontNpmPrune = true; # hangs forever on both Linux/darwin

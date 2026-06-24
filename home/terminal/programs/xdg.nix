@@ -69,8 +69,10 @@ in
     userDirs = {
       enable = true;
       createDirectories = true;
+      setSessionVariables = true; # keep legacy default (26.05 flipped it to false)
       extraConfig = {
-        XDG_SCREENSHOTS_DIR = "${config.xdg.userDirs.pictures}/Screenshots";
+        # 26.05: unprefixed keys (SCREENSHOTS) instead of XDG_SCREENSHOTS_DIR
+        SCREENSHOTS = "${config.xdg.userDirs.pictures}/Screenshots";
       };
     };
   };

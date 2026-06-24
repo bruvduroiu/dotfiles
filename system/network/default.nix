@@ -21,11 +21,14 @@
   services = {
     resolved = {
       enable = true;
-      dnsovertls = "opportunistic";
-      fallbackDns = [
-        "1.1.1.1#cloudflare-dns.com"
-        "8.8.8.8#dns.google"
-      ];
+      # 26.05 renamed dnsovertls/fallbackDns into settings.Resolve.*
+      settings.Resolve = {
+        DNSOverTLS = "opportunistic";
+        FallbackDNS = [
+          "1.1.1.1#cloudflare-dns.com"
+          "8.8.8.8#dns.google"
+        ];
+      };
     };
   };
 }

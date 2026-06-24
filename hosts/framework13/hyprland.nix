@@ -11,7 +11,7 @@
 
       monitor = [
         "DP-4, 3840x2160@60.00, 0x0, 1, vrr, 1"
-        "eDP-1, preferred, 3840x0, 1.3333, vrr, 1"
+        "eDP-1, preferred, 3840x0, 1, vrr, 1"
       ];
 
       # Deep work on the external 4K, comms/overflow on the laptop panel.

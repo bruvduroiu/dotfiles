@@ -35,20 +35,17 @@ in
 {
   home.packages = [ deepseek-code ];
 
-  # Workaround: rulesDir not yet available in locked home-manager release-25.11
-  home.file.".claude/rules" = {
-    source = ./config/rules;
-    recursive = true;
-  };
-
   programs.claude-code = {
     enable = true;
 
     package = pkgs.claude-code;
 
+    # agentsDir/hooksDir/rulesDir are dir-path options in 26.05 (no warning).
     agentsDir = ./config/agents;
-    skillsDir = ./config/skills;
     hooksDir = ./config/hooks;
+    rulesDir = ./config/rules; # replaces the old home.file.".claude/rules" workaround
+    # skillsDir was renamed to `skills` in 26.05 (accepts a dir path or attrset).
+    skills = ./config/skills;
 
     # MCP servers configuration — Nix store paths resolved at build time
     mcpServers = {

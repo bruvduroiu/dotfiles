@@ -313,7 +313,7 @@ in {
     hl.bind(mod .. " + SHIFT + Print", hl.dsp.exec_cmd("wf-recorder-toggle area"))
 
     -- special workspaces
-    hl.bind(mod .. " + M", hl.dsp.exec_cmd("chat-toggle"))
+    hl.bind(mod .. " + M", hl.dsp.workspace.toggle_special("chat"))
     hl.bind(mod .. " + SHIFT + M", hl.dsp.window.move({ workspace = "special:chat" }))
     hl.bind(mod .. " + B", hl.dsp.workspace.toggle_special("work"))
     hl.bind(mod .. " + SHIFT + B", hl.dsp.window.move({ workspace = "special:work" }))
@@ -435,7 +435,7 @@ in {
     hl.window_rule({ match = { class = "^(com.mitchellh.ghostty)$" }, tag = "+terminal" })
     hl.window_rule({ match = { class = "^([Tt]hunderbird)$" }, tag = "+im-work" })
     hl.window_rule({ match = { class = "^([Ss]lack)$" }, tag = "+im-work" })
-    hl.window_rule({ match = { class = "^([Dd]iscord)$" }, tag = "+im" })
+    hl.window_rule({ match = { class = "^([Dd]iscord).*$" }, tag = "+im" })
     hl.window_rule({ match = { class = "^(org.telegram.desktop)$" }, tag = "+im" })
     hl.window_rule({ match = { class = "^([Ss]ignal)$" }, tag = "+im" })
     hl.window_rule({ match = { class = "^([Tt]hunar|org.gnome.Nautilus)$" }, tag = "+file-manager" })

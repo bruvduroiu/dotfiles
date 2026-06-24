@@ -73,17 +73,6 @@ let
     '';
   };
 
-  # Chat centre: spawn messengers if missing (window rules tag them "im" and
-  # route to special:chat), then toggle the workspace.
-  chat-toggle = pkgs.writeShellApplication {
-    name = "chat-toggle";
-    text = ''
-      pgrep -xf Telegram >/dev/null || uwsm app -- Telegram &
-      pgrep -f signal-desktop >/dev/null || uwsm app -- signal-desktop &
-      hyprctl dispatch togglespecialworkspace chat
-    '';
-  };
-
   # Screenshots: grim captures, satty edits. "area" opens the annotation
   # editor (Ctrl+C copy / Ctrl+S save / copy also saves); "full" goes
   # straight to clipboard + file.
@@ -124,7 +113,6 @@ in {
   environment = {
     pathsToLink = ["/share/icons"];
     systemPackages = [
-      chat-toggle
       hypr-binds-menu
       hypr-mark
       mako-history-menu

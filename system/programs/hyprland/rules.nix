@@ -24,7 +24,7 @@ in {
       "tag +terminal, match:class ^(com.mitchellh.ghostty)$"
       "tag +im-work, match:class ^([Tt]hunderbird)$"
       "tag +im-work, match:class ^([Ss]lack)$"
-      "tag +im, match:class ^([Dd]iscord)$"
+      "tag +im, match:class ^([Dd]iscord).*$"
       "tag +im, match:class ^(org.telegram.desktop)$"
       "tag +im, match:class ^([Ss]ignal)$"
       "tag +file-manager, match:class ^([Tt]hunar|org.gnome.Nautilus)$"

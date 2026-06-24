@@ -12,7 +12,6 @@
     invoice
     libreoffice
     onlyoffice-desktopeditors
-    gnucash
     gimp
     pinta
     slack

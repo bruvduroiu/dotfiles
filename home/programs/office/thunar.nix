@@ -2,12 +2,13 @@
 
 {
   home.packages = with pkgs; [
-    xfce.thunar
-    xfce.thunar-volman
-    xfce.thunar-vcs-plugin
-    xfce.thunar-archive-plugin
-    xfce.thunar-media-tags-plugin
-    xfce.tumbler
+    # xfce.thunar* moved to top-level in nixpkgs 26.05
+    thunar
+    thunar-volman
+    thunar-vcs-plugin
+    thunar-archive-plugin
+    thunar-media-tags-plugin
+    tumbler
   ];
   xdg.configFile."Thunar/uca.xml".text = ''
     <?xml version="1.0" encoding="UTF-8"?>

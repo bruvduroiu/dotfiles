@@ -12,13 +12,14 @@ let
       hash = "sha256-jURQ/vr1CTzyS9I9/ksyH9JL6BRi/gSmJvYhOpR6jNg=";
     };
 
-    pnpmDeps = pkgs.pnpm.fetchDeps {
+    pnpmDeps = pkgs.fetchPnpmDeps {
       inherit pname version src;
-      fetcherVersion = 2;
-      hash = "sha256-qqIdSF41gv4EDxEKP0sfpW1xW+3SMES9oGf2ru1lUnE=";
+      fetcherVersion = 3;
+      hash = "sha256-BWQwBy2mBvsh4nsEy/ia5k4Ax7oogfjXb+LCb0OBjJI=";
     };
 
-    npmConfigHook = pkgs.pnpm.configHook;
+    nativeBuildInputs = with pkgs; [ nodejs pnpm ]; # pnpmConfigHook needs pnpm on PATH
+    npmConfigHook = pkgs.pnpmConfigHook;
     npmDeps = pnpmDeps;
 
     dontNpmPrune = true; # hangs forever on both Linux/darwin
