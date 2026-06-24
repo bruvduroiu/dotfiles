@@ -141,7 +141,12 @@ in {
     };
 
     group = {
-      auto_group = true;
+      # auto_group OFF: Hyprland 0.55.0 has a bounds bug in CGroup::remove /
+      # CGroup::destroy (out-of-range -> SIGABRT/SIGSEGV that kills the whole
+      # compositor). Auto-grouping firefox+obsidian on ws1 meant a firefox
+      # crash unmapped a grouped window and took hyprland down with it. Group
+      # manually with $mod+G instead. Re-enable once upstream fixes the bounds.
+      auto_group = false;
 
       groupbar = {
         enabled = true;

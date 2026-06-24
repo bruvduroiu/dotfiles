@@ -115,6 +115,10 @@ in {
     ./binds.nix
     ./rules.nix
     ./settings.nix
+
+    # Hyprland 0.55 Lua config (generated alongside the hyprlang .conf above;
+    # .lua is preferred at startup). See docs/hyprland-lua-migration.md.
+    ./lua.nix
   ];
 
   environment = {
