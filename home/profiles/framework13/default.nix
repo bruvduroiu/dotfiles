@@ -12,6 +12,9 @@
     ../../programs
     ../../programs/keepassxc.nix
     ../../programs/wayland
+    # HM-generated Hyprland lua config (framework13-first; replaces the
+    # hand-authored system-level lua.nix once verified). See Change 2 plan.
+    ../../programs/wayland/hyprland.nix
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
     ../../programs/gpg.nix
