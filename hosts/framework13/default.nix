@@ -33,7 +33,6 @@
       image = lib.mkForce "${self}/home/wallpapers/taipei-toner-4k-positive.png";
       base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/rose-pine-dawn.yaml";
       polarity = lib.mkForce "light";
-      opacity.terminal = lib.mkForce 1.0;
     };
   };
 
