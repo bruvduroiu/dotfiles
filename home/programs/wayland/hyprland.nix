@@ -98,7 +98,11 @@ in {
         hl.exec_cmd("uwsm app -- wl-paste --type image --watch cliphist store")
         hl.exec_cmd("hyprlock")
         hl.exec_cmd("uwsm app -- mako")
-        hl.exec_cmd("fcitx5 -d --replace")
+        -- fcitx5 is owned by the NixOS i18n.inputMethod XDG-autostart systemd
+        -- unit (app-org.fcitx.Fcitx5@autostart.service). Launching it again
+        -- here raced that unit via --replace and left the survivor with an
+        -- empty IM group: apps connected over wayland_v2 but Ctrl+Space (and
+        -- even dbus -o) toggled nothing. Let systemd own the single instance.
         hl.exec_cmd("[workspace 1 silent] uwsm app -- firefox")
         hl.exec_cmd("[workspace 1 silent] uwsm app -- obsidian -disable-gpu")
       end'') ]; };

@@ -1,8 +1,36 @@
 { lib
 , pkgs
-, ... 
+, ...
 }:
 
+let
+  # Shared app.json defaults. The obsidian module merges `settings` per
+  # top-level key (app/appearance/...), NOT deeply — a vault that sets
+  # `settings.app` replaces this whole block, so reuse it explicitly.
+  appDefaults = {
+    defaultViewMode = "preview";
+    tabSize = 2;
+    vimMode = true;
+    focusNewTab = true;
+    propertiesInDocument = "visible";
+    foldHeading = true;
+    foldIndent = true;
+    rightToLeft = false;
+    spellcheck = true;
+    autoPairBrackets = true;
+    autoPairMarkdown = true;
+    smartIndentList = true;
+    useTab = true;
+    autoConvertHtml = true;
+    promptDelete = false;
+    trashOption = "local";
+    alwaysUpdateLinks = false;
+    newFileLocation = "current";
+    newLinkFormat = "shortest";
+    useMarkdownLinks = false;
+    showUnsupportedFiles = true;
+  };
+in
 {
   # Scripts, templates, and bases are stored here as version-controlled backup.
   # They live in the vault directly (synced via Syncthing).
@@ -15,12 +43,33 @@
         enable = true;
         target = "Documents/Keep";
         settings = {
-          appearance = {
-            baseFontSize = lib.mkForce 16;
+          app = appDefaults // {
+            attachmentFolderPath = "9 - Attachments";
           };
+          corePlugins = [
+            "backlink"
+            "bases"
+            "bookmarks"
+            "canvas"
+            "command-palette"
+            "editor-status"
+            "file-explorer"
+            "file-recovery"
+            "global-search"
+            "graph"
+            "note-composer"
+            "outgoing-link"
+            "outline"
+            "page-preview"
+            "slash-command"
+            "switcher"
+            "tag-pane"
+            "templates"
+            "word-count"
+          ];
           communityPlugins = [
             {
-              pkg = pkgs.callPackage ./plugins/templater { };
+              pkg = pkgs.callPackage ./plugins/templater.nix { };
               settings = {
                 trigger_on_file_creation = true;
                 auto_jump_to_cursor = true;
@@ -33,7 +82,7 @@
               };
             }
             { 
-              pkg = pkgs.callPackage ./plugins/dataview { };
+              pkg = pkgs.callPackage ./plugins/dataview.nix { };
               settings = {
                 enableDataviewJs = true;
                 enableInlineDataviewJs = true;
@@ -43,66 +92,44 @@
                 defaultDateTimeFormat = "HH:mm - dd/MM/yyyy";
               };
             }
+            {
+              pkg = pkgs.callPackage ./plugins/maps.nix { };
+              settings = { };
+            }
           ];
         };
       };
       Blog = {
         enable = true;
         target = "development/bruvduroiu/website/content";
-        settings = {
-          appearance = {
-            baseFontSize = lib.mkForce 16;
-          };
+        settings = { 
+          corePlugins = [
+            "backlink"
+            "bookmarks"
+            "command-palette"
+            "editor-status"
+            "file-explorer"
+            "global-search"
+            "note-composer"
+            "outgoing-link"
+            "outline"
+            "page-preview"
+            "slash-command"
+            "switcher"
+            "tag-pane"
+            "templates"
+            "word-count"
+          ];
         };
       };
     };
 
     defaultSettings = {
-      app = {
-        defaultViewMode = "preview"; 
-        tabSize = 2;
-        vimMode = true;
-        focusNewTab = true;
-        propertiesInDocument = "visible";
-        foldHeading = true;
-        foldIndent = true;
-        rightToLeft = false;
-        spellcheck = true;
-        autoPairBrackets = true;
-        autoPairMarkdown = true;
-        smartIndentList = true;
-        useTab = true;
-        autoConvertHtml = true;
-        promptDelete = false;
-        trashOption = "local";
-        alwaysUpdateLinks = false;
-        newFileLocation = "current";
-        newLinkFormat = "shortest";
-        useMarkdownLinks = false;
-        showUnsupportedFiles = true;
-        attachmentFolderPath = "9 - Attachments";
+      appearance = {
+        baseFontSize = lib.mkForce 16;
       };
 
-      corePlugins = [
-        "backlink"
-        "bookmarks"
-        "canvas"
-        "command-palette"
-        "editor-status"
-        "file-explorer"
-        "file-recovery"
-        "global-search"
-        "graph"
-        "note-composer"
-        "outgoing-link"
-        "outline"
-        "page-preview"
-        "slash-command"
-        "switcher"
-        "tag-pane"
-        "templates"
-        "word-count"
-      ];
+      app = appDefaults;
     };
   };
 }
