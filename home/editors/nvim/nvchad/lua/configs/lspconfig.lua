@@ -5,10 +5,11 @@ configs.defaults()
 -- vim.lsp handler. focusable = false is REQUIRED: without it the cursor jumps
 -- into the floating signature window on trigger. The :checkhealth noice warning
 -- "signature_help is not configured to be handled by Noice" is expected here.
-vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-	focusable = false,
-	silent = true,
-})
+-- vim.lsp.with() was removed in nvim 0.12; wrap the handler manually (same effect).
+vim.lsp.handlers["textDocument/signatureHelp"] = function(err, result, ctx, config)
+	return vim.lsp.handlers.signature_help(err, result, ctx,
+		vim.tbl_deep_extend("force", { focusable = false, silent = true }, config or {}))
+end
 
 local servers = {
 	html = {},
