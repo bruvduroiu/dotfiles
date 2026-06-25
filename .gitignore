@@ -4,3 +4,5 @@
 .secrets.env
 .playwright-mcp/
 tmp
+scripts/
+docs/
