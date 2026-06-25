@@ -74,7 +74,7 @@ in {
       fileManager = { _var = "uwsm app -- yazi"; };
       browser     = { _var = "uwsm app -- firefox"; };
       workBrowser = { _var = "uwsm app -- firefox -P work --no-remote"; };         # -P matches HM profile name; --no-remote = separate instance alongside personal
-      hardBrowser = { _var = "uwsm app -- firefox -P hardened --no-remote"; };     # ghost/arkenfox profile
+      hardBrowser = { _var = "uwsm app -- mullvad-browser"; };                     # ghost: Tor-Browser-minus-Tor, blends into the anti-fingerprint crowd
       webapp      = { _var = mkLuaInline ''browser .. " --new-tab"''; };
 
       # ----- env ----------------------------------------------------------
