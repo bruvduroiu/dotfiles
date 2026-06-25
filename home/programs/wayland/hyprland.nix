@@ -73,6 +73,8 @@ in {
       terminal    = { _var = "uwsm app -- ghostty"; };
       fileManager = { _var = "uwsm app -- yazi"; };
       browser     = { _var = "uwsm app -- firefox"; };
+      workBrowser = { _var = "uwsm app -- firefox -P work --no-remote"; };         # -P matches HM profile name; --no-remote = separate instance alongside personal
+      hardBrowser = { _var = "uwsm app -- firefox -P hardened --no-remote"; };     # ghost/arkenfox profile
       webapp      = { _var = mkLuaInline ''browser .. " --new-tab"''; };
 
       # ----- env ----------------------------------------------------------
@@ -104,7 +106,7 @@ in {
         -- empty IM group: apps connected over wayland_v2 but Ctrl+Space (and
         -- even dbus -o) toggled nothing. Let systemd own the single instance.
         hl.exec_cmd("[workspace 1 silent] uwsm app -- firefox")
-        hl.exec_cmd("[workspace 1 silent] uwsm app -- obsidian -disable-gpu")
+        hl.exec_cmd("[workspace 1 silent] uwsm app -- obsidian")
       end'') ]; };
 
       # ----- keyword config (hl.config) -----------------------------------
@@ -435,10 +437,12 @@ in {
         settings.bind = [
           (bk "A" ''hl.dsp.exec_cmd(webapp .. " https://openrouter.ai/chat")'')
           (bk "B" "hl.dsp.exec_cmd(browser)")
+          (bk "W" "hl.dsp.exec_cmd(workBrowser)")
+          (bk "H" "hl.dsp.exec_cmd(hardBrowser)")
           (bk "C" ''hl.dsp.exec_cmd(webapp .. " https://app.hey.com/calendar/weeks/")'')
           (bk "D" ''hl.dsp.exec_cmd(terminal .. " -e lazydocker")'')
           (bk "E" ''hl.dsp.exec_cmd(webapp .. " https://app.hey.com")'')
-          (bk "O" ''hl.dsp.exec_cmd("uwsm app -- obsidian -disable-gpu")'')
+          (bk "O" ''hl.dsp.exec_cmd("uwsm app -- obsidian")'')
           (bk "R" ''hl.dsp.exec_cmd(terminal .. " -e newsboat")'')
           (bk "slash" ''hl.dsp.exec_cmd("uwsm app -- keepassxc")'')
           (bk "escape" ''hl.dsp.submap("reset")'')

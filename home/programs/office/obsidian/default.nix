@@ -94,7 +94,16 @@ in
             }
             {
               pkg = pkgs.callPackage ./plugins/maps.nix { };
-              settings = { };
+              settings = { 
+                tileSets = [
+                  {
+                    id = "protomaps";
+                    name = "Protomaps";
+                    lightTiles = "https://tiles.openfreemap.org/styles/liberty";
+                    darkTiles  = "https://tiles.openfreemap.org/styles/dark";
+                  }
+                ];
+              };
             }
           ];
         };
