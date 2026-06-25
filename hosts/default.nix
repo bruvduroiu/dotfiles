@@ -35,6 +35,7 @@
           backupFileExtension = ".hm-backup";
           sharedModules = [
             inputs.sops-nix.homeManagerModules.sops
+            inputs.nix4nvchad.homeManagerModules.default
           ];
         };
       }
@@ -91,6 +92,7 @@
             backupFileExtension = ".hm-backup";
             sharedModules = [
               inputs.sops-nix.homeManagerModules.sops
+              inputs.nix4nvchad.homeManagerModules.default
             ];
           };
         }
@@ -122,6 +124,7 @@
             backupFileExtension = ".hm-backup";
             sharedModules = [
               inputs.sops-nix.homeManagerModules.sops
+              inputs.nix4nvchad.homeManagerModules.default
             ];
           };
         }

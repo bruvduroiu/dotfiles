@@ -2,7 +2,11 @@ return {
   defaults = { lazy = true },
   install = { colorscheme = { "nvchad" } },
 
-  lockfile = vim.fn.stdpath("data") .. "/lazy-lock.json",
+  -- Read the lockfile nix4nvchad places in the config dir (= stdpath("config")),
+  -- so the Nix-pinned commits are what lazy.nvim restores. The old stdpath("data")
+  -- path was a workaround for the readonly /nix/store symlink era; under nvchad the
+  -- config dir is a writable copy, so point back here.
+  lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json",
 
   -- NixOS can't run lazy's hererocks/luarocks installer (sandboxed store);
   -- no plugins here need it, so disable to silence the healthcheck error.

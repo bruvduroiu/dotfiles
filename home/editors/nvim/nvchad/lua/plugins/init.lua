@@ -39,6 +39,7 @@ return {
 				"typescript",
 				"go",
 				"zig",
+				"nix",
 				"terraform",
 				"markdown",
 				"markdown_inline",
