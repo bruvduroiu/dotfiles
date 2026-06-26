@@ -32,6 +32,9 @@ let
   # plain-key bind (no mod expression — bare key string)
   bk = key: disp: { _args = [ key (mkLuaInline disp) ]; };
   bko = key: disp: opts: { _args = [ key (mkLuaInline disp) opts ]; };
+  # function-callback bind: key + raw lua body. Needed when one keypress runs
+  # several dispatches (Hyprland 0.55 lua binds accept a function as the action).
+  bkf = key: body: { _args = [ key (mkLuaInline "function() ${body} end") ]; };
 
   # workspaces 1..10: switch / move / move-silent (was the genList in binds.nix /
   # the for-loop in lua.nix). key 10 -> "0".
@@ -55,9 +58,9 @@ let
     { match = { title = "^(${t})(.*)$"; }; center = true; }
   ]) dialogTitles;
 
-  # place-submap: batched specific-window pixel ops have no typed helper -> exec_cmd
-  # of a hyprctl --batch string in lua long-brackets [[ ]] (dodges quote/% escaping).
-  placeBatch = s: ''hl.dsp.exec_cmd([[hyprctl --batch "${s}"]])'';
+  # place-submap window snapping lives in a Lua `place()` helper (see extraConfig).
+  # It replaces the old exec_cmd("hyprctl --batch \"dispatch ...\"") strings: Hyprland
+  # 0.55 reparses `hyprctl dispatch` args as Lua, so the plaintext dispatchers errored.
 in {
   wayland.windowManager.hyprland = {
     enable = true;
@@ -65,6 +68,21 @@ in {
     portalPackage = null;
     systemd.enable = false;
     configType = "lua";
+
+    # Raw Lua appended after the generated config. `place()` drives the `place`
+    # submap: float the active window, then size + position it as fractions of the
+    # focused monitor. Monitor width/height are PHYSICAL px, but exact move/resize
+    # work in LOGICAL space, so divide by scale (x/y are already logical).
+    extraConfig = ''
+      function place(fw, fh, fx, fy)
+        local m = hl.get_active_monitor()
+        local w = m.width / m.scale
+        local h = m.height / m.scale
+        hl.dispatch(hl.dsp.window.float({ action = "enable" }))
+        hl.dispatch(hl.dsp.window.resize({ x = math.floor(w * fw), y = math.floor(h * fh), exact = true }))
+        hl.dispatch(hl.dsp.window.move({ x = math.floor(m.x + w * fx), y = math.floor(m.y + h * fy), exact = true }))
+      end
+    '';
 
     settings = {
       # ----- variables (-> lua locals) ------------------------------------
@@ -451,20 +469,20 @@ in {
 
       # place: snap floating windows to zones; stays active for multiple placements
       place.settings.bind = [
-        # halves
-        (bk "h" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 100% ; dispatch movewindowpixel exact 0 0"))
-        (bk "l" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 100% ; dispatch movewindowpixel exact 50% 0"))
-        (bk "k" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 100% 50% ; dispatch movewindowpixel exact 0 0"))
-        (bk "j" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 100% 50% ; dispatch movewindowpixel exact 0 50%"))
-        # center variants
-        (bk "c" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 70% 70% ; dispatch centerwindow"))
-        (bk "f" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 95% 95% ; dispatch centerwindow"))
-        (bk "m" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch centerwindow"))
+        # halves — place(width, height, x, y) as monitor fractions
+        (bkf "h" "place(0.5, 1.0, 0.0, 0.0)")
+        (bkf "l" "place(0.5, 1.0, 0.5, 0.0)")
+        (bkf "k" "place(1.0, 0.5, 0.0, 0.0)")
+        (bkf "j" "place(1.0, 0.5, 0.0, 0.5)")
+        # center variants (centred = equal margins: x = (1 - w) / 2)
+        (bkf "c" "place(0.7, 0.7, 0.15, 0.15)")
+        (bkf "f" "place(0.95, 0.95, 0.025, 0.025)")
+        (bkf "m" "place(0.5, 0.5, 0.25, 0.25)")
         # quadrants
-        (bk "1" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch movewindowpixel exact 0 0"))
-        (bk "2" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch movewindowpixel exact 50% 0"))
-        (bk "3" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch movewindowpixel exact 0 50%"))
-        (bk "4" (placeBatch "dispatch setfloating ; dispatch resizewindowpixel exact 50% 50% ; dispatch movewindowpixel exact 50% 50%"))
+        (bkf "1" "place(0.5, 0.5, 0.0, 0.0)")
+        (bkf "2" "place(0.5, 0.5, 0.5, 0.0)")
+        (bkf "3" "place(0.5, 0.5, 0.0, 0.5)")
+        (bkf "4" "place(0.5, 0.5, 0.5, 0.5)")
         # incremental move (repeatable)
         (bko "SHIFT + h" "hl.dsp.window.move({ x = -40, y = 0, relative = true })" { repeating = true; })
         (bko "SHIFT + l" "hl.dsp.window.move({ x = 40, y = 0, relative = true })"  { repeating = true; })
