@@ -1,3 +1,26 @@
+local function review_base()
+	local head = vim.fn.systemlist({ "git", "symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD" })
+	if vim.v.shell_error == 0 and head[1] and head[1] ~= "" then
+		return head[1]
+	end
+	for _, b in ipairs({ "origin/main", "origin/master", "main", "master" }) do
+		vim.fn.system({ "git", "rev-parse", "--verify", "--quiet", b })
+		if vim.v.shell_error == 0 then
+			return b
+		end
+	end
+	return nil
+end
+
+local function review_pr_diff()
+	local base = review_base()
+	if not base then
+		vim.notify("diffview: no base branch found (origin/HEAD unset; no main/master)", vim.log.levels.ERROR)
+		return
+	end
+	vim.cmd("DiffviewOpen " .. base .. "...HEAD")
+end
+
 return {
 	{ "hrsh7th/nvim-cmp", enabled = false },
 	{
@@ -356,5 +379,100 @@ return {
 		"kosayoda/nvim-lightbulb",
 		event = "LspAttach",
 		opts = require("configs.lightbulb"),
+	},
+
+	-- ── PR review surface ─────────────────────────────────────────────────────
+	{
+		"sindrets/diffview.nvim",
+		cmd = {
+			"DiffviewOpen",
+			"DiffviewFileHistory",
+			"DiffviewClose",
+			"DiffviewToggleFiles",
+			"DiffviewFocusFiles",
+			"DiffviewRefresh",
+		},
+		keys = {
+			-- Triple-dot = merge-base diff = exact GitHub "Files changed" semantics.
+			-- Base resolved locally (review_base) so it works without origin/HEAD set.
+			{ "<leader>rd", review_pr_diff, desc = "Review: PR diff vs base" },
+			{ "<leader>rw", "<cmd>DiffviewOpen<cr>", desc = "Review: working-tree diff" },
+			{
+				"<leader>rB",
+				function()
+					vim.ui.input({ prompt = "Diff vs base: ", default = review_base() or "origin/main" }, function(b)
+						if b and b ~= "" then
+							vim.cmd("DiffviewOpen " .. b .. "...HEAD")
+						end
+					end)
+				end,
+				desc = "Review: diff vs base…",
+			},
+			{ "<leader>rf", "<cmd>DiffviewFileHistory %<cr>", desc = "Review: file history" },
+			{ "<leader>rl", "<cmd>DiffviewFileHistory<cr>", desc = "Review: branch history" },
+			{ "<leader>rq", "<cmd>DiffviewClose<cr>", desc = "Review: close diffview" },
+		},
+		opts = require("configs.diffview"),
+		init = function()
+			-- Label the <leader>r "review" umbrella in which-key v3. init runs at
+			-- lazy startup (before the User VeryLazy event fires), so the autocmd
+			-- catches it. NvChad's which-key opts is a function, so a child
+			-- opts.spec override can be dropped during lazy's merge — register
+			-- imperatively instead, pcall-guarded in case which-key is absent.
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "VeryLazy",
+				callback = function()
+					local ok, wk = pcall(require, "which-key")
+					if ok then
+						wk.add({ { "<leader>r", group = "review" } })
+					end
+				end,
+			})
+		end,
+	},
+	{
+		"pwntester/octo.nvim",
+		cmd = "Octo",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-telescope/telescope.nvim",
+			"nvim-tree/nvim-web-devicons",
+		},
+		keys = {
+			{ "<leader>ro", "<cmd>Octo pr list<cr>", desc = "Review: list PRs" },
+			{ "<leader>rc", "<cmd>Octo pr checkout<cr>", desc = "Review: checkout PR" },
+			{ "<leader>rs", "<cmd>Octo review start<cr>", desc = "Review: start review" },
+			{ "<leader>rS", "<cmd>Octo review submit<cr>", desc = "Review: submit review" },
+			{ "<leader>rr", "<cmd>Octo review resume<cr>", desc = "Review: resume review" },
+			{ "<leader>ri", "<cmd>Octo issue list<cr>", desc = "Review: list issues" },
+		},
+		opts = require("configs.octo"),
+	},
+	{
+		"nvim-treesitter/nvim-treesitter-context",
+		event = { "BufReadPost", "BufNewFile" },
+		dependencies = { "nvim-treesitter/nvim-treesitter" },
+		-- Safe on treesitter branch="main": uses core vim.treesitter + its own
+		-- bundled queries, not the rewritten nvim-treesitter module API.
+		opts = {
+			max_lines = 4, -- cap sticky-header height on deep nesting
+			multiline_threshold = 1, -- collapse long signatures to one line
+			trim_scope = "outer", -- keep innermost scope when over max_lines
+			mode = "cursor",
+			multiwindow = true, -- show context in BOTH diffview panes
+		},
+		keys = {
+			-- [x, not [c: this config remaps ]c/[c to class-nav (via
+			-- treesitter-textobjects), so [x is the free key for scope-jump.
+			-- Native ]c/[c diff-change motion is restored in diff windows in mappings.lua.
+			{
+				"[x",
+				function()
+					require("treesitter-context").go_to_context(vim.v.count1)
+				end,
+				desc = "Jump to context",
+			},
+			{ "<leader>tC", "<cmd>TSContext toggle<cr>", desc = "Toggle sticky context" },
+		},
 	},
 }

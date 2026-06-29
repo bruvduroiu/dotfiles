@@ -39,6 +39,7 @@
       gopls
 
       # tools
+      gh # GitHub CLI — octo.nvim's API backend (token → OS keyring)
       go
 
       # image.nvim — inline images in markdown via Ghostty's kitty graphics

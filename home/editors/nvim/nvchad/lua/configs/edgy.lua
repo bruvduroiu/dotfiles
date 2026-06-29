@@ -8,6 +8,8 @@ return {
 		{ ft = "fugitive", size = { width = 0.3 } },
 		{ ft = "gitcommit", size = { width = 0.3 } },
 		{ ft = "trouble", size = { width = 0.3 } },
+		{ ft = "DiffviewFiles", title = "Diff Files", size = { width = 0.3 } },
+		{ ft = "DiffviewFileHistory", title = "Diff History", size = { width = 0.3 } },
 	},
 	bottom = {
 		{

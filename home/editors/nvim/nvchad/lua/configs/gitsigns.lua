@@ -90,11 +90,6 @@ return {
     map("n", "<leader>hq", gs.setqflist, { desc = "Hunks as qflist (buffer)" })
     map("n", "<leader>hu", gs.toggle_deleted, { desc = "Toggle deleted" })
 
-    -- Cross-file review: fuzzy hunk list across all dirty files
-    map("n", "<leader>hh", function()
-      require("configs.telescope").hunks_picker()
-    end, { desc = "All dirty hunks (telescope)" })
-
     -- Text object
     map({ "o", "x" }, "ih", gs.select_hunk, { desc = "Select hunk inner" })
   end,

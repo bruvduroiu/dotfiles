@@ -22,14 +22,31 @@ map("n", "<leader>fu", "<cmd>Telescope undo<cr>", { desc = "Undo tree" })
 map("n", "<leader>fr", builtin.resume, { desc = "Resume last picker" })
 map("n", "<leader>fo", builtin.oldfiles, { desc = "Recent files" })
 
--- Code review: jump between dirty hunks across files
+-- Code review: fuzzy-jump between dirty hunks across files (custom picker).
+-- Rebound into the <leader>r "review" group alongside diffview/octo. Unique vs
+-- diffview: fuzzy-typeahead over hunk section names, which diffview can't do.
 local hunks_picker = require("configs.telescope").hunks_picker
-map("n", "<leader>gh", hunks_picker, { desc = "Git hunks vs HEAD" })
-map("n", "<leader>gH", function()
+map("n", "<leader>rh", hunks_picker, { desc = "Fuzzy hunks vs HEAD" })
+map("n", "<leader>rH", function()
   vim.ui.input({ prompt = "Review against base: ", default = "origin/HEAD" }, function(base)
     if base and base ~= "" then
       hunks_picker({ base = base })
     end
   end)
-end, { desc = "Git hunks vs base…" })
+end, { desc = "Fuzzy hunks vs base…" })
 map("n", "<leader>gf", builtin.git_status, { desc = "Changed files (git status)" })
+
+-- treesitter-textobjects remaps ]c/[c to next/prev class globally, which shadows
+-- Vim's native ]c/[c "next/prev diff change" motion. In diff windows (diffview
+-- review, :Gdiffsplit) restore native change-stepping buffer-locally so PR review
+-- can walk changes the GitHub way. bang=true bypasses the global class-nav remap.
+vim.api.nvim_create_autocmd("OptionSet", {
+  pattern = "diff",
+  callback = function()
+    if not vim.wo.diff then
+      return
+    end
+    map("n", "]c", function() vim.cmd.normal({ "]c", bang = true }) end, { buffer = 0, desc = "Next diff change" })
+    map("n", "[c", function() vim.cmd.normal({ "[c", bang = true }) end, { buffer = 0, desc = "Prev diff change" })
+  end,
+})
