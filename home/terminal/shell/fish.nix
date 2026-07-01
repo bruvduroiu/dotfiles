@@ -22,6 +22,9 @@ in
         if test -f ${config.sops.secrets.deepseek_api_key.path}
           set -gx DEEPSEEK_API_KEY (cat ${config.sops.secrets.deepseek_api_key.path})
         end
+        if test -f ${config.sops.secrets.alphavantage_api_key.path}
+          set -gx ALPHAVANTAGE_API_KEY (cat ${config.sops.secrets.alphavantage_api_key.path})
+        end
       '';
       interactiveShellInit = ''
         fzf_configure_bindings --directory=\cp --processes=\co

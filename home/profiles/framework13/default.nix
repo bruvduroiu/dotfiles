@@ -40,6 +40,11 @@
     sopsFile = "${self}/secrets/common/api-keys.yaml";
   };
 
+  # Alpha Vantage key (used by portfolio-update-prices)
+  sops.secrets.alphavantage_api_key = {
+    sopsFile = "${self}/secrets/common/api-keys.yaml";
+  };
+
   # Datadog API keys (used by opencode dd-log tool)
   sops.secrets.dd_api_key = {
     sopsFile = "${self}/secrets/common/datadog.yaml";
