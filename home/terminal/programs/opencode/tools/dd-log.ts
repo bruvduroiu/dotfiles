@@ -1,8 +1,22 @@
 import { tool } from "@opencode-ai/plugin"
+import { readFile } from "node:fs/promises"
 
 const DD_SITE = process.env.DD_SITE || "datadoghq.com"
-const DD_API_KEY = process.env.DD_API_KEY
-const DD_APP_KEY = process.env.DD_APP_KEY
+
+// Secrets come either directly from the environment or, on sops-managed
+// hosts, from a file referenced by DD_API_KEY_FILE / DD_APP_KEY_FILE so the
+// key material never sits in the environment of every process.
+async function readSecret(name: string): Promise<string | undefined> {
+  const direct = process.env[name]
+  if (direct) return direct
+  const file = process.env[`${name}_FILE`]
+  if (!file) return undefined
+  try {
+    return (await readFile(file, "utf8")).trim()
+  } catch {
+    return undefined
+  }
+}
 
 export default tool({
   description:
@@ -44,9 +58,11 @@ export default tool({
       ),
   },
   async execute(args) {
+    const DD_API_KEY = await readSecret("DD_API_KEY")
+    const DD_APP_KEY = await readSecret("DD_APP_KEY")
     if (!DD_API_KEY || !DD_APP_KEY) {
       const envDoc =
-        "```\nDD_API_KEY=your-datadog-api-key\nDD_APP_KEY=your-datadog-application-key\nDD_SITE=datadoghq.com  # optional, for EU: datadoghq.eu\n```"
+        "```\nDD_API_KEY=your-datadog-api-key        # or DD_API_KEY_FILE=/path/to/secret\nDD_APP_KEY=your-datadog-application-key  # or DD_APP_KEY_FILE=/path/to/secret\nDD_SITE=datadoghq.com  # optional, for EU: datadoghq.eu\n```"
       return `Datadog API keys are not configured in the environment.\n\nSet these environment variables before using this tool:\n${envDoc}\n\nFor details: https://docs.datadoghq.com/account_management/api-app-keys/`
     }
 
@@ -116,18 +132,17 @@ function parseTimeRange(value: string): string {
     return new Date().toISOString()
   }
 
+  const unitMs: Record<string, number> = {
+    s: 1000,
+    m: 60 * 1000,
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
+    w: 7 * 24 * 60 * 60 * 1000,
+  }
   const relMatch = value.match(/^-(\d+)(s|m|h|d|w)$/)
   if (relMatch) {
     const amount = parseInt(relMatch[1], 10)
-    const unit = relMatch[2]
-    const ms =
-      {
-        s: 1000,
-        m: 60 * 1000,
-        h: 60 * 60 * 1000,
-        d: 24 * 60 * 60 * 1000,
-        w: 7 * 24 * 60 * 60 * 1000,
-      }[unit] * amount
+    const ms = (unitMs[relMatch[2]] ?? 0) * amount
     return new Date(Date.now() - ms).toISOString()
   }
 

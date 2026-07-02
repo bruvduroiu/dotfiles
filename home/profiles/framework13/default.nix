@@ -40,6 +40,11 @@
     sopsFile = "${self}/secrets/common/api-keys.yaml";
   };
 
+  # Z.AI Coding Plan key (used by opencode zai-coding-plan provider)
+  sops.secrets.zai_api_key = {
+    sopsFile = "${self}/secrets/common/api-keys.yaml";
+  };
+
   # Alpha Vantage key (used by portfolio-update-prices)
   sops.secrets.alphavantage_api_key = {
     sopsFile = "${self}/secrets/common/api-keys.yaml";
@@ -51,5 +56,12 @@
   };
   sops.secrets.dd_app_key = {
     sopsFile = "${self}/secrets/common/datadog.yaml";
+  };
+
+  # dd-log reads *_FILE variants so key material stays on disk (sops
+  # runtime paths), not in every process environment.
+  home.sessionVariables = {
+    DD_API_KEY_FILE = config.sops.secrets.dd_api_key.path;
+    DD_APP_KEY_FILE = config.sops.secrets.dd_app_key.path;
   };
 }

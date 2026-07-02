@@ -1,27 +1,29 @@
 { config
+, lib
 , pkgs
-, ... 
+, ...
 }:
 
 let
-  superpowersSrc = pkgs.fetchFromGitHub {
-    owner = "obra";
-    repo = "superpowers";
-    rev = "v5.0.7";
-    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-  };
+  lspDeps = import ./lsp-deps.nix { inherit pkgs; };
 in
 {
   programs.opencode = {
     enable = true;
     enableMcpIntegration = true;
 
-    # Waiting for home-manager to get these
-    # web.enable = true;
-    package = pkgs.opencode;
+    web.enable = true;
+
+    agents = {
+      plan = ./agents/plan.md;
+      code = ./agents/code.md;
+      code-review = ./agents/code-review.md;
+    };
+
+    skills = { };
 
     settings = {
-      enabled_providers = [ "deepseek" "openrouter" ];
+      enabled_providers = [ "deepseek" "openrouter" "zai-coding-plan" ];
       provider = {
         deepseek = {
           options = {
@@ -33,15 +35,18 @@ in
             apiKey = "{file:${config.sops.secrets.openrouter_api_key.path}}";
           };
         };
+        # Z.AI Coding Plan (subscription endpoint, GLM models). Provider id
+        # from models.dev; hits https://api.z.ai/api/coding/paas/v4.
+        zai-coding-plan = {
+          options = {
+            apiKey = "{file:${config.sops.secrets.zai_api_key.path}}";
+          };
+        };
       };
       plugin = [ "superpowers@git+https://github.com/obra/superpowers.git" ];
       autoshare = false;
       autoupdate = true;
       model = "deepseek/deepseek-v4-pro";
-      # TODO: Migrate to programs.opencode.tools when home-manager supports it
-      # tools = {
-      #   dd-log = ./tools/dd-log.ts;
-      # };
       permission = {
         "*" = "allow";
         "skill" = {
@@ -89,14 +94,25 @@ in
         };
       };
     };
-
-    agents = {
-      plan = ./agents/plan.md;
-    };
   };
 
-  # TODO: Remove when programs.opencode.tools is available in home-manager
-  xdg.configFile = {
-    "opencode/tools/dd-log.ts".source = ./tools/dd-log.ts;
-  };
+  # Tools must be real files, not symlinks into /nix/store: opencode's
+  # embedded Bun resolves `@opencode-ai/plugin` from the importer's
+  # realpath, and the store has no node_modules ancestor. Copying keeps
+  # resolution anchored at ~/.config/opencode, where opencode auto-installs
+  # the plugin package.
+  home.activation.opencodeToolsCopy = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    run mkdir -p "${config.xdg.configHome}/opencode/tools"
+    run install -m 0644 ${./tools}/*.ts "${config.xdg.configHome}/opencode/tools/"
+  '';
+
+  # Symlink nix-built node_modules into the repo checkout so the editor LSP
+  # resolves @opencode-ai/plugin in tools/*.ts without any npm install.
+  # Guarded: only hosts that have the dotfiles checkout get the link.
+  home.activation.opencodeLspDeps = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    opencodeRepoDir="$HOME/development/dotfiles/home/terminal/programs/opencode"
+    if [ -d "$opencodeRepoDir" ]; then
+      run ln -sfnT ${lspDeps} "$opencodeRepoDir/node_modules"
+    fi
+  '';
 }
