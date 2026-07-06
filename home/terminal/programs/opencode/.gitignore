@@ -1,0 +1,2 @@
+# symlink to nix-built LSP deps (see lsp-deps.nix, wired via home.activation)
+node_modules

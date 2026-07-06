@@ -1,0 +1,8 @@
+.aider*
+.DS_Store
+.opencode
+.secrets.env
+.playwright-mcp/
+tmp
+scripts/
+docs/

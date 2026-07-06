@@ -1,0 +1,41 @@
+{
+  services = {
+    mako = {
+      enable = true;
+
+      settings = {
+        sort = "-time";
+        border-radius = 2;
+        border-size = 3;
+        actions = true;
+        anchor = "top-right";
+        default-timeout = 5000;
+        icons = true;
+        layer = "overlay";
+        padding = "12,20";
+        width = 420;
+        height = 110;
+        margin = 10;
+        outer-margin = 20;
+        max-icon-size = 32;
+        # history pool consumed by mako-history-menu ($mod CTRL D)
+        max-history = 100;
+
+        "urgency=critical" = {
+          default-timeout = 0;
+        };
+
+        # do-not-disturb: toggled via `makoctl mode -t dnd` (bind + waybar)
+        "mode=dnd" = {
+          invisible = 1;
+        };
+
+        # auto-set by meeting-guard while mic/screenshare is live — separate
+        # mode so it never fights the manual dnd toggle
+        "mode=meeting" = {
+          invisible = 1;
+        };
+      };
+    };
+  };
+}

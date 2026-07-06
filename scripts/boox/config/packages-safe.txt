@@ -1,0 +1,30 @@
+# Safe to Remove - Minimal risk, obvious bloatware
+# These are universally safe to disable on Boox devices
+
+# Onyx bloatware and telemetry
+com.onyx.aiassistant          # AI assistant - phones home, not needed
+com.onyx.android.ksync        # Boox Cloud sync - telemetry concern
+com.onyx.android.production.test  # Factory testing tool
+com.onyx.appmarket            # Boox app store - use Play Store/F-Droid
+com.onyx.easytransfer         # File transfer - use Syncthing instead
+com.onyx.igetshop             # Shopping/promotional app
+com.onyx.mail                 # Email app - use better alternatives
+
+# Google bloat (optional, uncomment if you don't use these)
+# com.google.android.tts      # Text-to-speech
+# com.google.android.apps.restore  # Backup restore
+
+# Android bloat
+com.android.dreams.phototable # Photo screensaver
+com.android.printservice.recommendation  # Print service suggestions
+com.android.quicksearchbox    # Search widget
+
+# Qualcomm services (safe to remove, not used on eReader)
+com.qualcomm.qtil.aptxui      # Bluetooth audio codec UI
+com.qualcomm.qti.xrcb         # XR (VR/AR) related
+com.qualcomm.qti.xrvd.service # XR video decoder
+com.qualcomm.wfd.service      # Wireless display/Miracast
+com.quicinc.voice.activation  # Voice activation
+vendor.qti.imsdatachannel     # IMS (VoLTE) data
+vendor.qti.imsrcs             # IMS RCS messaging
+vendor.qti.iwlan              # WiFi calling
