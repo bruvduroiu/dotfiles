@@ -50,12 +50,6 @@ in {
     };
 
     settings = {
-      gui = {
-        theme = "dark";
-        # Hardcoded username for GUI authentication
-        user = "bogdan";
-      };
-
       options = {
         # Prefer local network syncing to save Tailscale/mobile data
         # Local discovery on LAN - primary sync method

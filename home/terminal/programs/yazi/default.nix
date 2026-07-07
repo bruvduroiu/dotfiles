@@ -29,7 +29,7 @@
 
     settings = {
       mgr = {
-        layout = [1 4 3];
+        layout = [1 3 4];
         sort_by = "alphabetical";
         sort_sensitive = true;
         sort_reverse = false;
@@ -51,7 +51,7 @@
           duckdb = map (type: {
             run = "duckdb";
             url = "*.${type}";
-          }) ["csv" "tsv" "parquet" "xlsx" "db" "duckdb"];
+          }) ["csv" "tsv" "parquet" "xlsx" "duckdb"];
         in [
           {
             mime = "{audio,video,image}/*";
@@ -80,9 +80,55 @@
           }
         ] ++ duckdb;
       };
+
+      opener = {
+        duckdb = [
+          {
+            run = ''duckdb -cmd "CREATE TABLE tbl AS FROM '$@';"'';
+            block = true;
+            desc = "Open in DuckDB";
+          }
+        ];
+        duckdb-text = [
+          {
+            run = ''duckdb -cmd "CREATE TABLE tbl AS FROM read_csv('$@');"'';
+            block = true;
+            desc = "Open in DuckDB";
+          }
+        ];
+        duckdb-excel = [
+          {
+            run = ''duckdb -cmd "INSTALL excel; LOAD excel;" -cmd "CREATE TABLE tbl AS FROM read_xlsx('$@');"'';
+            block = true;
+            desc = "Open in DuckDB";
+          }
+        ];
+        duckdb-db = [
+          {
+            run = ''duckdb -cmd "INSTALL sqlite; LOAD sqlite;" "$@"'';
+            block = true;
+            desc = "Open in DuckDB";
+          }
+        ];
+      };
+
+      open = {
+        prepend_rules = [
+          { url = "*.html"; use = [ "open" "edit"]; }
+          { url = "*.parquet"; use = "duckdb"; }
+          { url = "*.json"; use = "duckdb"; }
+          { url = "*.csv"; use = "duckdb-text"; }
+          { url = "*.tsv"; use = "duckdb-text"; }
+          { url = "*.xlsx"; use = "duckdb-excel"; }
+          { url = "*.db"; use = "duckdb-db"; }
+          { url = "*.duckdb"; use = "duckdb-db"; }
+          { url = "*.sqlite"; use = "duckdb-db"; }
+          { url = "*.sqlite3"; use = "duckdb-db"; }
+        ];
+      };
     };
 
-    keymap.manager.prepend_keymap = [
+    keymap.mgr.prepend_keymap = [
       {
         on = ["<C-n>"];
         run = ''shell '${lib.getExe pkgs.ripdrag} "$@" -x 2>/dev/null &' --confirm'';
@@ -97,11 +143,6 @@
         on = "<C-l>";
         run = "plugin duckdb +1";
         desc = "Scroll one column to the right";
-      }
-      {
-        on = ["g" "o"];
-        run = "plugin duckdb -open";
-        desc = "Open with duckdb";
       }
       {
         on = ["g" "u"];
