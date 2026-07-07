@@ -386,6 +386,9 @@ in {
         { match = { title = "^(Grayjay)$"; }; float = false; }
         { match = { title = "^(Grayjay)$"; }; workspace = "4"; }
 
+        # workspace 3 = floating (no float layout in hypr; float every window)
+        { match = { workspace = "3"; }; float = true; }
+
         # picture-in-picture
         { match = { initial_title = "^Picture-in-Picture$"; }; opacity = "1 1"; }
         { match = { tag = "pip"; }; float = true; }
