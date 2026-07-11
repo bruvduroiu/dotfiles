@@ -1,0 +1,147 @@
+/* letter.css — same Geist design language as report.css, dialled down for memos,
+ * one-pagers, and short notes: smaller display type, no section dividers, tighter
+ * rhythm. Still minimal + bold, just quieter.
+ */
+
+@font-face {
+  font-family: "Geist";
+  src: url("@fontdir@/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("@fontdir@/JetBrainsMono-Variable.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ink: #000;
+  --body: #1a1a1a;
+  --muted: #8f8f8f;
+  --rule: #eaeaea;
+  --accent: #0070f3;
+  --code-bg: #fafafa;
+  --code-border: #eaeaea;
+}
+
+* { box-sizing: border-box; }
+
+.md2pdf-doc {
+  color: var(--body);
+  font-family: "Geist", -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.6;
+  max-width: 100%;
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1, "liga" 1;
+  /* Force fractional glyph advances — see report.css. Without this, chromium rounds
+   * per-glyph advances to whole pixels at body sizes, giving loose, gappy spacing. */
+  text-rendering: geometricPrecision;
+}
+
+h1, h2, h3, h4 {
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  break-after: avoid;
+}
+h1 { font-size: 22pt; font-weight: 800; letter-spacing: -0.04em; margin: 0 0 0.5em; }
+h2 { font-size: 15pt; margin: 1.5em 0 0.5em; }
+h3 { font-size: 12pt; margin: 1.2em 0 0.35em; letter-spacing: -0.02em; }
+h4 {
+  font-size: 8.5pt;
+  margin: 1em 0 0.35em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+p { margin: 0 0 0.8em; orphans: 3; widows: 3; }
+strong { font-weight: 700; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; font-weight: 500; }
+
+img { max-width: 100%; height: auto; }
+figure { margin: 1.2em 0; text-align: center; break-inside: avoid; }
+figure figcaption {
+  display: block;
+  font-size: 8.5pt;
+  color: var(--muted);
+  margin-top: 0.5em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2em 0;
+  font-size: 10pt;
+  font-variant-numeric: tabular-nums;
+}
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th, td { padding: 8px 12px 8px 0; text-align: left; vertical-align: top; }
+th {
+  font-size: 8pt;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  border-bottom: 1.5px solid var(--ink);
+}
+td { border-bottom: 1px solid var(--rule); }
+td:last-child, th:last-child { padding-right: 0; }
+
+blockquote {
+  margin: 1.2em 0;
+  padding: 0.1em 0 0.1em 1em;
+  border-left: 3px solid var(--ink);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+code {
+  font-family: "JetBrains Mono", "SF Mono", "DejaVu Sans Mono", monospace;
+  font-size: 9pt;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  padding: 0.05em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  padding: 0.9em 1.1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  break-inside: avoid;
+  font-size: 8.5pt;
+  line-height: 1.5;
+}
+pre code { background: none; border: none; padding: 0; }
+
+pre.mermaid {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: center;
+  break-inside: avoid;
+  margin: 1.4em 0;
+}
+pre.mermaid svg { max-width: 100%; height: auto; }
+pre.mermaid svg text,
+pre.mermaid svg .nodeLabel,
+pre.mermaid svg .edgeLabel { font-family: "Geist", sans-serif !important; }
+
+hr { border: none; border-top: 1px solid var(--rule); margin: 1.6em 0; }
+ul, ol { margin: 0 0 0.8em; padding-left: 1.3em; }
+li { margin: 0.2em 0; }
+li::marker { color: var(--muted); }
+math { font-size: 1.05em; }

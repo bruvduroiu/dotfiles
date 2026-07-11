@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>$title$</title>
+  <link rel="stylesheet" href="$theme_css$">
+  <script src="$mermaid_js$"></script>
+</head>
+<body>
+  <main class="md2pdf-doc">
+$body$
+  </main>
+  <script>
+    // Render diagrams, then flip a ready flag the printer waits on. startOnLoad is
+    // off so we control timing and can signal completion; without this, chromium
+    // may print before mermaid finishes drawing.
+    // Monochrome, bold, Geist-typed diagrams to match the theme CSS.
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "loose",
+      theme: "base",
+      themeVariables: {
+        fontFamily: "Geist, -apple-system, sans-serif",
+        fontSize: "14px",
+        primaryColor: "#ffffff",
+        primaryTextColor: "#000000",
+        primaryBorderColor: "#000000",
+        lineColor: "#000000",
+        secondaryColor: "#fafafa",
+        tertiaryColor: "#f4f4f4",
+      },
+    });
+    window.__md2pdfReady = false;
+    (async () => {
+      try {
+        if (document.querySelector("pre.mermaid")) {
+          await mermaid.run({ querySelector: "pre.mermaid" });
+        }
+      } catch (err) {
+        console.error("md2pdf: mermaid render failed:", err);
+      }
+      window.__md2pdfReady = true;
+    })();
+  </script>
+</body>
+</html>

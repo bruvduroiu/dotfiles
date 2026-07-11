@@ -1,0 +1,182 @@
+/* report.css — Geist-flavoured "pitch deck" aesthetic: minimal, bold, high
+ * contrast. Pure black on white, heavy tightly-tracked headings, hairline rules,
+ * ragged-right body, a single electric accent used sparingly. Font paths are
+ * substituted to bundled Geist Sans/Mono at build time.
+ *
+ * Page geometry + page-number footer live in print.py; this file owns the look.
+ */
+
+@font-face {
+  font-family: "Geist";
+  src: url("@fontdir@/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("@fontdir@/JetBrainsMono-Variable.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ink: #000;
+  --body: #1a1a1a;
+  --muted: #8f8f8f;
+  --rule: #eaeaea;
+  --hair: #000;
+  --accent: #0070f3;       /* electric blue, used sparingly */
+  --code-bg: #fafafa;
+  --code-border: #eaeaea;
+}
+
+* { box-sizing: border-box; }
+
+.md2pdf-doc {
+  color: var(--body);
+  font-family: "Geist", -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.6;
+  font-weight: 400;
+  max-width: 100%;
+  text-align: left;                 /* ragged right — never justify */
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1, "liga" 1, "cv01" 1;
+  /* Force fractional glyph advances. Chromium's default text-rendering rounds each
+   * glyph's advance to a whole pixel at body sizes, which accumulates into loose,
+   * uneven spacing and mid-word gaps with Geist's fractional metrics. optimizeLegibility
+   * does NOT fix it; only geometricPrecision honours the font's true advances + kerning. */
+  text-rendering: geometricPrecision;
+}
+
+/* Headings: heavy, tight tracking, near-flush line-height. Section-level h2s get
+ * a full-width hairline above them — the Geist "divider" motif. */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  break-after: avoid;
+}
+
+h1 {
+  font-size: 34pt;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  margin: 0 0 0.5em;
+  line-height: 1.02;
+}
+
+h2 {
+  font-size: 18pt;
+  margin: 1.8em 0 0.6em;
+  padding-top: 0.8em;
+  border-top: 1px solid var(--hair);
+}
+
+h3 { font-size: 13.5pt; margin: 1.4em 0 0.4em; letter-spacing: -0.02em; }
+h4 {
+  font-size: 9pt;
+  margin: 1.2em 0 0.4em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+p { margin: 0 0 0.85em; orphans: 3; widows: 3; }
+strong { font-weight: 700; color: var(--ink); }
+em { font-style: italic; }
+
+a { color: var(--accent); text-decoration: none; font-weight: 500; }
+
+img { max-width: 100%; height: auto; }
+figure { margin: 1.4em 0; text-align: center; break-inside: avoid; }
+figure figcaption {
+  display: block;
+  font-size: 8.5pt;
+  color: var(--muted);
+  margin-top: 0.6em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Tables: borderless minimalism — hairline rules only, uppercase micro-caps
+ * header, tabular figures, roomy padding. No zebra; whitespace does the work. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.4em 0;
+  font-size: 10pt;
+  font-variant-numeric: tabular-nums;
+}
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th, td { padding: 9px 12px 9px 0; text-align: left; vertical-align: top; }
+th {
+  font-size: 8pt;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  border-bottom: 1.5px solid var(--hair);
+}
+td { border-bottom: 1px solid var(--rule); }
+td:last-child, th:last-child { padding-right: 0; }
+
+/* Pull-quote style blockquote: no italics, bold, thick accent bar. */
+blockquote {
+  margin: 1.4em 0;
+  padding: 0.1em 0 0.1em 1.1em;
+  border-left: 3px solid var(--ink);
+  font-size: 12pt;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+/* Monospace: Geist Mono. Inline gets a chip; blocks get a soft card. */
+code {
+  font-family: "JetBrains Mono", "SF Mono", "DejaVu Sans Mono", monospace;
+  font-size: 9pt;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  padding: 0.05em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  padding: 0.9em 1.1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  break-inside: avoid;
+  font-size: 8.5pt;
+  line-height: 1.5;
+}
+pre code { background: none; border: none; padding: 0; }
+
+/* Mermaid: centered, scaled, unboxed. */
+pre.mermaid {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: center;
+  break-inside: avoid;
+  margin: 1.6em 0;
+}
+pre.mermaid svg { max-width: 100%; height: auto; }
+/* mermaid styles SVG text inline; force Geist so diagrams match the body. */
+pre.mermaid svg text,
+pre.mermaid svg .nodeLabel,
+pre.mermaid svg .edgeLabel { font-family: "Geist", sans-serif !important; }
+
+hr { border: none; border-top: 1px solid var(--hair); margin: 2em 0; }
+
+ul, ol { margin: 0 0 0.85em; padding-left: 1.3em; }
+li { margin: 0.25em 0; }
+li::marker { color: var(--muted); }
+
+math { font-size: 1.05em; }

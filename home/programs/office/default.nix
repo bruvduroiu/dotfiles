@@ -4,6 +4,7 @@
   imports = [
     ./thunar.nix
     ./zathura.nix
+    ./md2pdf
     ./obsidian
     ./thunderbird.nix
   ];

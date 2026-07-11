@@ -28,6 +28,7 @@
         uber-receipts = prev.callPackage "${self}/pkgs/uber-receipts" {};
         portfolio-tracker = prev.callPackage "${self}/pkgs/portfolio-tracker" {};
         hister = prev.callPackage "${self}/pkgs/hister.nix" {};
+        md2pdf = prev.callPackage "${self}/pkgs/md2pdf" {};
         mullvad-jump = prev.callPackage "${self}/pkgs/mullvad-jump.nix" {};
         invoice = prev.callPackage "${self}/pkgs/invoice.nix" {
           srcHash = "sha256-Qa7lTpRBB3m3GiK5mBkDMyg0InUqziUANf5Ds5XDnGg=";

@@ -5,6 +5,11 @@
 }:
 
 let
+  # md2pdf integration is opt-in per host (see programs.md2pdf.obsidian.enable).
+  # The command + hotkey below are only added when enabled, so hosts without it
+  # (and its chromium closure) stay lean.
+  mdCfg = config.programs.md2pdf;
+
   # Shared app.json defaults. The obsidian module merges `settings` per
   # top-level key (app/appearance/...), NOT deeply — a vault that sets
   # `settings.app` replaces this whole block, so reuse it explicitly.
@@ -135,6 +140,10 @@ let
     max_visible_lines_in_shell_command_fields = false;
     shell_commands = [
       (mkShellCommand "blog-sync" "Blog: sync vault -> repo content" "${blog-sync}/bin/blog-sync")
+    ] ++ lib.optionals mdCfg.obsidian.enable [
+      # {{file_path:absolute}} → the active note; md2pdf writes <note>.pdf beside it.
+      (mkShellCommand "md2pdf-export" "Export: note -> PDF (md2pdf)"
+        "${mdCfg.package}/bin/md2pdf --theme ${mdCfg.defaultTheme} {{file_path:absolute}}")
     ];
     prompts = [ ];
     builtin_variables = { };
@@ -179,6 +188,8 @@ in
             "templater-obsidian:9 - Templates/Blog Post.md" = [
               { modifiers = [ "Mod" "Shift" ]; key = "B"; }
             ];
+          } // lib.optionalAttrs mdCfg.obsidian.enable {
+            "obsidian-shellcommands:shell-command-md2pdf-export" = [ mdCfg.obsidian.hotkey ];
           };
           corePlugins = [
             "backlink"

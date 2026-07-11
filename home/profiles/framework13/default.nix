@@ -35,6 +35,13 @@
     inputs.secrets.homeModules.default
   ];
 
+  # Markdown -> styled PDF pipeline (pandoc + headless chromium), with an
+  # Obsidian "Export: note -> PDF" command bound to Mod+Shift+E.
+  programs.md2pdf = {
+    enable = true;
+    obsidian.enable = true;
+  };
+
   # SOPS secret for OpenRouter API key (used by nvim 99 plugin)
   sops.secrets.openrouter_api_key = {
     sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
