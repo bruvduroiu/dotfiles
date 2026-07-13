@@ -12,7 +12,6 @@
   home.packages = with pkgs; [
     invoice
     libreoffice
-    onlyoffice-desktopeditors
     gimp
     pinta
     slack

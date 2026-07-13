@@ -4,7 +4,9 @@
   imageViewer = ["org.gnome.Loupe"];
   videoPlayer = ["io.github.celluloid_player.Celluloid"];
   audioPlayer = ["io.bassi.Amberol"];
-  officeEditor = ["onlyoffice-desktopeditors.desktop"];
+  officeWriter = ["writer.desktop"];
+  officeCalc = ["calc.desktop"];
+  officeImpress = ["impress.desktop"];
 
   xdgAssociations = type: program: list:
     builtins.listToAttrs (map (e: {
@@ -28,16 +30,20 @@
       "x-extension-xhtml"
       "xhtml+xml"
     ]);
-  office = 
-    (xdgAssociations "application" officeEditor [
+  office =
+    (xdgAssociations "application" officeWriter [
       "vnd.openxmlformats-officedocument.wordprocessingml.document"
-      "vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      "vnd.openxmlformats-officedocument.presentationml.presentation"
       "vnd.oasis.opendocument.text"
-      "vnd.oasis.opendocument.spreadsheet"
-      "vnd.oasis.opendocument.presentation"
       "msword"
+    ])
+    // (xdgAssociations "application" officeCalc [
+      "vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "vnd.oasis.opendocument.spreadsheet"
       "vnd.ms-excel"
+    ])
+    // (xdgAssociations "application" officeImpress [
+      "vnd.openxmlformats-officedocument.presentationml.presentation"
+      "vnd.oasis.opendocument.presentation"
       "vnd.ms-powerpoint"
     ]);
 
