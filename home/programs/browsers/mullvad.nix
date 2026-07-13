@@ -26,6 +26,14 @@ let
       lockPref("dom.security.https_only_mode", false);
       lockPref("dom.security.https_only_mode_ever_enabled", false);
       lockPref("dom.security.https_first", false);
+
+      // Mullvad Browser is permanent private-browsing (privatebrowsing.autostart)
+      // and HTTPS upgrade prefs have separate _pbm variants that override the
+      // globals above in private windows, so they must be disabled too.
+      lockPref("dom.security.https_only_mode_pbm", false);
+      lockPref("dom.security.https_only_mode_ever_enabled_pbm", false);
+      lockPref("dom.security.https_first_pbm", false);
+      lockPref("dom.security.https_first_schemeless", false);
     '';
   };
 in

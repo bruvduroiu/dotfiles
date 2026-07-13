@@ -54,6 +54,9 @@
       disable-ccid = true;
       # Use PC/SC for card access
       pcsc-driver = "${pkgs.pcsclite.lib}/lib/libpcsclite.so";
+      # Open the card in shared PC/SC mode so age-plugin-yubikey and ssh-agent
+      # can use the YubiKey while scdaemon holds it (sops decrypt during deploys)
+      pcsc-shared = true;
     };
   };
   home.packages = [ pkgs.gnupg ];
