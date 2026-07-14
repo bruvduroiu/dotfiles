@@ -11,6 +11,80 @@ let
   monocleAccent = c.base0C;
   monocleDimAlpha = if isDark then "40%" else "65%";
 
+  # Combined WireGuard indicator: one widget, both tunnels. wg0 (home hub) then
+  # wg-mullvad (egress), each drawn as its own glyph and colored independently
+  # via inline pango — a single waybar module has only one CSS class, so
+  # per-glyph state can't come from CSS. Each glyph's color IS its health:
+  #   white  (foreground) = up + fresh handshake — inconspicuous, all-good
+  #   orange (base09)      = up but no recent handshake (not passing traffic)
+  #   red    (base08)      = interface gone (for wg-mullvad: real IP leaking)
+  #
+  # Up/down is interface presence (`ip link`, no privilege). Handshake freshness
+  # needs `wg show … dump` (root) — the absolute path below matches the
+  # passwordless sudo rules in system/network/wireguard.nix EXACTLY (sudo
+  # secure_path would otherwise resolve a different store path and deny).
+  wgBin = "${pkgs.wireguard-tools}/bin/wg";
+  wgWhite = if isDark then c.base05 else c.base00;   # matches @foreground
+  wgOrange = c.base09;
+  wgRed = c.base08;
+  wireguard-indicator = pkgs.writeShellApplication {
+    name = "waybar-wireguard-indicator";
+    runtimeInputs = with pkgs; [ iproute2 wireguard-tools jq coreutils gawk curl ];
+    text = ''
+      # Resolve a Mullvad relay hostname from its peer public key, e.g.
+      # "de-fra-wg-001 (Frankfurt, Germany)". The relay catalog (key → name)
+      # is cached and refreshed in the BACKGROUND only when missing/stale, so
+      # the 10s poll never blocks on the network and works offline once warm.
+      RELAY_API="https://api.mullvad.net/public/relays/wireguard/v1"
+      CACHE="''${XDG_CACHE_HOME:-$HOME/.cache}/waybar-mullvad-relays.tsv"
+      relay_name() {
+        local pk=$1 age_s
+        mkdir -p "$(dirname "$CACHE")"
+        if [ ! -s "$CACHE" ]; then age_s=999999
+        else age_s=$(( $(date +%s) - $(stat -c %Y "$CACHE") )); fi
+        if [ "$age_s" -gt 86400 ]; then
+          # detach: never let the fetch stall waybar; next poll picks it up
+          ( curl -sf --max-time 15 "$RELAY_API" | jq -r '
+              .countries[] as $c | $c.cities[] as $ci | $ci.relays[]
+              | [.public_key, .hostname, $ci.name, $c.name] | @tsv' \
+              > "$CACHE.tmp" 2>/dev/null && mv "$CACHE.tmp" "$CACHE" ) >/dev/null 2>&1 &
+        fi
+        [ -s "$CACHE" ] || return 0
+        awk -F'\t' -v k="$pk" '$1==k {print $2" ("$3", "$4")"; exit}' "$CACHE"
+      }
+      # Emit "<color>\t<glyph>\t<tooltip line>" for one interface.
+      state() {
+        local iface=$1 glyph=$2 label=$3 downmsg=$4
+        if ! ip link show "$iface" >/dev/null 2>&1; then
+          printf '%s\t%s\t%s\n' '${wgRed}' "$glyph" "$downmsg"
+          return
+        fi
+        local pk="" endpoint="" hs="" dump now age where r
+        dump=$(sudo ${wgBin} show "$iface" dump 2>/dev/null || true)
+        read -r pk endpoint hs < <(printf '%s\n' "$dump" | awk 'NR==2 {print $1, $3, $5}') || true
+        now=$(date +%s)
+        where=$endpoint
+        if [ "$iface" = wg-mullvad ] && [ -n "$pk" ]; then
+          r=$(relay_name "$pk"); [ -n "$r" ] && where=$r
+        fi
+        if [ -n "''${hs:-}" ] && [ "$hs" -gt 0 ]; then age=$(( now - hs )); else age=-1; fi
+        if [ "$age" -ge 0 ] && [ "$age" -le 180 ]; then
+          printf '%s\t%s\t%s\n' '${wgWhite}' "$glyph" \
+            "$label connected — handshake ''${age}s ago ($where)"
+        else
+          printf '%s\t%s\t%s\n' '${wgOrange}' "$glyph" \
+            "$label up but NO recent handshake — not passing traffic ($where)"
+        fi
+      }
+      IFS=$'\t' read -r c0 g0 t0 < <(state wg0 "󰋜" "Home hub" \
+        "Home hub DOWN — no LAN/overlay access")
+      IFS=$'\t' read -r cm gm tm < <(state wg-mullvad "󰦝" "Mullvad" \
+        "Mullvad DOWN — traffic unprotected (real IP leaking)")
+      text="<span color='$c0'>$g0</span> <span color='$cm'>$gm</span>"
+      jq -cn --arg t "$text" --arg tip "$t0"$'\n'"$tm" '{text:$t, tooltip:$tip}'
+    '';
+  };
+
   # monocle window dots: one dot per tiled window on the active workspace,
   # active window filled — only when the workspace's layout is monocle
   # (hyprctl activeworkspace -j exposes tiledLayout on 0.55). Empty text
@@ -104,11 +178,15 @@ in {
       #custom-gpu,
       #custom-dnd,
       #custom-fcitx,
+      #custom-wireguard,
       #idle_inhibitor,
       #power-profiles-daemon {
         padding: 0 10px;
         border-radius: 15px;
       }
+      /* Per-tunnel health is colored inline (pango) inside the indicator
+         script — one module, two independently-colored glyphs. See
+         wireguard-indicator in default.nix. */
 
       #submap {
         padding: 0 10px;
@@ -138,6 +216,7 @@ in {
       #network:hover,
       #pulseaudio:hover,
       #custom-gpu:hover,
+      #custom-wireguard:hover,
       #idle_inhibitor:hover,
       #power-profiles-daemon:hover {
         background: alpha(@background, ${hoverAlpha});
@@ -199,7 +278,7 @@ in {
       margin = "0";
       modules-left = ["clock" "custom/timew" "custom/playerctl"];
       modules-center = ["hyprland/submap" "hyprland/workspaces" "custom/monocle"];
-      modules-right = ["custom/fcitx" "pulseaudio" "battery" "power-profiles-daemon" "network" "group/hardware" "custom/gpu" "temperature" "idle_inhibitor" "custom/dnd" "privacy"];
+      modules-right = ["custom/fcitx" "pulseaudio" "battery" "power-profiles-daemon" "custom/wireguard" "network" "group/hardware" "custom/gpu" "temperature" "idle_inhibitor" "custom/dnd" "privacy"];
       "hyprland/workspaces" = {
         format = "{icon}";
         format-icons = {
@@ -231,6 +310,23 @@ in {
         on-scroll-up = ''hyprctl dispatch "hl.dsp.layout('cyclenext')"'';
         on-scroll-down = ''hyprctl dispatch "hl.dsp.layout('cycleprev')"'';
         tooltip = true;
+      };
+
+      # Both tunnels in one widget (see wireguard-indicator above): wg0 glyph +
+      # wg-mullvad glyph, each colored by its own health. Polled — the
+      # connected→stale transition is time-based (handshake age), so an event
+      # model alone wouldn't catch it. One widget, one click target, so buttons
+      # are split across the tunnels (all in a terminal, interactive sudo — no
+      # extra sudoers rule needed):
+      #   left   → live `wg show` of both
+      #   right  → show mullvad tunnel options
+      "custom/wireguard" = {
+        format = "{}";
+        return-type = "json";
+        exec = "${wireguard-indicator}/bin/waybar-wireguard-indicator";
+        interval = 10;
+        on-click = "ghostty -e watch -n1 sudo wg show";
+        on-click-right = "ghostty -e mullvad-jump list";
       };
 
       # visible only while a submap (resize/launch/place) is active

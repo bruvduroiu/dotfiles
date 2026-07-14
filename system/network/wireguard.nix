@@ -1,4 +1,4 @@
-# WireGuard peer module: home hub + Mullvad split tunnel with kill switch.
+# WireGuard peer module: home hub + Mullvad split tunnel (NO kill switch).
 #
 # Design: docs/superpowers/specs/2026-07-05-wireguard-mullvad-design.md
 #
@@ -9,9 +9,10 @@
 # Per-host values (overlay IP, Mullvad addresses) are set in
 # hosts/<host>/default.nix via the network.wireguard options below.
 #
-# Split tunnel / kill switch — pure policy routing, no packet marking:
+# Split tunnel — pure policy routing, no packet marking, FAILS OPEN:
 #   Both WG sockets carry fwmark 51820 (wg-quick's standard full-tunnel
-#   mechanism). Three RPDB rules, placed after Tailscale's legacy range:
+#   mechanism). Three RPDB rules, added by wg-mullvad's own postUp (torn
+#   down by preDown), placed after Tailscale's legacy range:
 #
 #     pref 5401  fwmark 51820 → main      encapsulated tunnel packets take
 #                                         the physical default route; makes
@@ -23,14 +24,16 @@
 #                                         option-121 routes. Only the default
 #                                         route is suppressed.
 #     pref 5403  → table 2468             everything else: wg-mullvad default
-#                                         (metric 50, added by postUp) or the
-#                                         permanent "unreachable" fallback
-#                                         (metric 100) — fail closed when the
-#                                         tunnel is down for ANY reason.
+#                                         (metric 50, added by postUp).
 #
-#   Captive portal escape hatch: `systemctl stop mullvad-killswitch`
-#   (stop propagates to wg-quick-wg-mullvad via Requires=). Start
-#   wg-quick-wg-mullvad again once authenticated.
+#   NO fail-closed fallback: when wg-mullvad goes down (clean or crash) its
+#   routes/rules disappear, table 2468 empties, and traffic falls through to
+#   the physical default route — i.e. it LEAKS your real IP/DNS. This is
+#   deliberate: tunnel state is surfaced in waybar (custom/wireguard) rather
+#   than enforced. Captive portals therefore "just work" with the tunnel down.
+#
+#   Waybar reads handshake freshness via `wg show wg-mullvad dump`; the
+#   passwordless sudo rule for exactly that command is defined below.
 #
 # Required secrets (inputs.secrets: secrets/<hostname>/wireguard.yaml, via sops):
 #   wg-private-key:        <WireGuard private key for wg0>
@@ -67,6 +70,7 @@ let
   wgFwmark = 51820;       # on both WG sockets; matched by rule 5401
   tableId = 2468;         # Mullvad egress table (default + unreachable)
   ip = "${pkgs.iproute2}/bin/ip";
+  resolvectl = "${config.systemd.package}/bin/resolvectl";
 in {
   options.network.wireguard = {
     overlayIP = lib.mkOption {
@@ -104,13 +108,11 @@ in {
 
     # ── Firewall ─────────────────────────────────────────────────────────────
     networking.firewall = {
-      # rp_filter must be OFF entirely: kernel reverse-path validation does
-      # its FIB lookup with iif=lo, so it hits the kill switch rule (pref
-      # 5403) and sees "unreachable" for any non-LAN source while wg-mullvad
-      # is down — silently dropping inbound wg0 replies (fail-closed egress
-      # table and rp_filter are fundamentally incompatible). WireGuard
-      # authenticates sources cryptographically, which is stronger than
-      # route symmetry.
+      # rp_filter stays OFF: kernel reverse-path validation does its FIB
+      # lookup with iif=lo, so it hits the egress rules (pref 5403 → table
+      # 2468) and can see an asymmetric path for the Mullvad tunnel, dropping
+      # legitimate inbound wg0 replies. WireGuard authenticates sources
+      # cryptographically, which is stronger than route symmetry anyway.
       checkReversePath = false;
       # Only the home overlay is trusted. wg-mullvad is an internet egress
       # path — inbound traffic from it goes through the normal firewall.
@@ -160,18 +162,46 @@ in {
         privateKeyFile = config.sops.secrets.${mullvadSecret}.path;
         mtu = 1280;
         # Never touch the main routing table — egress is owned by the policy
-        # rules (mullvad-killswitch). NetworkManager keeps the default route.
+        # rules below. NetworkManager keeps the physical default route, which
+        # is what traffic falls back to (leaks) when this interface is down.
         table = "off";
-        # Tunnel default routes sit at metric 50, below the permanent
-        # unreachable fallback (metric 100) installed by the kill switch.
+        # postUp installs the egress policy: fwmark on the socket, the three
+        # RPDB rules, and the tunnel default in table 2468 (metric 50, sole
+        # entry — no unreachable fallback, so the table empties when the
+        # interface dies and traffic fails open). Rules are del-then-add so
+        # restarts don't stack duplicates.
         postUp = ''
           ${pkgs.wireguard-tools}/bin/wg set wg-mullvad fwmark ${toString wgFwmark}
+          for fam in -4 -6; do
+            ${ip} $fam rule del pref 5401 2>/dev/null || true
+            ${ip} $fam rule add pref 5401 fwmark ${toString wgFwmark} lookup main
+            ${ip} $fam rule del pref 5402 2>/dev/null || true
+            ${ip} $fam rule add pref 5402 lookup main suppress_prefixlength 0
+            ${ip} $fam rule del pref 5403 2>/dev/null || true
+            ${ip} $fam rule add pref 5403 iif lo lookup ${toString tableId}
+          done
           ${ip} route replace default dev wg-mullvad metric 50 table ${toString tableId}
           ${ip} -6 route replace default dev wg-mullvad metric 50 table ${toString tableId}
+          # DNS: pin the Mullvad resolver to THIS link and claim the ~.
+          # routing domain. resolved routes each query to the scope with the
+          # best matching domain; ~. outranks the NM uplinks' bare
+          # DefaultRoute flag, so their DHCP (ISP) resolvers stop receiving
+          # queries while the tunnel is up. Without ~., resolved fans every
+          # query out to ALL default-route scopes in parallel — global DNS=
+          # does not exclude per-link servers, which is exactly the leak.
+          # Per-link resolved state dies with the interface (crash included),
+          # so DNS fails open together with the routes above.
+          ${resolvectl} dns wg-mullvad ${mullvadDNS}
+          ${resolvectl} domain wg-mullvad "~."
         '';
         preDown = ''
-          ${ip} route del default dev wg-mullvad table ${toString tableId} 2>/dev/null || true
-          ${ip} -6 route del default dev wg-mullvad table ${toString tableId} 2>/dev/null || true
+          ${resolvectl} revert wg-mullvad 2>/dev/null || true
+          for fam in -4 -6; do
+            ${ip} $fam rule del pref 5401 2>/dev/null || true
+            ${ip} $fam rule del pref 5402 2>/dev/null || true
+            ${ip} $fam rule del pref 5403 2>/dev/null || true
+            ${ip} $fam route flush table ${toString tableId} 2>/dev/null || true
+          done
         '';
         peers = [
           {
@@ -183,57 +213,27 @@ in {
       };
     };
 
-    # ── Kill switch (persistent, fail-closed) ────────────────────────────────
-    # Pure RPDB — no nftables, no address lists, nothing to keep in sync.
-    # Independent of the wg-quick unit lifecycle: rules and the unreachable
-    # fallback survive tunnel crashes and restarts.
-    systemd.services.mullvad-killswitch = {
-      description = "Mullvad kill switch (policy routing, fail closed)";
-      wantedBy = [ "multi-user.target" ];
-      wants = [ "network-pre.target" ];
-      before = [ "network-pre.target" ];
-      path = [ pkgs.iproute2 ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
-      script = ''
-        for fam in -4 -6; do
-          # Encapsulated WG packets → physical default route
-          ip $fam rule del pref 5401 2>/dev/null || true
-          ip $fam rule add pref 5401 fwmark ${toString wgFwmark} lookup main
-          # Specific routes (LAN, overlay, option-121) win; default suppressed
-          ip $fam rule del pref 5402 2>/dev/null || true
-          ip $fam rule add pref 5402 lookup main suppress_prefixlength 0
-          # Everything else *locally generated*: Mullvad or fail closed.
-          # `iif lo` matches output route lookups only — it does NOT exempt
-          # kernel reverse-path lookups (those also use iif=lo), hence
-          # checkReversePath=false above.
-          ip $fam rule del pref 5403 2>/dev/null || true
-          ip $fam rule add pref 5403 iif lo lookup ${toString tableId}
-          ip $fam route replace unreachable default metric 100 table ${toString tableId}
-        done
-      '';
-      # Stopping the unit restores normal routing (captive portal escape
-      # hatch); Requires= below also stops the Mullvad tunnel with it.
-      preStop = ''
-        for fam in -4 -6; do
-          ip $fam rule del pref 5401 2>/dev/null || true
-          ip $fam rule del pref 5402 2>/dev/null || true
-          ip $fam rule del pref 5403 2>/dev/null || true
-          ip $fam route flush table ${toString tableId} 2>/dev/null || true
-        done
-      '';
-    };
-
-    # Never run the Mullvad tunnel without the kill switch: if the kill
-    # switch fails to install, the tunnel does not come up (and traffic
-    # visibly has no VPN) instead of silently egressing via the physical
-    # uplink.
-    systemd.services."wg-quick-wg-mullvad" = {
-      requires = [ "mullvad-killswitch.service" ];
-      after = [ "mullvad-killswitch.service" ];
-    };
+    # ── Waybar tunnel-state read access ──────────────────────────────────────
+    # The waybar custom/wireguard module polls handshake freshness on BOTH
+    # tunnels to tell "up" from "up but not passing traffic". `wg show` needs
+    # root, so grant exactly these two commands passwordless (interface-scoped,
+    # read-only). sudoers matches the full command line, so one entry per iface;
+    # the store path must match the waybar script's ${pkgs.wireguard-tools} EXACTLY.
+    security.sudo.extraRules = [
+      {
+        groups = [ "wheel" ];
+        commands = [
+          {
+            command = "${pkgs.wireguard-tools}/bin/wg show wg0 dump";
+            options = [ "NOPASSWD" ];
+          }
+          {
+            command = "${pkgs.wireguard-tools}/bin/wg show wg-mullvad dump";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
+    ];
 
     # ── DNS ──────────────────────────────────────────────────────────────────
     # Mullvad DNS for everything, replacing Tailscale's MagicDNS.
@@ -243,12 +243,15 @@ in {
     # Push .home.arpa as a search domain so `ssh openwrt` resolves.
     networking.search = [ "home.arpa" ];
 
-    # systemd-resolved: Mullvad in-tunnel DNS (plain :53 — already encrypted
-    # by the WG tunnel; it is not a DoT endpoint, so no hostname pin).
-    # FallbackDNS stays as a safety net (queries will fail anyway via kill
-    # switch if the tunnel is down — no leak).
+    # systemd-resolved: the Mullvad in-tunnel resolver (plain :53 — already
+    # encrypted by the WG tunnel) is bound to the wg-mullvad LINK in postUp
+    # above, together with the ~. routing domain. Deliberately NOT a global
+    # DNS= entry here: global servers only join the parallel fan-out next to
+    # the uplinks' DHCP servers — they never preempt them, so the ISP still
+    # sees every query (the leak this replaces). NB: with no kill switch,
+    # when the tunnel is down the uplinks' DHCP resolvers take over — DNS
+    # leaks along with the rest of the traffic (by design; watch waybar).
     services.resolved.settings.Resolve = {
-      DNS = [ mullvadDNS ];
       FallbackDNS = [
         "1.1.1.1#cloudflare-dns.com"
         "8.8.8.8#dns.google"
