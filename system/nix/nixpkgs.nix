@@ -43,8 +43,8 @@
         }).obsidian;
         opencode = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.opencode;
         sheets = prev.callPackage "${self}/pkgs/sheets.nix" {
-          srcHash = "sha256-79ZsCKUEU8swzzlYf5Lnnb3g/gfHfzobTyuhQuXf/FY=";
-          vendorHash = "sha256-WWtAt0+W/ewLNuNgrqrgho5emntw3rZL9JTTbNo4GsI=";
+          srcHash = "sha256-xDu+jbWH7ubXC6ImvkRVgPI0OHAaUQ60sELDJN8hY1M=";
+          vendorHash = "sha256-X7bfALH9mM15HP6SM60CFIG1rm4Ma6LEh2p7z5LNW64=";
         };
         sqlit-tui = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.sqlit-tui;
         google-cloud-sdk = prev.google-cloud-sdk.overrideAttrs (oldAttrs: rec {

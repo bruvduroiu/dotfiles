@@ -15,7 +15,7 @@ let
     pnpmDeps = pkgs.fetchPnpmDeps {
       inherit pname version src;
       fetcherVersion = 3;
-      hash = "sha256-BWQwBy2mBvsh4nsEy/ia5k4Ax7oogfjXb+LCb0OBjJI=";
+      hash = "sha256-mTXwN6bHvQCeokRCxhlEfZ7Xof7mdQvT6qaTh61wnbs=";
     };
 
     nativeBuildInputs = with pkgs; [ nodejs pnpm ]; # pnpmConfigHook needs pnpm on PATH

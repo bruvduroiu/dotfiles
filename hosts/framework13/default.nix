@@ -49,7 +49,7 @@
   ];
 
   boot = {
-    kernelPackages = lib.mkForce inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.linuxPackages_7_0;
+    kernelPackages = lib.mkForce inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.linuxPackages_latest;
   };
 
   # System configuration
