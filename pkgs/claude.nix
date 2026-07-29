@@ -14,7 +14,7 @@
   pyright,
 }:
 let
-  version = "2.1.173";
+  version = "2.1.220";
 
   # Servers the typescript-lsp / gopls-lsp / pyright-lsp plugins expect on PATH.
   # nodejs backs the JS-based servers; `typescript` provides tsserver; `go`
@@ -32,7 +32,7 @@ let
   platforms = {
     "x86_64-linux" = {
       platform = "linux-x64";
-      hash = "sha256-z36hlOF0iTL6MPGA6qn1b5pwOdzjcDApiMKSZimyohk=";
+      hash = "sha256-Z09h8g/zBvMQDPkgDkw2xLcCeLW+8ohFSYGblCqJyGM=";
     };
     "aarch64-linux" = {
       platform = "linux-arm64";

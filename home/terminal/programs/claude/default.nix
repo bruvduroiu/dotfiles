@@ -1,6 +1,11 @@
 { config, pkgs, inputs, ... }:
 
 let
+  # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a
+  # writeShellApplication (deps pinned, shellchecked at build time) and exports
+  # the settings.json registration graph that actually makes them fire.
+  claudeHooks = import ./hooks.nix { inherit pkgs; };
+
   # Only available on hosts that declare the secret (e.g. framework13);
   # `or null` keeps eval safe on phantom/iso where it isn't set.
   deepseekKeyPath = config.sops.secrets.deepseek_api_key.path or null;
@@ -40,10 +45,12 @@ in
 
     package = pkgs.claude-code;
 
-    # agentsDir/hooksDir/rulesDir are dir-path options in 26.05 (no warning).
+    # agentsDir/rulesDir are dir-path options in 26.05 (no warning).
     agentsDir = ./config/agents;
-    hooksDir = ./config/hooks;
     rulesDir = ./config/rules; # replaces the old home.file.".claude/rules" workaround
+    # No hooksDir: it only symlinks the scripts into ~/.claude/hooks as 0444
+    # (not executable, and not registered anywhere). settings.hooks below points
+    # at the built store paths instead — see hooks.nix.
     # skillsDir was renamed to `skills` in 26.05 (accepts a dir path or attrset).
     skills = ./config/skills;
 
@@ -77,6 +84,10 @@ in
 
     # Settings
     settings = {
+      # Event -> matcher -> command graph. Commands are /nix/store paths, so
+      # they are executable and carry their own jq/shellcheck/nix on PATH.
+      hooks = claudeHooks.settings;
+
       enabledPlugins = {
         "caveman@caveman" = true;
         "superpowers@superpowers-marketplace" = true;
