@@ -36,52 +36,6 @@ let
   mkBucket = tag: ''"query:${tag} ∙ unread:tags # \"${tag}\" and unread = \"yes\""'';
   bucketQueries = lib.concatMapStringsSep "\n" mkBucket feedTags;
 
-  # bookmark-cmd target: save the full article as a markdown note in the Keep
-  # vault. newsboat calls: <cmd> <url> <title> <description> <feed-title>
-  newsboat-clip = pkgs.writeShellApplication {
-    name = "newsboat-clip";
-    runtimeInputs = [ pkgs.python3Packages.trafilatura pkgs.coreutils ];
-    text = ''
-      url=''${1:-}
-      title=''${2:-untitled}
-      desc=''${3:-}
-      feed=''${4:-}
-
-      dir="$HOME/Documents/Keep/5 - Main Notes"
-      mkdir -p "$dir"
-
-      # filename: article title, path-hostile chars -> _, whitespace collapsed
-      safe=$(printf '%s' "$title" | tr '/\\:*?"<>|' '_________' | tr -s ' ' | sed 's/^ *//; s/ *$//')
-      [ -z "$safe" ] && safe=untitled
-      file="$dir/$safe.md"
-      n=1
-      while [ -e "$file" ]; do
-        file="$dir/$safe ($n).md"
-        n=$((n + 1))
-      done
-
-      # full text via trafilatura; fall back to feed description on failure
-      body=$(trafilatura -u "$url" --markdown 2>/dev/null || true)
-      [ -z "$body" ] && body="$desc"
-
-      # escape double-quotes for YAML frontmatter values
-      esc() { printf '%s' "$1" | sed 's/"/\\"/g'; }
-      today=$(date +%Y-%m-%d)
-
-      {
-        printf -- '---\n'
-        printf 'title: "%s"\n' "$(esc "$title")"
-        printf 'source: "%s"\n' "$(esc "$url")"
-        printf 'feed: "%s"\n' "$(esc "$feed")"
-        printf 'date: %s\n' "$today"
-        printf 'topic: ""\n'
-        printf 'tags: [clipping]\n'
-        printf -- '---\n\n'
-        printf '%s\n' "$body"
-      } > "$file"
-    '';
-  };
-
   # notify-program target: notify-format string arrives as args
   newsboat-notify = pkgs.writeShellApplication {
     name = "newsboat-notify";
@@ -92,11 +46,9 @@ let
   };
 in
 {
-  # trafilatura + the two helper wrappers; the newsboat package itself comes
+  # helper wrapper; the newsboat package itself comes
   # from programs.newsboat.package below.
   home.packages = [
-    pkgs.python3Packages.trafilatura
-    newsboat-clip
     newsboat-notify
   ];
 
@@ -131,10 +83,6 @@ in
       feedlist-format    "%4i %n %11u  %t"
       highlight article "[Tt]aiwan|[Kk]ubernetes|[Nn]ix([Oo][Ss])?|[Bb]ogdan|[Bb]uduroiu" yellow default bold
 
-      # capture → Obsidian (Keep vault, 5 - Main Notes/)
-      bookmark-cmd "${newsboat-clip}/bin/newsboat-clip"
-      bookmark-autopilot yes
-
       # notifications (global — fires for any new articles)
       notify-program "${newsboat-notify}/bin/newsboat-notify"
       notify-format "newsboat: %d new (%n unread)"
@@ -168,7 +116,6 @@ in
       bind ^D articlelist  halfpagedown
       bind ^U articlelist  halfpageup
       bind-key F edit-flags
-      bind-key b bookmark
       bind-key A mark-feed-read
       bind-key C mark-all-feeds-read
       bind-key U show-urls
@@ -181,8 +128,6 @@ in
       browser "uwsm app -- xdg-open %u"
       macro o set browser "uwsm app -- firefox --new-tab %u"; open-in-browser ; set browser "uwsm app -- xdg-open %u"
       macro v set browser "uwsm app -- celluloid %u"; open-in-browser ; set browser "uwsm app -- xdg-open %u"
-      # full-text on demand — fetch the real article into vim even on truncated feeds
-      macro f set browser "trafilatura -u %u --markdown --images 2>/dev/null | nvim -R -c 'set filetype=markdown' -"; open-in-browser ; set browser "uwsm app -- xdg-open %u"
 
       # colors — palette slots inherit the stylix-themed terminal
       color background        default default

@@ -57,6 +57,8 @@ https://www.alignmentforum.org/feed.xml ai "~AI Alignment Forum"
 # applied ML craft
 https://vickiboykis.com/index.xml ai "~Vicki Boykis"
 https://eugeneyan.com/rss/ ai "~Eugene Yan"
+https://yogthos.net/feed.xml ai "~(iterate think thoughts)"
+https://sebastianraschka.com/rss_feed.xml ai "~Sebastian Raschka, PhD"
 
 # ── maker — hardware hacking, RF/SDR, embedded ────────────────────────
 https://www.bunniestudios.com/blog/feed/ maker "~bunnie's blog"
