@@ -36,14 +36,10 @@ let
     # --- Waybar ---
     pkill -SIGUSR2 waybar 2>/dev/null || true
 
-    # --- GTK ---
-    if command -v gsettings &>/dev/null; then
-      if [ "$target" = "dark" ]; then
-        gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
-      else
-        gsettings set org.gnome.desktop.interface color-scheme 'prefer-light' 2>/dev/null || true
-      fi
-    fi
+    # --- GTK / portal color-scheme ---
+    # Handled by the specialisation switch above: Stylix's GNOME target writes
+    # org/gnome/desktop/interface/color-scheme per polarity (see theme/stylix.nix),
+    # which xdg-desktop-portal-gtk publishes as org.freedesktop.appearance.
 
     # --- Neovim ---
     if [ "$target" = "dark" ]; then

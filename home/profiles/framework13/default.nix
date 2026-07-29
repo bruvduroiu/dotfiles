@@ -12,8 +12,8 @@
     ../../programs
     ../../programs/keepassxc.nix
     ../../programs/wayland
-    # HM-generated Hyprland lua config (framework13-first; replaces the
-    # hand-authored system-level lua.nix once verified). See Change 2 plan.
+    # Hyprland config: hand-written hyprland.lua shipped via HM's lua
+    # backend, with a Nix prelude for stylix colours (framework13-first).
     ../../programs/wayland/hyprland.nix
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix

@@ -132,144 +132,20 @@ let
 in {
   programs.waybar = {
     enable = true;
+    # Theme variables come from stylix and so must be generated here; every
+    # structural rule lives in ./style.css (pure CSS, referencing these names).
+    # GTK CSS @define-color accepts color expressions, so the two alpha scalars
+    # become fully-composited colors (@panel, @panel-hover) — the stylesheet
+    # then needs zero interpolation. Order matters: @panel references
+    # @background, so @background is defined first.
     style = ''
       @define-color foreground ${if isDark then c.base05 else c.base00};
-      @define-color foreground-inactive ${if isDark then c.base04 else c.base03};
       @define-color background ${if isDark then c.base00 else c.base04};
       @define-color color9 ${c.base0E};
-
-      * {
-        font-family: JetBrainsMono Nerd Font;
-        font-size: 17px;
-        padding: 0;
-        margin: 0;
-      }
-
-      window#waybar {
-        all: unset;
-        color: @foreground;
-      }
-
-      .modules-left,
-      .modules-center,
-      .modules-right {
-        color: @foreground;
-        background: alpha(@background, ${bgAlpha});
-        margin: 5px 10px;
-        padding: 0 5px;
-        border-radius: 15px;
-      }
-      .modules-left {
-        padding: 0 5px;
-      }
-      .modules-center {
-        padding: 0 10px;
-        margin: 5 0 5 0;
-      }
-
-      #clock,
-      #battery,
-      #cpu,
-      #memory,
-      #disk,
-      #temperature,
-      #network,
-      #pulseaudio,
-      #custom-gpu,
-      #custom-dnd,
-      #custom-fcitx,
-      #custom-wireguard,
-      #idle_inhibitor,
-      #power-profiles-daemon {
-        padding: 0 10px;
-        border-radius: 15px;
-      }
-      /* Per-tunnel health is colored inline (pango) inside the indicator
-         script — one module, two independently-colored glyphs. See
-         wireguard-indicator in default.nix. */
-
-      #submap {
-        padding: 0 10px;
-        border-radius: 15px;
-        color: @color9;
-        font-style: italic;
-      }
-
-      #custom-dnd.dnd {
-        color: @color9;
-      }
-
-      #custom-fcitx.zh {
-        color: @color9;
-      }
-
-      #idle_inhibitor.activated {
-        color: @color9;
-      }
-
-      #clock:hover,
-      #battery:hover,
-      #cpu:hover,
-      #memory:hover,
-      #disk:hover,
-      #temperature:hover,
-      #network:hover,
-      #pulseaudio:hover,
-      #custom-gpu:hover,
-      #custom-wireguard:hover,
-      #idle_inhibitor:hover,
-      #power-profiles-daemon:hover {
-        background: alpha(@background, ${hoverAlpha});
-      }
-
-      #workspaces {
-        padding: 0px 5px;
-      }
-
-      #custom-monocle {
-        padding: 0px 5px;
-      }
-
-      #workspaces button {
-        all: unset;
-        padding: 0px 5px;
-        color: alpha(@color9, 0.4);
-        transition: all 0.2s ease;
-      }
-
-      #workspaces button:hover {
-        color: alpha(@color9, 0.7);
-        border: none;
-        text-shadow: 0px 0px 1.5px alpha(@color9, 0.5);
-        transition: all 1s ease;
-      }
-      #workspaces button.active {
-        color: @color9;
-        border: none;
-        text-shadow: 0px 0px 2px alpha(@color9, 0.5);
-      }
-      #workspaces button.empty {
-        color: alpha(@foreground, 0.15);
-        border: none;
-        text-shadow: 0px 0px 1.5px alpha(@foreground, 0.1);
-      }
-      #workspaces button.empty:hover {
-        color: alpha(@foreground, 0.3);
-        border: none;
-        text-shadow: 0px 0px 1.5px alpha(@foreground, 0.3);
-        transition: all 1s ease;
-      }
-      #workspaces button.empty.active {
-        color: @color9;
-        border: none;
-        text-shadow: 0px 0px 2px alpha(@color9, 0.5);
-      }
-      #workspaces button.urgent {
-        color: ${c.base08};
-        border: none;
-        text-shadow: 0px 0px 2px alpha(${c.base08}, 0.7);
-      }
-    '';
+      @define-color urgent ${c.base08};
+      @define-color panel alpha(@background, ${bgAlpha});
+      @define-color panel-hover alpha(@background, ${hoverAlpha});
+    '' + builtins.readFile ./style.css;
     settings = [{
       layer = "top";
       position = "top";
