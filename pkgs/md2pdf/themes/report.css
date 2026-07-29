@@ -20,6 +20,13 @@
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: "Noto Sans Math";
+  src: url("@fontdir@/NotoSansMath-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --ink: #000;
@@ -179,4 +186,12 @@ ul, ol { margin: 0 0 0.85em; padding-left: 1.3em; }
 li { margin: 0.25em 0; }
 li::marker { color: var(--muted); }
 
-math { font-size: 1.05em; }
+/* Noto Sans Math: sans font with an OpenType MATH table, so chromium's MathML
+ * uses matching italic variants instead of serif fallback glyphs mid-formula. */
+math { font-family: "Noto Sans Math", "Geist", sans-serif; font-size: 1.05em; }
+math[display="block"] {
+  display: block math;
+  text-align: center;
+  margin: 1.1em 0;
+  break-inside: avoid;
+}

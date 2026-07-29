@@ -1,0 +1,261 @@
+/* academic.css — the report theme's scholarly sibling. Same Geist-flavoured
+ * look (sans everywhere, hairlines, black on white — deliberately NOT the
+ * serifed LaTeX-paper cliché) but tuned for papers: justified + hyphenated
+ * body, numbered sections, "Figure N." / "Table N." captions, proper display
+ * math, and a footnotes block. Math is set in Noto Sans Math — a sans typeface
+ * with a real OpenType MATH table, so chromium's MathML gets correct italic
+ * variants, stretchy fences and script placement that visually match Geist
+ * instead of falling back to a serif math font.
+ *
+ * Page geometry + page-number footer live in print.py; this file owns the look.
+ */
+
+@font-face {
+  font-family: "Geist";
+  src: url("@fontdir@/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("@fontdir@/JetBrainsMono-Variable.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans Math";
+  src: url("@fontdir@/NotoSansMath-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --ink: #000;
+  --body: #1a1a1a;
+  --muted: #8f8f8f;
+  --rule: #eaeaea;
+  --hair: #000;
+  --accent: #0070f3;
+  --code-bg: #fafafa;
+  --code-border: #eaeaea;
+}
+
+* { box-sizing: border-box; }
+
+.md2pdf-doc {
+  color: var(--body);
+  font-family: "Geist", -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 10pt;
+  line-height: 1.55;
+  font-weight: 400;
+  max-width: 100%;
+  /* Justified + hyphenated — the one place this theme trades the Geist
+   * ragged-right for the even "text block" colour of a paper. */
+  text-align: justify;
+  hyphens: auto;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "kern" 1, "liga" 1, "cv01" 1;
+  /* Same fix as report.css: force fractional glyph advances, otherwise
+   * chromium rounds each advance to whole pixels and Geist spacing goes
+   * loose and uneven at body sizes. */
+  text-rendering: geometricPrecision;
+  counter-reset: sec fig tbl;
+}
+
+/* Headings: still heavy and tightly tracked, but paper-scaled. The document
+ * title (h1) is centered; sections are numbered with CSS counters. */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  text-align: left;
+  break-after: avoid;
+}
+
+h1 {
+  font-size: 21pt;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-align: center;
+  margin: 0 0 1.2em;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 13pt;
+  margin: 1.8em 0 0.6em;
+  padding-top: 0.7em;
+  border-top: 1px solid var(--hair);
+  counter-increment: sec;
+  counter-reset: subsec;
+}
+h2::before { content: counter(sec) "\2002"; color: var(--muted); font-weight: 600; }
+
+h3 {
+  font-size: 11pt;
+  margin: 1.4em 0 0.4em;
+  letter-spacing: -0.02em;
+  counter-increment: subsec;
+}
+h3::before { content: counter(sec) "." counter(subsec) "\2002"; color: var(--muted); font-weight: 600; }
+
+h4 {
+  font-size: 8.5pt;
+  margin: 1.2em 0 0.4em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+p { margin: 0 0 0.85em; orphans: 3; widows: 3; }
+strong { font-weight: 700; color: var(--ink); }
+em { font-style: italic; }
+
+a { color: var(--accent); text-decoration: none; font-weight: 500; }
+
+img { max-width: 100%; height: auto; }
+figure {
+  margin: 1.5em 0;
+  text-align: center;
+  break-inside: avoid;
+  counter-increment: fig;
+}
+figure figcaption {
+  display: block;
+  font-size: 8.5pt;
+  color: var(--muted);
+  margin-top: 0.7em;
+  text-align: center;
+  hyphens: none;
+}
+figure figcaption::before {
+  content: "Figure " counter(fig) ".\2002";
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Tables: same hairline minimalism as report, with numbered captions. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 9.5pt;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  counter-increment: tbl;
+}
+table caption {
+  caption-side: top;
+  font-size: 8.5pt;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 0.7em;
+  hyphens: none;
+}
+table caption::before {
+  content: "Table " counter(tbl) ".\2002";
+  font-weight: 600;
+  color: var(--ink);
+}
+thead { display: table-header-group; }
+tr { break-inside: avoid; }
+th, td { padding: 8px 12px 8px 0; text-align: left; vertical-align: top; }
+th {
+  font-size: 8pt;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  border-bottom: 1.5px solid var(--hair);
+}
+td { border-bottom: 1px solid var(--rule); }
+td:last-child, th:last-child { padding-right: 0; }
+
+/* Blockquote: quieter than report's pull-quote — indented aside with a
+ * hairline, for abstracts and quoted passages. */
+blockquote {
+  margin: 1.4em 0;
+  padding: 0.1em 0 0.1em 1.1em;
+  border-left: 2px solid var(--ink);
+  font-size: 9.5pt;
+  color: var(--body);
+  line-height: 1.5;
+}
+
+/* Monospace: identical treatment to report. */
+code {
+  font-family: "JetBrains Mono", "SF Mono", "DejaVu Sans Mono", monospace;
+  font-size: 8.5pt;
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  padding: 0.05em 0.35em;
+  border-radius: 4px;
+}
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  padding: 0.9em 1.1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  break-inside: avoid;
+  font-size: 8.5pt;
+  line-height: 1.5;
+  text-align: left;
+}
+pre code { background: none; border: none; padding: 0; }
+
+/* Mermaid: centered, scaled, unboxed. */
+pre.mermaid {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: center;
+  break-inside: avoid;
+  margin: 1.6em 0;
+}
+pre.mermaid svg { max-width: 100%; height: auto; }
+pre.mermaid svg text,
+pre.mermaid svg .nodeLabel,
+pre.mermaid svg .edgeLabel { font-family: "Geist", sans-serif !important; }
+
+hr { border: none; border-top: 1px solid var(--hair); margin: 2em 0; }
+
+ul, ol { margin: 0 0 0.85em; padding-left: 1.3em; }
+li { margin: 0.25em 0; }
+li::marker { color: var(--muted); }
+
+/* Math: Noto Sans Math for every token — identifiers, operators AND \text{}
+ * runs — so formulas are internally consistent instead of mixing serif italics
+ * with sans text. Slightly larger than body to hold its own next to Geist. */
+math {
+  font-family: "Noto Sans Math", "Geist", sans-serif;
+  font-size: 1.05em;
+}
+/* Display math: centered block with breathing room, never split across pages.
+ * (Chromium does not center display MathML on its own.) */
+math[display="block"] {
+  display: block math;
+  text-align: center;
+  margin: 1.1em 0;
+  break-inside: avoid;
+}
+
+/* Pandoc footnotes: smaller type under a short hairline, endnote style. */
+section.footnotes {
+  margin-top: 2.5em;
+  font-size: 8.5pt;
+  line-height: 1.5;
+  color: var(--body);
+}
+section.footnotes hr {
+  margin: 0 0 1em;
+  border-top: 1px solid var(--hair);
+  width: 30%;
+  margin-left: 0;
+}
+section.footnotes p { margin: 0 0 0.5em; }
