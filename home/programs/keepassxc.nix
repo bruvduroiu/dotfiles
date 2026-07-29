@@ -1,12 +1,5 @@
-{ config, ... }:
+{ ... }:
 
-let
-  # Stylix is only wired on framework13; live-iso/phantom lack it.
-  hasStylix = config ? lib && config.lib ? stylix;
-  # KeePassXC ApplicationTheme: "auto" follows the desktop, else light/dark.
-  # config.stylix.polarity is "dark"/"light", which are valid theme values.
-  appTheme = if hasStylix then config.stylix.polarity else "auto";
-in
 {
   programs.keepassxc = {
     enable = true;
@@ -27,7 +20,11 @@ in
       };
 
       GUI = {
-        ApplicationTheme = appTheme;
+        # "auto" follows the XDG appearance portal live (KeePassXC listens for
+        # org.freedesktop.portal.Settings SettingChanged). Baking in
+        # stylix.polarity instead would only apply on the next launch, since the
+        # theme is read once at startup — and restarting means re-unlocking.
+        ApplicationTheme = "auto";
         CompactMode = true;
         CheckForUpdates = false;
         # Close button minimises instead of quitting -> process stays alive so

@@ -15,6 +15,7 @@
     gimp
     pinta
     slack
+    mattermost-desktop
     sheets
     zulip-term
     xournalpp
