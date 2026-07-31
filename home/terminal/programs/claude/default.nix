@@ -45,6 +45,12 @@ in
 
     package = pkgs.claude-code;
 
+    # ~/.claude/CLAUDE.md — global memory loaded into every session. Holds the
+    # NixOS operating manual (how to reach python/node/etc. without a system
+    # install). Was previously an orphan file in this directory that nothing
+    # referenced, so none of it ever reached Claude.
+    memory.source = ./CLAUDE.md;
+
     # agentsDir/rulesDir are dir-path options in 26.05 (no warning).
     agentsDir = ./config/agents;
     rulesDir = ./config/rules; # replaces the old home.file.".claude/rules" workaround
@@ -89,7 +95,6 @@ in
       hooks = claudeHooks.settings;
 
       enabledPlugins = {
-        "caveman@caveman" = true;
         "superpowers@superpowers-marketplace" = true;
         "frontend-design@claude-plugins-official" = true;
         "gopls-lsp@claude-plugins-official" = true;
@@ -107,12 +112,6 @@ in
           source = {
             source = "github";
             repo = "obra/superpowers-marketplace";
-          };
-        };
-        caveman = {
-          source = {
-            source = "github";
-            repo = "JuliusBrussee/caveman";
           };
         };
       };
@@ -139,15 +138,27 @@ in
           "WebFetch(domain:*)"
           "Bash(curl:*)"
         ];
+        # Read(...) rules cover the Read tool only — `cat`/`echo $TOKEN` slip
+        # past them entirely. The secret-read-guard hook (hooks.nix) is what
+        # covers Bash; these stay as the cheap first line of defence.
         deny = [
           "Read(./.env)"
           "Read(./.env.*)"
           "Read(./secrets/**)"
+          # sops-nix decrypts to /run/secrets at activation: plaintext on a
+          # tmpfs, and the single highest-value thing on the box to leak.
+          "Read(/run/secrets/**)"
+          "Read(/run/secrets.d/**)"
           # Private flake (inputs.secrets): sops files AND vars — keeps
           # network topology/identifiers out of AI conversation context
           "Read(~/development/secrets/**)"
           "Read(~/.aws/**)"
           "Read(~/.ssh/**)"
+          "Read(~/.gnupg/**)"
+          "Read(~/.config/sops/**)"
+          "Read(~/.netrc)"
+          "Read(~/.npmrc)"
+          "Read(~/.docker/config.json)"
           "Bash(wget:*)"
         ];
         defaultMode = "default";
@@ -173,15 +184,6 @@ in
       # (SUPER+D jumps to it). Default "auto" would send desktop notifications
       # in ghostty instead; the bell/urgency path is quieter and survives DND.
       preferredNotifChannel = "terminal_bell";
-
-      # Caveman plugin badge ([CAVEMAN] / [CAVEMAN:ULTRA] …). The plugin cache
-      # path embeds a version hash that changes on plugin update, so resolve
-      # the newest cached copy at runtime instead of hardcoding it. Wrapped in
-      # `bash -c` because settings.env sets SHELL=fish and the snippet is POSIX.
-      statusLine = {
-        type = "command";
-        command = "bash -c 's=$(ls -t \"$HOME\"/.claude/plugins/cache/caveman/caveman/*/hooks/caveman-statusline.sh 2>/dev/null | head -n1); [ -n \"$s\" ] && exec bash \"$s\"; exit 0'";
-      };
     };
   };
 }

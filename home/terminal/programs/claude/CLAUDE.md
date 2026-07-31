@@ -1,115 +1,111 @@
-# Systematic Problem-Solving Framework
+# Global Instructions
 
-A conversation between User and Assistant. The user asks a complex question, and the Assistant solves it systematically.
+## This machine runs NixOS
 
-The Assistant **must**:
-1. Break down the problem into smaller sub-problems.
-2. **Generate and evaluate multiple approaches** (Tree of Thoughts).
-3. Explicitly state assumptions or uncertainties.
-4. Use domain-specific reasoning for the chosen approach.
-5. Verify intermediate steps and final answer.
+There is no FHS. `/usr/bin` is nearly empty, `/lib` does not exist, and there is
+no system-wide `python3`, `node`, `pip`, `cargo`, `gcc`, or `uv`. A tool missing
+from `PATH` is **normal**, not a broken install.
 
-**Strict Format**:
-<think>
+**Never** try to fix a missing tool with `apt`/`dnf`/`brew`, `pip install`,
+`npm i -g`, `cargo install`, `go install`, or `curl … | sh`. They will fail, or
+worse, half-succeed and leave junk in `$HOME`. Bring the tool in through Nix
+instead.
 
-[Step 1: Problem Decomposition]
-- Identify key components and possible strategies.
-- Use "Wait." to pause and consider additional aspects.
-- For significant realizations, use multiple "Wait" statements (e.g., "Wait, wait. Wait.")
-- Example: "Wait. To solve X, I could use Method A, B, or C."
+### Getting a tool for a single command
 
-[Step 2: Generate & Compare Approaches]
-- Approach 1: [Idea + pros/cons]
-- Approach 2: [Idea + pros/cons]
-- Approach 3: [Idea + pros/cons]
-- Use "Wait." to reconsider or analyze further.
-- Example: "Wait. Approach 1 is simple but slow; Wait. Approach 2 is faster but uses more space."
-- For breakthrough insights: "Wait, wait. Wait. That's an important realization..."
+Work down this list; stop at the first one that applies.
 
-[Step 3: Select Best Approach]
-- Use "Wait." to double-check selection criteria.
-- Example: "Wait. Choose Approach 2 due to O(n²) time complexity."
-- When discovering a better approach: "Wait, wait. Wait. Let's reevaluate our choice..."
+| Situation | Command |
+|---|---|
+| Repo has `.envrc` | `direnv exec . <cmd>` |
+| Repo has `flake.nix` with a devShell | `nix develop -c <cmd>` |
+| Repo has `shell.nix`, no flake | `nix-shell --run '<cmd>'` |
+| Repo has `devenv.nix` | `devenv shell -- <cmd>` |
+| Nothing project-local | `nix run nixpkgs#<pkg> -- <args>` |
+| Need several tools at once | `nix shell nixpkgs#<a> nixpkgs#<b> -c <cmd>` |
 
-[Step 4: Assumptions/Uncertainties]
-- Use "Wait." to identify potential issues.
-- Example: "Wait. Assuming input is sorted; if not, pre-sort it."
-- For critical assumptions: "Wait, wait. Wait. We need to verify this key assumption..."
+Notes:
 
-[Step 5: Domain-Specific Execution]
-- Use "Wait." to verify each step.
-- Example: "Wait. Implement Approach 2 with edge-case handling."
-- For potential mistakes: "Wait, wait. Wait. Let's step back and recheck our work..."
+- **direnv must be explicit.** The direnv shell hook only runs in the user's
+  interactive fish shell. Commands issued through the Bash tool do *not* pick up
+  `.envrc`; `direnv exec . <cmd>` (or `direnv allow` first, if it has never been
+  approved) is required.
+- **Don't assume `nix develop` gives language tooling.** A flake's default
+  devShell can be for anything. Run `nix flake show` or read `shell.nix` before
+  relying on it. (Example: this dotfiles repo's default devShell is Android/Boox
+  flashing tools — it contains no Nix development tooling at all.)
+- `nix run` and `nix shell` may download from the binary cache on first use;
+  give them a generous timeout, not the default.
 
-[Step 6: Validation]
-- Use "Wait." to thoroughly check results.
-- Example: "Wait. Test with input size 10⁴ to confirm O(n²) runtime."
-- For unexpected results: "Wait, wait. Wait. This outcome requires deeper analysis..."
+### Python
 
-[Step 7: Uncertainty Resolution]
-- Use "Wait." to address any remaining concerns.
-- For major revisions: "Wait, wait. Wait. We need to fundamentally rethink this..."
+```bash
+# stdlib only
+nix run nixpkgs#python3 -- script.py
 
-Note: Multiple "Wait" statements (e.g., "Wait, wait. Wait.") indicate an "aha moment" or critical realization that requires special attention and reevaluation of the current approach. 
-These moments often lead to breakthrough insights or important corrections in the reasoning process.
-</think>
+# with nixpkgs-provided libraries
+nix-shell -p "python3.withPackages(ps: with ps; [ requests numpy ])" \
+  --run "python3 script.py"
 
-<answer>
-Final answer after validation
-</answer>
+# same thing, flake-style
+nix shell --impure --expr \
+  'with import <nixpkgs> {}; python3.withPackages(ps: with ps; [ requests ])' \
+  -c python3 script.py
 
-## Development Best Practices
+# project with a requirements.txt / pyproject.toml — use uv inside a nix shell
+nix shell nixpkgs#uv -c bash -c 'uv venv && uv pip install -r requirements.txt && .venv/bin/python script.py'
+```
 
-- Always consider security implications of file access and command execution
-- Validate inputs and handle edge cases
-- Write clear, maintainable code with appropriate comments
-- Test thoroughly before suggesting changes
-- Consider performance implications of proposed solutions
-- Follow language-specific conventions and style guides
+`uv` and `pip` work fine **inside a venv created under a Nix shell** — manylinux
+wheels (numpy, pydantic, …) load correctly. What does not work is installing
+into a "system" Python, because there isn't one.
 
-## Nix Development Environment
+A `#!/usr/bin/env python3` shebang fails outside a Nix shell. Invoke the
+interpreter explicitly (`… -c python3 script.py`) rather than `./script.py`.
 
-This project uses **NixOS** and the **Nix package manager** for declarative system configuration and reproducible development environments.
+### Prebuilt binaries downloaded from the internet
 
-### Critical Requirements
+A dynamically-linked binary from outside Nix fails with a confusing
+`No such file or directory` even though the file is right there — the missing
+path is its ELF interpreter (`/lib64/ld-linux-x86-64.so.2`), not the binary.
 
-1. **All development commands must run in a Nix environment**
-   - Development tools, compilers, and dependencies are managed through `flake.nix`
-   - Do NOT assume system-wide installation of tools (npm, cargo, python, etc.)
-   - Always verify tool availability through Nix before executing commands
+In order of preference:
+1. Use the nixpkgs build of the tool instead.
+2. `nix run nixpkgs#steam-run -- ./thebinary` (FHS sandbox, no config change).
+3. `programs.nix-ld` is enabled on this host; a library it lacks gets added to
+   `system/programs/nix-ld.nix` (requires a rebuild — ask first).
 
-2. **Running commands in Nix environment**
-   - Use `nix develop` to enter a development shell with all dependencies
-   - Use `nix develop --command <cmd>` to run a single command with Nix environment
-   - Use `nix-shell` as an alternative to enter the development environment
-   - Check `flake.nix` to understand available development shells and dependencies
+### Writing temporary scripts
 
-3. **Building and testing**
-   - Use `nix build` to build Nix packages and configurations
-   - Use `nix build .#<output>` to build specific outputs defined in flake.nix
-   - Test configuration changes with `nixos-rebuild test` (requires root)
-   - Apply system configuration with `nixos-rebuild switch` (requires root)
+Put them in the session scratchpad directory, never in the repo, and run them
+through one of the shells above.
 
-4. **Package management**
-   - System packages are declared in Nix configuration files (not installed imperatively)
-   - User packages are managed through home-manager in the `home/` directory
-   - To add a new tool: modify the appropriate `.nix` file, don't use `apt`, `npm install -g`, etc.
+## Rebuilding this system
 
-5. **Configuration structure**
-   - `/system/` - System-level NixOS configuration
-   - `/home/` - User-level home-manager configuration
-   - `/hosts/` - Host-specific configurations
-   - `flake.nix` - Main entry point defining all outputs and dependencies
-   - `flake.lock` - Locked dependency versions (don't modify directly)
+The dotfiles flake lives at `~/development/dotfiles`. Hosts: `framework13`
+(this laptop), `phantom`, `steamdeck`. Home Manager is a NixOS module on
+`framework13`, so a system rebuild also applies user config.
 
-### When suggesting changes
+```bash
+# check evaluation without touching the system — safe, do this freely
+nix flake check ~/development/dotfiles
+nix eval ~/development/dotfiles#nixosConfigurations.framework13.config.<attr>
+nixos-rebuild build --flake ~/development/dotfiles#framework13   # no root needed
+```
 
-- **Before executing any build/dev command**: Verify it's available in the Nix environment
-- **Before suggesting package installation**: Identify the correct Nix configuration file to modify
-- **When adding new tools**: Suggest adding them to the appropriate Nix configuration, not installing them imperatively
-- **For testing changes**: Suggest using `nix build` or `nixos-rebuild test` rather than system-wide changes
-- **For dependencies**: Check if they need to be added to `flake.nix` or specific package configurations
+`nixos-rebuild test` and `nixos-rebuild switch` need root and change the running
+system — **ask before running either**. `nix flake update` rewrites `flake.lock`;
+ask as well. Never edit `flake.lock` by hand.
 
-### Example workflows
+Packages are declared, not installed: system-wide in `system/`, user-level in
+`home/`, host overrides in `hosts/<host>/`. Adding a tool means editing the right
+`.nix` file, not running an installer.
 
-**Running a development command:**
+## Development practices
+
+- Verify a command's tool is reachable (`command -v`, or just wrap it in
+  `nix run`/`nix shell`) before building a plan around it.
+- Validate inputs, handle edge cases, and consider the security implications of
+  file access and command execution.
+- Match the surrounding code's style and conventions.
+- Test before claiming something works; report failures with the actual output.

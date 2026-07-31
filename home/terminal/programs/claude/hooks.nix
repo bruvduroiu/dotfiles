@@ -24,6 +24,11 @@ let
 
   blockNoVerify = mkHook "block-no-verify" [ pkgs.jq ];
   secretScan = mkHook "secret-scan" [ pkgs.jq ];
+  secretReadGuard = mkHook "secret-read-guard" [
+    pkgs.jq
+    pkgs.gnused
+    pkgs.coreutils
+  ];
   shellcheckLint = mkHook "shellcheck-lint" [
     pkgs.jq
     pkgs.shellcheck
@@ -40,6 +45,7 @@ in
     inherit
       blockNoVerify
       secretScan
+      secretReadGuard
       shellcheckLint
       nixParseCheck
       ;
@@ -56,6 +62,20 @@ in
             command = "${blockNoVerify}/bin/block-no-verify";
             timeout = 10;
             statusMessage = "Checking for hook bypass...";
+          }
+        ];
+      }
+      # settings.permissions.deny only constrains the Read tool, so it does
+      # nothing about `cat /run/secrets/x` or `echo $FOO_TOKEN`. This one sees
+      # every tool that can name a path, Bash included.
+      {
+        matcher = "Bash|Read|Grep|Glob|Edit|Write|MultiEdit|NotebookEdit";
+        hooks = [
+          {
+            type = "command";
+            command = "${secretReadGuard}/bin/secret-read-guard";
+            timeout = 10;
+            statusMessage = "Checking for secret access...";
           }
         ];
       }
