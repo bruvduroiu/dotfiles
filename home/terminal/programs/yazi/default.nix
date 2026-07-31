@@ -81,33 +81,48 @@
         ] ++ duckdb;
       };
 
+      # Openers use yazi's `%s` placeholder (shell-escaped selection), not the
+      # old `$@` — current yazi passes no positional args, so `$@` expanded to
+      # nothing and every duckdb query ran against an empty path.
+      # `set -- %s` re-anchors it as `$1` so paths with spaces survive the
+      # trip into the SQL string literal.
       opener = {
         duckdb = [
           {
-            run = ''duckdb -cmd "CREATE TABLE tbl AS FROM '$@';"'';
+            run = ''set -- %s; duckdb -cmd "CREATE TABLE tbl AS FROM '$1';"'';
             block = true;
             desc = "Open in DuckDB";
           }
         ];
         duckdb-text = [
           {
-            run = ''duckdb -cmd "CREATE TABLE tbl AS FROM read_csv('$@');"'';
+            run = ''set -- %s; duckdb -cmd "CREATE TABLE tbl AS FROM read_csv('$1');"'';
             block = true;
             desc = "Open in DuckDB";
           }
         ];
         duckdb-excel = [
           {
-            run = ''duckdb -cmd "INSTALL excel; LOAD excel;" -cmd "CREATE TABLE tbl AS FROM read_xlsx('$@');"'';
+            # header = true: sheets whose header row mixes text and numeric
+            # labels (e.g. year columns) defeat duckdb's sniffer, which then
+            # names columns A1, B1, ... and treats the header as data.
+            run = ''set -- %s; duckdb -cmd "INSTALL excel; LOAD excel;" -cmd "CREATE TABLE tbl AS FROM read_xlsx('$1', header = true);"'';
             block = true;
             desc = "Open in DuckDB";
           }
         ];
         duckdb-db = [
           {
-            run = ''duckdb -cmd "INSTALL sqlite; LOAD sqlite;" "$@"'';
+            run = ''duckdb -cmd "INSTALL sqlite; LOAD sqlite;" %s'';
             block = true;
             desc = "Open in DuckDB";
+          }
+        ];
+        libreoffice = [
+          {
+            run = ''libreoffice %s'';
+            orphan = true;
+            desc = "Open in LibreOffice";
           }
         ];
       };
@@ -119,7 +134,8 @@
           { url = "*.json"; use = "duckdb"; }
           { url = "*.csv"; use = "duckdb-text"; }
           { url = "*.tsv"; use = "duckdb-text"; }
-          { url = "*.xlsx"; use = "duckdb-excel"; }
+          # Enter -> duckdb; `O` (open interactively) offers LibreOffice too.
+          { url = "*.xlsx"; use = ["duckdb-excel" "libreoffice"]; }
           { url = "*.db"; use = "duckdb-db"; }
           { url = "*.duckdb"; use = "duckdb-db"; }
           { url = "*.sqlite"; use = "duckdb-db"; }

@@ -187,31 +187,55 @@ local function place(fw, fh, fx, fy)
 	hl.dispatch(hl.dsp.window.move({ x = math.floor(m.x + w * fx), y = math.floor(m.y + h * fy), exact = true }))
 end
 
--- cycle_next({ next = false, tiled = true }) is broken on monocle/master:
--- upstream routes it to layoutMessage("cyclenext, b") (ConfigActions.cpp),
--- which neither layout parses -- monocle wants exactly "cycleprev", master
--- only knows a "noloop" arg. Branch on the workspace layout and use the
--- layoutmsg path there; generic window cycle everywhere else.
+-- Position of the active window inside its own group, 1-based, plus the group
+-- size. group.current_index exists too but its base isn't pinned down by the
+-- stubs, so walk members and match on address instead. Returns nil when the
+-- window is ungrouped or members isn't a usable list.
+local function group_pos(w)
+	local g = w and w.group
+	local m = g and g.members
+	if type(m) ~= "table" then
+		return nil
+	end
+	for i, x in ipairs(m) do
+		if x and x.address == w.address then
+			return i, #m
+		end
+	end
+	return nil
+end
+
+-- cycle_win() walks the workspace's windows *and* group tabs as one sequence:
+-- inside a group it steps the groupbar (group.next/prev), and once it runs off
+-- the last tab (or before the first, going back) it hands over to the layout
+-- cycle so focus leaves the group instead of wrapping inside it. Entering the
+-- next group lands on its active tab, so the sequence stays continuous.
+-- HL.Window.group is nil for ungrouped windows, so this is a plain field read
+-- at press time -- only possible because lua binds take a function instead of
+-- a fixed dispatcher.
+--
+-- The tail is layout-dependent: cycle_next({ next = false, tiled = true }) is
+-- broken on monocle/master -- upstream routes it to layoutMessage("cyclenext,
+-- b") (ConfigActions.cpp), which neither layout parses (monocle wants exactly
+-- "cycleprev", master only knows a "noloop" arg). Use the layoutmsg path
+-- there; generic window cycle everywhere else.
 local function cycle_win(next)
+	local w = hl.get_active_window()
+	if w and w.group then
+		local i, n = group_pos(w)
+		-- unknown position -> stay in the group (old behaviour); otherwise
+		-- only tab while there's a tab left in the direction of travel.
+		if not i or (next and i < n) or (not next and i > 1) then
+			hl.dispatch(next and hl.dsp.group.next() or hl.dsp.group.prev())
+			return
+		end
+	end
 	local ws = hl.get_active_workspace()
 	local l = ws and ws.tiled_layout or ""
 	if l == "monocle" or l == "master" then
 		hl.dispatch(hl.dsp.layout(next and "cyclenext" or "cycleprev"))
 	else
 		hl.dispatch(hl.dsp.window.cycle_next({ tiled = true, next = next }))
-	end
-end
-
--- SUPER+TAB is dual-purpose: inside a group it steps the tabs (groupbar),
--- everywhere else it cycles windows. HL.Window.group is nil for ungrouped
--- windows, so the branch is a plain field read at press time -- only
--- possible because lua binds take a function instead of a fixed dispatcher.
-local function tab_next(next)
-	local w = hl.get_active_window()
-	if w and w.group then
-		hl.dispatch(next and hl.dsp.group.next() or hl.dsp.group.prev())
-	else
-		cycle_win(next)
 	end
 end
 
@@ -237,15 +261,15 @@ hl.bind(mod .. " + SHIFT + C", hl.dsp.window.center())
 hl.bind(mod .. " + P", hl.dsp.window.pin({ action = "toggle" }))
 hl.bind(mod .. " + D", hl.dsp.focus({ urgent_or_last = true }))
 
--- window / group-tab cycling — tab_next() tabs through the group when the
--- active window is grouped, else falls back to cycle_win(), which branches
--- per layout (see helpers): the generic cycle_next reverse is broken
--- upstream on monocle/master.
+-- window / group-tab cycling — cycle_win() treats group tabs as part of the
+-- window sequence: tab through the group, then step out to the next window
+-- (see helpers; it also branches per layout, since the generic cycle_next
+-- reverse is broken upstream on monocle/master).
 hl.bind(mod .. " + TAB", function()
-	tab_next(true)
+	cycle_win(true)
 end)
 hl.bind(mod .. " + SHIFT + TAB", function()
-	tab_next(false)
+	cycle_win(false)
 end)
 hl.bind(mod .. " + CTRL + G", hl.dsp.window.move({ out_of_group = true }))
 hl.bind(mod .. " + ALT + G", hl.dsp.exec_cmd("hyprctl dispatch lockgroups toggle"))
