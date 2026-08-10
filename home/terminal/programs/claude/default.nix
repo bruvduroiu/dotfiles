@@ -6,39 +6,50 @@ let
   # the settings.json registration graph that actually makes them fire.
   claudeHooks = import ./hooks.nix { inherit pkgs; };
 
-  # Only available on hosts that declare the secret (e.g. framework13);
-  # `or null` keeps eval safe on phantom/iso where it isn't set.
-  deepseekKeyPath = config.sops.secrets.deepseek_api_key.path or null;
+  # Second Claude account on this machine. ~/.claude stays the personal
+  # profile; work gets its own config dir, selected via CLAUDE_CONFIG_DIR.
+  #
+  # On Linux that env var is complete isolation — credentials live at
+  # <config-dir>/.credentials.json (0600), alongside sessions/, projects/,
+  # history.jsonl and .claude.json. (On macOS it is not: OAuth tokens go to
+  # the Keychain, so only settings and history separate.)
+  workConfigDir = ".claude-work";
 
-  # `deepseek-code`: launch the same (LSP-wrapped) claude binary but pointed at
-  # DeepSeek's Anthropic-compatible endpoint, with the API key read from sops
-  # into ANTHROPIC_AUTH_TOKEN at runtime (never baked into the Nix store).
-  deepseek-code = pkgs.writeShellScriptBin "deepseek-code" (''
+  # `claude-work`: the same binary and the same config, a different account.
+  #
+  # Execs finalPackage, NOT pkgs.claude-code. finalPackage is the module's
+  # wrapper, which passes `--plugin-dir <generated>` — and that generated
+  # plugin dir is where `mcpServers` below actually lives. Bypassing the
+  # wrapper silently drops every MCP server.
+  claude-work = pkgs.writeShellScriptBin "claude-work" ''
     set -eu
-  '' + (if deepseekKeyPath == null then ''
-    echo "deepseek-code: deepseek_api_key sops secret is not configured on this host" >&2
-    exit 1
-  '' else ''
-    if [ ! -r "${deepseekKeyPath}" ]; then
-      echo "deepseek-code: cannot read DeepSeek API key at ${deepseekKeyPath}" >&2
-      exit 1
-    fi
-    ANTHROPIC_AUTH_TOKEN="$(${pkgs.coreutils}/bin/cat ${deepseekKeyPath})"
-    export ANTHROPIC_AUTH_TOKEN
-
-    export ANTHROPIC_BASE_URL="https://api.deepseek.com/anthropic"
-    export ANTHROPIC_MODEL="deepseek-v4-pro[1m]"
-    export ANTHROPIC_DEFAULT_OPUS_MODEL="deepseek-v4-pro[1m]"
-    export ANTHROPIC_DEFAULT_SONNET_MODEL="deepseek-v4-pro[1m]"
-    export ANTHROPIC_DEFAULT_HAIKU_MODEL="deepseek-v4-flash"
-    export CLAUDE_CODE_SUBAGENT_MODEL="deepseek-v4-flash"
-    export CLAUDE_CODE_EFFORT_LEVEL="max"
-
-    exec ${pkgs.claude-code}/bin/claude "$@"
-  ''));
+    export CLAUDE_CONFIG_DIR="$HOME/${workConfigDir}"
+    exec ${config.programs.claude-code.finalPackage}/bin/claude "$@"
+  '';
 in
 {
-  home.packages = [ deepseek-code ];
+  home.packages = [ claude-work ];
+
+  # `programs.claude-code` materialises exactly one configDir, so a session
+  # launched under a different CLAUDE_CONFIG_DIR would start with *nothing*
+  # from this repo — no secret-read-guard hook, no deny list, no NixOS
+  # CLAUDE.md. Mirror the same store paths into the work profile; only the
+  # per-account state (credentials, sessions, projects, MCP OAuth tokens)
+  # differs, which is the entire point of the split.
+  #
+  # settings.json is taken from the module's own generated output rather than
+  # rebuilt here, so hooks/permissions/plugins cannot drift between accounts.
+  home.file = {
+    "${workConfigDir}/settings.json".source =
+      config.home.file."${config.programs.claude-code.configDir}/settings.json".source;
+    "${workConfigDir}/CLAUDE.md".source = ./CLAUDE.md;
+    # recursive: recreate the directory and symlink each file individually,
+    # so the directory itself stays writable — `/agents` can still add one at
+    # runtime. A bare `source = ./dir` would symlink the whole read-only dir.
+    "${workConfigDir}/agents" = { source = ./config/agents; recursive = true; };
+    "${workConfigDir}/rules" = { source = ./config/rules; recursive = true; };
+    "${workConfigDir}/skills" = { source = ./config/skills; recursive = true; };
+  };
 
   programs.claude-code = {
     enable = true;
@@ -95,7 +106,6 @@ in
       hooks = claudeHooks.settings;
 
       enabledPlugins = {
-        "superpowers@superpowers-marketplace" = true;
         "frontend-design@claude-plugins-official" = true;
         "gopls-lsp@claude-plugins-official" = true;
         "typescript-lsp@claude-plugins-official" = true;
@@ -106,12 +116,6 @@ in
           source = {
             source = "git";
             url = "https://github.com/anthropics/claude-plugins-official.git";
-          };
-        };
-        superpowers-marketplace = {
-          source = {
-            source = "github";
-            repo = "obra/superpowers-marketplace";
           };
         };
       };
@@ -164,13 +168,6 @@ in
         defaultMode = "default";
       };
       env = {
-        # ANTHROPIC_BASE_URL = "https://api.deepseek.com/anthropic";
-        # ANTHROPIC_MODEL = "deepseek-v4-pro[1m]";
-        # ANTHROPIC_DEFAULT_OPUS_MODEL = "deepseek-v4-pro[1m]";
-        # ANTHROPIC_DEFAULT_SONNET_MODEL = "deepseek-v4-pro[1m]";
-        # ANTHROPIC_DEFAULT_HAIKU_MODEL = "deepseek-v4-flash";
-        # CLAUDE_CODE_SUBAGENT_MODEL = "deepseek-v4-flash";
-        # CLAUDE_CODE_EFFORT_LEVEL = "max";
         SHELL = "fish";
         API_TIMEOUT_MS = "3000000";
         NIX_ENVIRONMENT = "true";
