@@ -1,7 +1,7 @@
 ---
 description: Implements features and fixes within the scope agreed with the user
 mode: primary
-model: deepseek/deepseek-v4-pro
+model: openai/gpt-5.6-sol
 temperature: 0.2
 tools:
   write: true

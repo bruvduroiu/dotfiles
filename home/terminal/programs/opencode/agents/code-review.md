@@ -1,7 +1,7 @@
 ---
 description: Reviews code changes for bugs, security issues, and maintainability. Use after implementation to vet diffs before commit or merge.
 mode: subagent
-model: openrouter/anthropic/claude-sonnet-4-5
+model: openai/gpt-5.6-sol
 temperature: 0.1
 tools:
   write: false
