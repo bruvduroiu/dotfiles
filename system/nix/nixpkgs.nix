@@ -17,6 +17,10 @@
             colors = import "${self}/lib/colors" prev.lib;
           };
         claude-code = prev.callPackage "${self}/pkgs/claude.nix" {};
+        # 26.05 pins codex 0.133; the config.toml schema this repo writes
+        # (permission profiles, `web_search` modes, `tui.notification_method`)
+        # only exists from ~0.140 onwards. Same treatment as opencode below.
+        codex = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.codex;
         terraform-mcp-server = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.terraform-mcp-server;
         keymapp = (import inputs.nixpkgs-unstable.outPath {
           system = prev.stdenv.hostPlatform.system;

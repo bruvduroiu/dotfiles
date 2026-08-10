@@ -16,8 +16,7 @@ Review priorities, in order:
 
 1. Correctness — bugs, unhandled edge cases, broken invariants, race conditions
 2. Security — injection, secret leakage, unsafe permissions, unvalidated input
-3. Spec compliance — does the diff match the OpenSpec change proposal, if one exists?
-4. Maintainability — naming, duplication, dead code, needless complexity
+3. Maintainability — naming, duplication, dead code, needless complexity
 
 For each finding give: file:line, the problem in one sentence, and a concrete fix.
 Distinguish blocking issues from nitpicks. If the change looks good, say so

@@ -32,7 +32,7 @@ let
   platforms = {
     "x86_64-linux" = {
       platform = "linux-x64";
-      hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      hash = "sha256-TpvsEXfOlpDovZiLcQrCQQXnDaQo3QlMWty754alVVU=";
     };
     "aarch64-linux" = {
       platform = "linux-arm64";
