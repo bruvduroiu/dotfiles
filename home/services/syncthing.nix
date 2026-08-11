@@ -16,6 +16,48 @@ let
       cleanoutDays = "30";  # Keep deleted files for 30 days
     };
   };
+
+  # Syncthing ignore patterns - managed declaratively
+  # These files tell Syncthing which paths to exclude from syncing.
+  #
+  # Strategy: .stignore files are NOT synced by Syncthing (by design).
+  # We use #include to reference a .stignore-common file that IS synced,
+  # allowing all devices to share the same ignore patterns.
+  #
+  # On mobile devices (Pixel), create a .stignore with:
+  #   #include .stignore-common
+  ignoreFiles = {
+    # Shared ignore patterns - this file IS synced to all devices
+    "Documents/.stignore-common" = ''
+      // Shared ignore patterns for all devices
+      // This file is synced, then included by each device's .stignore
+
+      // Obsidian configuration - managed by home-manager on Framework13
+      // Contains symlinks that can't sync to Android/iOS
+      **/.obsidian
+    '';
+
+    # Local .stignore that includes the shared patterns
+    "Documents/.stignore" = ''
+      // Include shared ignore patterns (synced across devices)
+      #include .stignore-common
+    '';
+  };
+
+  # Materialise each ignore file as a *real* file under $HOME. See the
+  # activation entry below for why a plain home.file symlink cannot work.
+  installIgnoreFile = relPath: text:
+    let
+      src = pkgs.writeText
+        "stignore-${lib.replaceStrings [ "/" "." ] [ "-" "" ] relPath}"
+        text;
+    in ''
+      run mkdir -p "$(dirname "$HOME/${relPath}")"
+      # Drop any previous generation's store symlink first: `install` would
+      # otherwise follow it and fail writing into the read-only store.
+      run rm -f "$HOME/${relPath}"
+      run install -m 0644 ${src} "$HOME/${relPath}"
+    '';
 in {
   # SOPS secrets configuration for Syncthing GUI authentication
   sops = {
@@ -135,18 +177,6 @@ in {
           rescanIntervalS = 3600;
           ignorePerms = true;
         };
-
-        # Books folder - bidirectional sync with Boox eReader only
-        "Books" = {
-          id = "books";
-          path = "/home/bogdan/Documents/Personal/Books";
-          devices = [ "Boox Go Color 7" ];
-          type = "sendreceive";
-          versioning = versioningConfig;
-          fsWatcherEnabled = true;
-          rescanIntervalS = 3600;
-          ignorePerms = true;
-        };
       };
     };
   };
@@ -159,38 +189,23 @@ in {
     };
   };
 
-  # Syncthing ignore patterns - managed declaratively
-  # These files tell Syncthing which paths to exclude from syncing
+  # Write the ignore files as real files, NOT via home.file.
   #
-  # Strategy: .stignore files are NOT synced by Syncthing (by design).
-  # We use #include to reference a .stignore-common file that IS synced,
-  # allowing all devices to share the same ignore patterns.
-  # 
-  # On mobile devices (Pixel), create a .stignore with:
-  #   #include .stignore-common
-  home.file = {
-    # Shared ignore patterns - this file IS synced to all devices
-    "Documents/.stignore-common".text = ''
-      // Shared ignore patterns for all devices
-      // This file is synced, then included by each device's .stignore
-      
-      // Obsidian configuration - managed by home-manager on Framework13
-      // Contains symlinks that can't sync to Android/iOS
-      **/.obsidian
-    '';
-
-    # Local .stignore that includes the shared patterns
-    "Documents/.stignore".text = ''
-      // Include shared ignore patterns (synced across devices)
-      #include .stignore-common
-    '';
-
-    # Books folder - ignore Boox-specific .sdr directories
-    # These contain reading progress/annotations specific to the Boox device
-    "Documents/Personal/Books/.stignore".text = ''
-      // Ignore Boox eReader metadata directories
-      // .sdr folders contain annotations, reading progress, and device-specific data
-      **/*.sdr
-    '';
-  };
+  # Syncthing 2.x opens everything inside a folder root with O_NOFOLLOW so a
+  # path can never escape the folder jail through a symlink. home.file only
+  # ever produces /nix/store symlinks, so a managed .stignore is rejected by
+  # the kernel with ELOOP ("too many levels of symbolic links") and the folder
+  # fails its initial scan entirely:
+  #   Failed initial scan (error="loading ignores: open .../.stignore:
+  #   too many levels of symbolic links" folder.id=docs)
+  #
+  # .stignore-common has a second reason to be a real file: it is meant to be
+  # synced to the other devices, and Syncthing would otherwise replicate it as
+  # a symlink pointing at a /nix/store path that exists on no other machine.
+  #
+  # Ordered after linkGeneration so home-manager has already cleaned up the
+  # symlinks left behind by generations that still used home.file.
+  home.activation.syncthingIgnores = lib.hm.dag.entryAfter [ "linkGeneration" ] (
+    lib.concatStrings (lib.mapAttrsToList installIgnoreFile ignoreFiles)
+  );
 }
