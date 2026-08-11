@@ -56,11 +56,15 @@ in
 
     package = pkgs.claude-code;
 
-    # ~/.claude/CLAUDE.md — global memory loaded into every session. Holds the
+    # ~/.claude/CLAUDE.md — global context loaded into every session. Holds the
     # NixOS operating manual (how to reach python/node/etc. without a system
     # install). Was previously an orphan file in this directory that nothing
     # referenced, so none of it ever reached Claude.
-    memory.source = ./CLAUDE.md;
+    #
+    # `memory.source`/`memory.text` were collapsed into a single `context`
+    # option (either lines or a path); a path still lands as a symlink, a
+    # string would be written inline.
+    context = ./CLAUDE.md;
 
     # agentsDir/rulesDir are dir-path options in 26.05 (no warning).
     agentsDir = ./config/agents;
