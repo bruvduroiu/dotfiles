@@ -44,12 +44,60 @@ let
       notify-send --app-name=newsboat "Newsboat" "$*"
     '';
   };
+
+  # full-text view: many feeds ship a teaser-only <description>, so this fetches
+  # the article's real page and renders it readability-style in a pager. Used as
+  # a throwaway `browser` by the `f` binding below — newsboat single-quotes %u
+  # before handing the command to the shell, so the URL arrives as one argv
+  # element and needs no quoting from us. open-in-browser runs it in the
+  # foreground, which is what lets less take over the terminal.
+  newsboat-reader = pkgs.writeShellApplication {
+    name = "newsboat-reader";
+    runtimeInputs = [
+      pkgs.reader
+      pkgs.less
+      pkgs.ncurses # tput
+      pkgs.coreutils
+    ];
+    text = ''
+      url="''${1:-}"
+      if [ -z "$url" ]; then
+        echo "usage: newsboat-reader <url>" >&2
+        exit 2
+      fi
+
+      # reader's auto width detection measures its stdout, which is a file here,
+      # so pass the width explicitly. Cap at 100 to match newsboat's text-width.
+      cols=$(tput cols 2>/dev/null || echo 100)
+      if [ "$cols" -gt 100 ]; then
+        cols=100
+      fi
+
+      out=$(mktemp)
+      err=$(mktemp)
+      trap 'rm -f "$out" "$err"' EXIT
+
+      # buffered rather than piped straight into less: a fetch failure should
+      # land in the pager as a readable message, not as a half-empty page
+      printf 'reader: fetching %s …\n' "$url"
+      if ! reader --image-mode ansi --terminal-width "$cols" -- "$url" \
+        >"$out" 2>"$err"; then
+        {
+          printf '\nreader failed on %s\n\n' "$url"
+          cat "$err"
+        } >>"$out"
+      fi
+
+      less -R -- "$out"
+    '';
+  };
 in
 {
   # helper wrapper; the newsboat package itself comes
   # from programs.newsboat.package below.
   home.packages = [
     newsboat-notify
+    newsboat-reader
   ];
 
   programs.newsboat = {
@@ -126,6 +174,11 @@ in
       # open links — quoted browser must live here, not the module's `browser`
       # option (the module renders it unquoted, dropping everything past `uwsm`)
       browser "uwsm app -- xdg-open %u"
+      # f — full text: Enter still shows the feed's own (often truncated) body,
+      # this fetches the linked page and renders it via reader in less. Same
+      # swap-browser-then-restore trick as the macros below; `bind` is used
+      # instead of `macro` so it stays a single keypress in the reading dialogs.
+      bind f article,articlelist,urlview set browser "${newsboat-reader}/bin/newsboat-reader %u" ; open-in-browser ; set browser "uwsm app -- xdg-open %u" -- "full text (reader)"
       macro o set browser "uwsm app -- firefox --new-tab %u"; open-in-browser ; set browser "uwsm app -- xdg-open %u"
       macro v set browser "uwsm app -- celluloid %u"; open-in-browser ; set browser "uwsm app -- xdg-open %u"
 
