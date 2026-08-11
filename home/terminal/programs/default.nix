@@ -29,5 +29,6 @@
     uber-receipts
     portfolio-tracker
     mullvad-jump
+    tz
   ];
 }
