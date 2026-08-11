@@ -195,14 +195,15 @@ in {
       # are split across the tunnels (all in a terminal, interactive sudo — no
       # extra sudoers rule needed):
       #   left   → live `wg show` of both
-      #   right  → show mullvad tunnel options
+      #   right  → fzf relay picker; the choice is pinned and re-resolved
+      #            against Mullvad's live catalog on every interface start
       "custom/wireguard" = {
         format = "{}";
         return-type = "json";
         exec = "${wireguard-indicator}/bin/waybar-wireguard-indicator";
         interval = 10;
         on-click = "ghostty -e watch -n1 sudo wg show";
-        on-click-right = "ghostty -e mullvad-jump list";
+        on-click-right = "ghostty -e mullvad-jump pick";
       };
 
       # visible only while a submap (resize/launch/place) is active

@@ -35,6 +35,18 @@
 #   Waybar reads handshake freshness via `wg show wg-mullvad dump`; the
 #   passwordless sudo rule for exactly that command is defined below.
 #
+# Relay selection — symbolic, resolved at every interface start:
+#   Mullvad retires relays and rotates their keys, so a pinned endpoint+key is
+#   a value that decays. Combined with fail-open that is the nastiest failure
+#   available: the interface comes up, handshakes with nobody, and traffic
+#   quietly takes the physical default route. What is stored instead is a
+#   relay-hostname PREFIX ("se", "se-got", "se-got-wg-001") — in
+#   /var/lib/mullvad-jump/pin, or `vars.wireguard.mullvad.relay` as the
+#   per-host default — which postUp resolves against the live catalog via
+#   `mullvad-jump apply`, trying successive relays until one handshakes.
+#   Switch and persist with `mullvad-jump <prefix>` (or `pick`); inspect with
+#   `mullvad-jump status`, which names a retired relay explicitly.
+#
 # Required secrets (inputs.secrets: secrets/<hostname>/wireguard.yaml, via sops):
 #   wg-private-key:        <WireGuard private key for wg0>
 #   mullvad-private-key:   <Mullvad WireGuard private key>
@@ -60,9 +72,25 @@ let
   hubNetworks = pvars.hub.networks;
 
   # ── Mullvad config ──────────────────────────────────────────────────────────
-  # Pick a region from https://mullvad.net/en/servers/
-  mullvadEndpoint = pvars.mullvad.endpoint;
-  mullvadPublicKey = pvars.mullvad.publicKey;
+  # OPTIONAL, AND BETTER LEFT UNSET. A relay's endpoint and public key are
+  # Mullvad's to change: keys rotate while the IP stays put, so a pinned pair
+  # can be half-correct and permanently dead. Declaring them here also means
+  # every relay change costs two commits across two repos. Omit both and the
+  # interface starts with NO peer at all, leaving `mullvad-jump apply` in
+  # postUp as the single source of peer identity — switching exits is then one
+  # command, no commit and no rebuild.
+  mullvadEndpoint = pvars.mullvad.endpoint or null;
+  mullvadPublicKey = pvars.mullvad.publicKey or null;
+
+  # Symbolic relay preference — a relay-hostname prefix at country ("se"),
+  # city ("se-got") or exact ("se-got-wg-001") granularity, resolved against
+  # Mullvad's live catalog at every interface start. Optional in the private
+  # flake: without it the pin in /var/lib/mullvad-jump/pin (written by
+  # `mullvad-jump <prefix>`) is the only source, and failing that the bootstrap
+  # peer above is left in place.
+  defaultRelay = pvars.mullvad.relay or "";
+
+  mullvadJump = "${pkgs.mullvad-jump}/bin/mullvad-jump";
   # In-tunnel resolver: no specific route in main → rule 5403 → tunnel.
   mullvadDNS = pvars.mullvad.dns;
 
@@ -172,27 +200,52 @@ in {
         # restarts don't stack duplicates.
         postUp = ''
           ${pkgs.wireguard-tools}/bin/wg set wg-mullvad fwmark ${toString wgFwmark}
+
+          # Stale-rule teardown runs BEFORE the resolver, not paired with each
+          # add below, and the order is load-bearing: `mullvad-jump apply` has
+          # to reach api.mullvad.net, and if rules from a crashed run survived,
+          # pref 5403 would route its fetch into the very tunnel it is trying
+          # to configure — a deadlock that resolves only by timeout. Clearing
+          # first guarantees the resolver always sees the physical uplink.
           for fam in -4 -6; do
             ${ip} $fam rule del pref 5401 2>/dev/null || true
-            ${ip} $fam rule add pref 5401 fwmark ${toString wgFwmark} lookup main
             ${ip} $fam rule del pref 5402 2>/dev/null || true
-            ${ip} $fam rule add pref 5402 lookup main suppress_prefixlength 0
             ${ip} $fam rule del pref 5403 2>/dev/null || true
-            ${ip} $fam rule add pref 5403 iif lo lookup ${toString tableId}
           done
-          ${ip} route replace default dev wg-mullvad metric 50 table ${toString tableId}
-          ${ip} -6 route replace default dev wg-mullvad metric 50 table ${toString tableId}
-          # DNS: pin the Mullvad resolver to THIS link and claim the ~.
-          # routing domain. resolved routes each query to the scope with the
-          # best matching domain; ~. outranks the NM uplinks' bare
-          # DefaultRoute flag, so their DHCP (ISP) resolvers stop receiving
-          # queries while the tunnel is up. Without ~., resolved fans every
-          # query out to ALL default-route scopes in parallel — global DNS=
-          # does not exclude per-link servers, which is exactly the leak.
-          # Per-link resolved state dies with the interface (crash included),
-          # so DNS fails open together with the routes above.
-          ${resolvectl} dns wg-mullvad ${mullvadDNS}
-          ${resolvectl} domain wg-mullvad "~."
+
+          # Replace the bootstrap peer with one resolved from Mullvad's live
+          # catalog, so a retired relay or rotated key self-heals on restart.
+          #
+          # The exit status GATES everything below, and that gate is the whole
+          # point: rules 5401-5403 pull every route into this interface, so
+          # installing them around a peer that cannot handshake does not "fail
+          # open" — it blackholes the machine completely. Fail-open has to mean
+          # "no verified relay ⇒ no egress policy", not merely "no interface ⇒
+          # no egress policy". Guarding with `if` also keeps a nonzero status
+          # from tripping wg-quick's `set -e` and tearing the interface down.
+          if ${mullvadJump} apply ${lib.escapeShellArg defaultRelay}; then
+            for fam in -4 -6; do
+              ${ip} $fam rule add pref 5401 fwmark ${toString wgFwmark} lookup main
+              ${ip} $fam rule add pref 5402 lookup main suppress_prefixlength 0
+              ${ip} $fam rule add pref 5403 iif lo lookup ${toString tableId}
+            done
+            ${ip} route replace default dev wg-mullvad metric 50 table ${toString tableId}
+            ${ip} -6 route replace default dev wg-mullvad metric 50 table ${toString tableId}
+            # DNS: pin the Mullvad resolver to THIS link and claim the ~.
+            # routing domain. resolved routes each query to the scope with the
+            # best matching domain; ~. outranks the NM uplinks' bare
+            # DefaultRoute flag, so their DHCP (ISP) resolvers stop receiving
+            # queries while the tunnel is up. Without ~., resolved fans every
+            # query out to ALL default-route scopes in parallel — global DNS=
+            # does not exclude per-link servers, which is exactly the leak.
+            # Per-link resolved state dies with the interface (crash included),
+            # so DNS fails open together with the routes above.
+            ${resolvectl} dns wg-mullvad ${mullvadDNS}
+            ${resolvectl} domain wg-mullvad "~."
+          else
+            echo "wg-mullvad: no verified relay — egress policy NOT installed;" >&2
+            echo "traffic stays on the physical uplink. Fix: mullvad-jump <prefix>" >&2
+          fi
         '';
         preDown = ''
           ${resolvectl} revert wg-mullvad 2>/dev/null || true
@@ -203,13 +256,22 @@ in {
             ${ip} $fam route flush table ${toString tableId} 2>/dev/null || true
           done
         '';
-        peers = [
-          {
-            publicKey = mullvadPublicKey;
-            allowedIPs = [ "0.0.0.0/0" "::/0" ];
-            endpoint = mullvadEndpoint;
-          }
-        ];
+        # Empty unless the private flake still pins a relay. An interface with
+        # no peers comes up fine and simply carries nothing until postUp
+        # resolves one — which is strictly better than starting with a peer
+        # that is probably stale, because "no peer" cannot masquerade as a
+        # working tunnel.
+        peers = lib.optional (mullvadEndpoint != null && mullvadPublicKey != null) {
+          publicKey = mullvadPublicKey;
+          allowedIPs = [ "0.0.0.0/0" "::/0" ];
+          endpoint = mullvadEndpoint;
+          # Without a keepalive the tunnel only handshakes once something
+          # routes into it, so "idle" and "dead relay" look identical — both
+          # to waybar and to mullvad-jump's post-configure verification.
+          # 25s also keeps the NAT mapping open. mullvad-jump sets the same
+          # value on every peer it installs.
+          persistentKeepalive = 25;
+        };
       };
     };
 
