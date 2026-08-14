@@ -1,13 +1,20 @@
-# WireGuard peer module: home hub + Mullvad split tunnel (NO kill switch).
+# WireGuard peer module: home hub + optional Mullvad split tunnel (NO kill switch).
 #
 # Design: docs/superpowers/specs/2026-07-05-wireguard-mullvad-design.md
 #
-# Each mobile peer runs two interfaces:
-#   wg0          → home hub (OpenWRT) for LAN/overlay access
-#   wg-mullvad   → Mullvad relay for internet egress
+# A mobile peer runs up to two interfaces:
+#   wg0          → home hub (OpenWRT) for LAN/overlay access   [always]
+#   wg-mullvad   → Mullvad relay for internet egress           [opt-in]
 #
 # Per-host values (overlay IP, Mullvad addresses) are set in
 # hosts/<host>/default.nix via the network.wireguard options below.
+#
+# Hosts that only want the home overlay set `network.wireguard.mullvad.enable
+# = false` (steamdeck). That is not merely cosmetic: it also stops the module
+# declaring `mullvad-private-key`. sops-install-secrets is all-or-nothing, so a
+# key named here but missing from the host's YAML fails the whole activation
+# and wg0's key never reaches /run/secrets either — the host drops off the
+# overlay because of a tunnel it was never meant to run.
 #
 # Split tunnel — pure policy routing, no packet marking, FAILS OPEN:
 #   Both WG sockets carry fwmark 51820 (wg-quick's standard full-tunnel
@@ -55,6 +62,7 @@
 
 let
   cfg = config.network.wireguard;
+  mullvadEnabled = cfg.mullvad.enable;
 
   hostName = config.networking.hostName;
   sopsFile = "${inputs.secrets}/secrets/${hostName}/wireguard.yaml";
@@ -106,32 +114,70 @@ in {
       example = "10.99.0.2";
       description = "This host's address on the 10.99.0.0/24 home overlay.";
     };
+    mullvad.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Whether to bring up the wg-mullvad egress tunnel alongside wg0.
+
+        Off means the host keeps ONLY the home overlay: no wg-mullvad
+        interface, no egress policy routing, and — the part that matters
+        operationally — no `mullvad-private-key` sops secret, so the host's
+        wireguard.yaml is not required to carry one.
+      '';
+    };
     mullvadAddressV4 = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.nullOr lib.types.str;
+      default = null;
       example = "10.72.215.171/32";
       description = ''
         Mullvad in-tunnel IPv4 address (CIDR). Bound to this host's Mullvad
-        device key — update together with the key when rotating.
+        device key — update together with the key when rotating. Required
+        only when mullvad.enable is on.
       '';
     };
     mullvadAddressV6 = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.nullOr lib.types.str;
+      default = null;
       example = "fc00:bbbb:bbbb:bb01::9:d7aa/128";
       description = "Mullvad in-tunnel IPv6 address (CIDR). Key-bound, like V4.";
     };
   };
 
   config = {
+    # A half-configured Mullvad tunnel is the worst outcome available here:
+    # the address is key-bound, so a placeholder handshakes fine and then
+    # silently drops every packet (this exact fault cost an evening during the
+    # 2026-07-05 rotation). Fail at eval instead.
+    assertions = [
+      {
+        assertion = mullvadEnabled ->
+          (cfg.mullvadAddressV4 != null && cfg.mullvadAddressV6 != null);
+        message = ''
+          network.wireguard.mullvad.enable is on for ${hostName} but
+          mullvadAddressV4/mullvadAddressV6 are unset. Take both from this
+          host's own Mullvad device config (they are bound to its device key),
+          or set network.wireguard.mullvad.enable = false for a host that only
+          needs the home overlay.
+        '';
+      }
+    ];
+
     # ── Secrets ──────────────────────────────────────────────────────────────
-    sops.secrets.${wgSecret} = {
-      inherit sopsFile;
-      mode = "0400";
-      owner = "root";
-    };
-    sops.secrets.${mullvadSecret} = {
-      inherit sopsFile;
-      mode = "0400";
-      owner = "root";
+    # Declared per enabled interface, never unconditionally: see the header
+    # note on sops-install-secrets being all-or-nothing.
+    sops.secrets = {
+      ${wgSecret} = {
+        inherit sopsFile;
+        mode = "0400";
+        owner = "root";
+      };
+    } // lib.optionalAttrs mullvadEnabled {
+      ${mullvadSecret} = {
+        inherit sopsFile;
+        mode = "0400";
+        owner = "root";
+      };
     };
 
     # ── Firewall ─────────────────────────────────────────────────────────────
@@ -183,6 +229,7 @@ in {
           }
         ];
       };
+    } // lib.optionalAttrs mullvadEnabled {
 
       # Mullvad internet egress
       "wg-mullvad" = {
@@ -276,9 +323,9 @@ in {
     };
 
     # ── Waybar tunnel-state read access ──────────────────────────────────────
-    # The waybar custom/wireguard module polls handshake freshness on BOTH
-    # tunnels to tell "up" from "up but not passing traffic". `wg show` needs
-    # root, so grant exactly these two commands passwordless (interface-scoped,
+    # The waybar custom/wireguard module polls handshake freshness on each
+    # tunnel to tell "up" from "up but not passing traffic". `wg show` needs
+    # root, so grant exactly these commands passwordless (interface-scoped,
     # read-only). sudoers matches the full command line, so one entry per iface;
     # the store path must match the waybar script's ${pkgs.wireguard-tools} EXACTLY.
     security.sudo.extraRules = [
@@ -289,20 +336,30 @@ in {
             command = "${pkgs.wireguard-tools}/bin/wg show wg0 dump";
             options = [ "NOPASSWD" ];
           }
-          {
-            command = "${pkgs.wireguard-tools}/bin/wg show wg-mullvad dump";
-            options = [ "NOPASSWD" ];
-          }
-        ];
+        ] ++ lib.optional mullvadEnabled {
+          command = "${pkgs.wireguard-tools}/bin/wg show wg-mullvad dump";
+          options = [ "NOPASSWD" ];
+        };
       }
     ];
 
     # ── DNS ──────────────────────────────────────────────────────────────────
-    # Mullvad DNS for everything, replacing Tailscale's MagicDNS.
+    # Mullvad DNS for everything (when enabled), replacing Tailscale's MagicDNS.
     # Local hostnames resolved via /etc/hosts (networking.hosts).
-    networking.hosts = pvars.overlayHosts;
+    #
+    # Every overlay host also gets its bare label as an alias. The search
+    # domain below does NOT cover this: search-domain expansion is a *DNS*
+    # mechanism, and nsswitch consults `files` (plain /etc/hosts, literal
+    # match on name + aliases) before ever reaching a resolver. So with FQDNs
+    # alone, `ping steamdeck.home.arpa` works while `ssh steamdeck` fails to
+    # resolve — which reads like the host being down rather than a naming gap.
+    networking.hosts = lib.mapAttrs
+      (_addr: names: lib.unique (names ++ map (lib.removeSuffix ".home.arpa")
+        (lib.filter (lib.hasSuffix ".home.arpa") names)))
+      pvars.overlayHosts;
 
-    # Push .home.arpa as a search domain so `ssh openwrt` resolves.
+    # Push .home.arpa as a search domain so bare labels also resolve through
+    # resolved for anything not pinned in /etc/hosts above.
     networking.search = [ "home.arpa" ];
 
     # systemd-resolved: the Mullvad in-tunnel resolver (plain :53 — already
@@ -313,6 +370,9 @@ in {
     # sees every query (the leak this replaces). NB: with no kill switch,
     # when the tunnel is down the uplinks' DHCP resolvers take over — DNS
     # leaks along with the rest of the traffic (by design; watch waybar).
+    # With mullvad.enable = false none of that applies: there is no in-tunnel
+    # resolver to bind, so DNS is whatever system/network/default.nix sets
+    # (Quad9 over DoT) and these fallbacks stay as the last resort.
     services.resolved.settings.Resolve = {
       FallbackDNS = [
         "1.1.1.1#cloudflare-dns.com"

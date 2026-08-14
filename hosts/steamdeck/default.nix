@@ -45,10 +45,30 @@ in
   networking.hostName = "steamdeck";
 
   # WireGuard peer identity (see system/network/wireguard.nix).
-  # Addresses live in the private flake's vars. Mullvad addresses there are
-  # placeholders — fill from the deck's own Mullvad device config before
-  # deploying WG on the deck.
-  network.wireguard = inputs.secrets.vars.hosts.steamdeck.wireguard;
+  #
+  # HOME OVERLAY ONLY — no Mullvad. The deck is a stationary console on the
+  # home LAN whose whole job is to be reachable (SSH, Syncthing, Kodi,
+  # Transmission); an egress tunnel buys it nothing and costs it a second
+  # private key plus the policy-routing rules that own its default route.
+  #
+  # overlayIP is spelled out rather than splatting the whole
+  # vars.hosts.steamdeck.wireguard attrset, because that attrset still carries
+  # mullvadAddressV4/V6 placeholders. Those are bound to a Mullvad device key
+  # the deck does not have, and a placeholder Mullvad address is the failure
+  # mode that handshakes happily and then drops every packet.
+  network.wireguard = {
+    overlayIP = inputs.secrets.vars.hosts.steamdeck.wireguard.overlayIP;
+    mullvad.enable = false;
+  };
+
+  # sops decryption identity for this host. The deck is headless and never
+  # holds the YubiKey, so it keeps a software age key instead of the laptop's
+  # YubiKey identity from system/core/sops.nix — mkForce because that default
+  # points at /home/bogdan, a user that does not exist here.
+  #
+  # Lives at host level, not in transmission.nix where it used to sit: WireGuard
+  # and Syncthing both depend on it, so it must not disappear if torrents ever do.
+  sops.age.keyFile = lib.mkForce "/home/deck/.config/sops/age/keys.txt";
 
   # Boot optimizations for gaming
   boot.kernelParams = [ "amd_pstate=active" ];

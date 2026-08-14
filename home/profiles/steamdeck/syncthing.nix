@@ -35,10 +35,13 @@ in {
     overrideDevices = true;
     overrideFolders = true;
 
-    # Note: We use 127.0.0.1 here because home-manager's syncthing-init service
-    # uses guiAddress for API calls (0.0.0.0 is not a valid connect address).
-    # The actual binding address (0.0.0.0:8384) is set via ExecStartPost below.
-    guiAddress = "127.0.0.1:8384";
+    # GUI reachable from the home overlay (secured by the password below).
+    # guiAddress does double duty in the HM module: it becomes Syncthing's
+    # `--gui-address` (the real bind) and the curl target for the init script.
+    # 0.0.0.0 is fine for both — the kernel routes a connect to 0.0.0.0 to
+    # loopback — and a non-default value makes the module PATCH the stored
+    # address itself. Matches home/services/syncthing.nix.
+    guiAddress = "0.0.0.0:8384";
 
     # GUI credentials from SOPS secrets
     guiCredentials = {
@@ -47,12 +50,12 @@ in {
     };
 
     settings = {
-      gui = {
-        theme = "dark";
-        # Note: address is set via systemd ExecStartPost below because
-        # home-manager's syncthing module overwrites settings.gui.address
-        # with guiAddress at the end of the init script.
-      };
+      # NO `gui` block here, deliberately — not even a theme. home-manager's
+      # merge-syncthing-config PATCHes the password from the sops secret first,
+      # then PUTs settings.gui afterwards; Syncthing's REST PUT replaces the
+      # whole gui object, so any key declared here blanks the password that was
+      # just installed and every login fails as "invalid password". Set the
+      # theme in the web UI instead. Same rule as home/services/syncthing.nix.
 
       options = {
         localAnnounceEnabled = true;
@@ -111,28 +114,14 @@ in {
     };
   };
 
+  # No ExecStartPost address fix-up any more: it hand-rolled the same
+  # `PATCH /rest/config/gui {"address": …}` the HM module already emits for a
+  # non-default guiAddress, and forced a restart to apply it. Setting
+  # guiAddress = "0.0.0.0:8384" gets the bind right from the start instead.
   systemd.user.services.syncthing-init = {
     Unit = {
       After = [ "sops-nix.service" ];
       Wants = [ "sops-nix.service" ];
-    };
-    Service = {
-      # After the init script runs, set the GUI address to 0.0.0.0:8384 for remote access.
-      # This is needed because home-manager's syncthing module uses guiAddress for both
-      # API calls (must be 127.0.0.1) and the final bind address (we want 0.0.0.0).
-      ExecStartPost = let
-        script = pkgs.writeShellScript "syncthing-set-gui-address" ''
-          API_KEY=$(${pkgs.gnugrep}/bin/grep -oP '(?<=<apikey>)[^<]+' ~/.local/state/syncthing/config.xml)
-          ${pkgs.curl}/bin/curl -s -X PATCH \
-            -H "X-API-Key: $API_KEY" \
-            -d '{"address": "0.0.0.0:8384"}' \
-            http://127.0.0.1:8384/rest/config/gui
-          # Restart syncthing to apply the address change
-          ${pkgs.curl}/bin/curl -s -X POST \
-            -H "X-API-Key: $API_KEY" \
-            http://127.0.0.1:8384/rest/system/restart
-        '';
-      in "${script}";
     };
   };
 }

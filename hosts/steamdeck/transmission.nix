@@ -17,8 +17,6 @@
     "d /srv/torrents/incomplete 0775 transmission users -"
   ];
 
-  sops.age.keyFile = lib.mkForce "/home/deck/.config/sops/age/keys.txt";
-
   sops.secrets."transmission/credentials" = {
     sopsFile = "${inputs.secrets}/secrets/steamdeck/transmission.json";
     format = "binary";
