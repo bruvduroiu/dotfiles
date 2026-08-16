@@ -10,6 +10,7 @@
     ./development.nix
     ./media
     ./media/audacious
+    ./media/fotema.nix
     ./media/newsboat
   ];
 }
