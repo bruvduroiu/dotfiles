@@ -16,6 +16,18 @@ let
       address = "127.0.0.1:4433";
       database = "${home}/Documents/hister.db";
     };
+    indexer = {
+      detect_languages = true;
+      keep_stopwords = false;
+      directories = [
+        { path = "${home}/Documents/Papers"; label = "Papers"; filetypes = [ "pdf" ]; }
+        { path = "${home}/Documents/Personal"; label = "Personal"; filetypes = [ "pdf" "md" ]; }
+        { path = "${home}/Documents/Work"; label = "Personal"; filetypes = [ "pdf" "md" ]; }
+      ];
+    };
+    crawler = {
+      backend = "http";
+    };
     hotkeys = {
       "alt+k" = "select_previous_result";
       "alt+j" = "select_next_result";
