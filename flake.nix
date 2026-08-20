@@ -95,6 +95,11 @@
     # Ephemeral root with selective persistence (for phantom USB)
     impermanence.url = "github:nix-community/impermanence";
 
+    # Hermes Agent desktop client (connects to the homelab gateway)
+    # Note: Don't override nixpkgs — the uv2nix-built closure is pinned to
+    # upstream's lock, and following ours would force a full local rebuild
+    hermes-agent.url = "github:NousResearch/hermes-agent";
+
     # Steam Deck support via Jovian-NixOS
     # Note: Don't override nixpkgs to ensure cache hits for pre-built binaries
     jovian-nixos.url = "github:Jovian-Experiments/Jovian-NixOS";

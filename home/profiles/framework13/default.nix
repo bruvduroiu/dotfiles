@@ -18,6 +18,7 @@
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
     ../../programs/gpg.nix
+    ../../programs/hermes.nix
 
     # terminal emulators
     ../../terminal/emulators/ghostty.nix

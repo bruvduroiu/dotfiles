@@ -22,7 +22,7 @@ let
       directories = [
         { path = "${home}/Documents/Papers"; label = "Papers"; filetypes = [ "pdf" ]; }
         { path = "${home}/Documents/Personal"; label = "Personal"; filetypes = [ "pdf" "md" ]; }
-        { path = "${home}/Documents/Work"; label = "Personal"; filetypes = [ "pdf" "md" ]; }
+        { path = "${home}/Documents/Work"; label = "Work"; filetypes = [ "pdf" "md" ]; }
       ];
     };
     crawler = {
