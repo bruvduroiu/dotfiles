@@ -11,13 +11,13 @@
 }:
 
 let
-  version = "0.17.0";
+  version = "0.18.0";
 
   src = fetchFromGitHub {
     owner = "asciimoo";
     repo = "hister";
     rev = "v${version}";
-    hash = "sha256-UIKQVs2hbzalDeRL1ILUgfMQnues5IFrzWn9Eg5sm30=";
+    hash = "sha256-yX/MGhGyQxE5cSe1Q4T9EEBwRS5mxUBtpkn/RnGN4lU=";
   };
 
   # server/static/static.go embeds `all:app/*`, which webui/build.sh generates
@@ -27,7 +27,7 @@ let
     inherit version src;
 
     npmWorkspace = "webui/app";
-    npmDepsHash = "sha256-l5A+MgAYIhVXgytrn/jmb+oSbx+ndhXK1gj0/UxbM1U=";
+    npmDepsHash = "sha256-WlN/84qmKSd98xGF/XTbwTt0WFqJgogmy9Kmyjq1DuY=";
 
     preBuild = ''
       patchShebangs webui
@@ -45,7 +45,9 @@ buildGoModule {
   pname = "hister";
   inherit version src;
 
-  vendorHash = "sha256-fZqT0B5T0FtZdkO96hgGwJCAHF0U6Jxw8XWF206mhlQ=";
+  # Upstream nix/package.nix publishes this hash; it assumes proxyVendor.
+  vendorHash = "sha256-UR384CLSa44MqPVzzgzGZC/ROdG2iWtJ5L8AX/tfg0k=";
+  proxyVendor = true;
 
   nativeBuildInputs = [
     installShellFiles
@@ -86,7 +88,7 @@ buildGoModule {
   meta = {
     description = "Web history on steroids";
     homepage = "https://github.com/asciimoo/hister";
-    license = lib.licenses.agpl3Only;
+    license = lib.licenses.agpl3Plus;
     mainProgram = "hister";
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
   };
