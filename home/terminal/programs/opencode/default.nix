@@ -169,10 +169,17 @@ in
         "doom_loop" = "ask";
         "external_directory" = {
           "/tmp/**" = "allow";
+          "~/development/**" = "allow";
         };
       };
     };
   };
+
+  # FFF refuses to index the home directory used by the web project picker,
+  # causing valid paths under ~/development to return no search results.
+  systemd.user.services.opencode-web.Service.Environment = [
+    "OPENCODE_DISABLE_FFF=1"
+  ];
 
   # Tools must be real files, not symlinks into /nix/store: opencode's
   # embedded Bun resolves `@opencode-ai/plugin` from the importer's
