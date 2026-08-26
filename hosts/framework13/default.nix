@@ -55,6 +55,9 @@
   # System configuration
   networking.hostName = "framework13";
 
+  # OpenCode web UI, bound to all interfaces for LAN and WireGuard access.
+  networking.firewall.allowedTCPPorts = [ 4096 ];
+
   # WireGuard peer identity (see system/network/wireguard.nix).
   # Addresses live in the private flake's vars.
   network.wireguard = inputs.secrets.vars.hosts.framework13.wireguard;

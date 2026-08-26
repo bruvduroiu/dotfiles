@@ -124,12 +124,20 @@ hl.config({
 			rounding = 0,
 			render_titles = true,
 			scrolling = true,
+			-- gradients stay off (default), so col.* paints only the indicator
+			-- strip and tabs keep no background fill — titles sit on the desktop.
 			col = {
 				active = host.active,
 				inactive = host.inactive,
 				locked_active = host.active,
 				locked_inactive = host.inactive,
 			},
+			-- Hyprland defaults these to a hardcoded white, unreadable on a light
+			-- wallpaper; base05/base04 track polarity (see hyprland.nix).
+			text_color = host.bar_text,
+			text_color_inactive = host.bar_text_inactive,
+			text_color_locked_active = host.bar_text,
+			text_color_locked_inactive = host.bar_text_inactive,
 		},
 		col = {
 			border_active = host.active,

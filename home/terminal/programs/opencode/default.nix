@@ -14,30 +14,13 @@ in
 
     web.enable = true;
 
-    # Bind the web UI to framework13's wg0 overlay address only, so it is
-    # reachable on port 4096 from the WireGuard overlay but not on LAN or
-    # public interfaces. Binding a specific address (vs. 0.0.0.0 + firewall)
-    # is what makes this tunnel-only. NOTE: this IP is framework13-specific;
-    # importing this module on another host would fail to bind.
-    #
-    # Was the Tailscale IP until the WireGuard migration retired the tailnet:
-    # the address stopped existing on any interface, so every start failed with
-    # EADDRNOTAVAIL and Restart=always looped it ~1800 times per boot. wg0 is
-    # brought up by wg-quick-wg0.service and holds its address whether or not
-    # the tunnel has a live handshake, so the bind does not depend on peer
-    # reachability — but it does depend on wg-quick having run.
-    #
-    # Written literally rather than via inputs.secrets.vars: the bind address
-    # is the one thing about this unit worth reading at a glance, and a wrong
-    # value is a boot-long crash loop rather than a build error.
-    #
+    # Bind the web UI to every interface for LAN and WireGuard access.
+    # framework13's firewall explicitly opens TCP 4096.
     # No OPENCODE_SERVER_PASSWORD is set, so anything that can route to this
-    # address gets an unauthenticated agent with the permissions below. That
-    # is deliberate — reachability is the overlay's job — but it means the
-    # blast radius of a new wg0 peer includes this port.
+    # host gets an unauthenticated agent with the permissions below.
     web.extraArgs = [
       "--hostname"
-      "10.99.0.2"
+      "0.0.0.0"
       "--port"
       "4096"
     ];
