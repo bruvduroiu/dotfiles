@@ -12,6 +12,7 @@
     ./direnv.nix
     ./eza.nix
     ./fd.nix
+    ./forgejo.nix
     ./fzf.nix
     ./gdu.nix
     ./git.nix
