@@ -2,7 +2,20 @@
   eza_opts = lib.strings.concatStringsSep " " config.programs.eza.extraOptions;
   fd_opts = lib.strings.concatStringsSep " " ["--hidden"];
   delta_opts = lib.strings.concatStringsSep " " ["--paging=never"];
-in 
+
+  # Helix-style modal editing for the fish command line. Not in nixpkgs, and it
+  # needs no build step — home-manager's `plugins` option only ever prepends
+  # $src/functions to $fish_function_path, and this repo ships nothing else.
+  # main targets fish >= 4 (there are 3.4/3.6 branches if we ever downgrade).
+  # Runtime deps are perl + coreutils/gnused, both guaranteed by NixOS'
+  # environment.defaultPackages / system path.
+  fish-helix = pkgs.fetchFromGitHub {
+    owner = "sshilovsky";
+    repo = "fish-helix";
+    rev = "c9487ea37dafee157cefb8a89c145bc98d21fd6b";
+    hash = "sha256-JqN4IbLpJFBJKNE6haZH2iFSMrLFdVh+Hbl840+xbfU=";
+  };
+in
 
 {
   programs = {
@@ -14,6 +27,7 @@ in
         { name = "forgit"; src = pkgs.fishPlugins.forgit.src; }
         { name = "hydro"; src = pkgs.fishPlugins.hydro.src; }
         { name = "fzf"; src = pkgs.fishPlugins.fzf.src; }
+        { name = "fish-helix"; src = fish-helix; }
       ];
       shellInit = ''
         if test -f ${config.sops.secrets.openrouter_api_key.path}
@@ -27,7 +41,6 @@ in
         end
       '';
       interactiveShellInit = ''
-        fzf_configure_bindings --directory=\cp --processes=\co
         set -gx fzf_fd_opts "${fd_opts}"
         set -gx fzf_preview_dir_cmd "${pkgs.eza}/bin/eza ${eza_opts}"
         set -gx fzf_diff_highlighter "${pkgs.delta}/bin/delta ${delta_opts}"
@@ -35,8 +48,11 @@ in
         # GPG needs to know the TTY for pinentry
         set -gx GPG_TTY (tty)
 
-        # Alt+O to open last command output in $EDITOR
-        bind \eo edit-output
+        # Helix modal editing on the command line. Only sets the variable —
+        # fish installs the bindings itself (and then calls
+        # fish_user_key_bindings) from __fish_config_interactive, which is
+        # deferred to the first prompt, i.e. after this file has been read.
+        set -g fish_key_bindings fish_helix_key_bindings
       '';
       shellAliases = {
         l = "ls -lah";
@@ -51,6 +67,28 @@ in
         tfa = "terraform apply";
       };
       functions = {
+        # Re-applied by fish every time $fish_key_bindings changes, right after
+        # the bindings function has run. fish_helix_key_bindings erases the
+        # preset bindings, so layering ours on from here (rather than from
+        # interactiveShellInit) keeps them in place across a mode switch.
+        fish_user_key_bindings = ''
+          fzf_configure_bindings --directory=\cp --processes=\co
+
+          # Alt+O to open last command output in $EDITOR
+          bind -M insert \eo edit-output
+          bind -M default \eo edit-output
+
+          # Alt+V drops the command line into real Helix. fish-helix implements
+          # motions and select->act, but has no match/surround support at all
+          # (no `mi(`, `ma(`, `mr'"`, `ms`) and no multiple cursors, so anything
+          # structural on a long command is done here instead. Alt+E is left
+          # alone and still opens $EDITOR (nvim).
+          # edit_command_buffer is fish's builtin and honours VISUAL, so this
+          # needs no wrapper function of its own.
+          for mode in insert default visual
+            bind -M $mode \ev "VISUAL=${config.programs.helix.package}/bin/hx edit_command_buffer"
+          end
+        '';
         fish_prompt = ''
           if [ $status = 0 ] 
             set_color green

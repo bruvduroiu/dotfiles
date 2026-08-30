@@ -1,4 +1,4 @@
-{ config, pkgs, inputs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a
@@ -46,9 +46,18 @@ in
     # recursive: recreate the directory and symlink each file individually,
     # so the directory itself stays writable — `/agents` can still add one at
     # runtime. A bare `source = ./dir` would symlink the whole read-only dir.
-    "${workConfigDir}/agents" = { source = ./config/agents; recursive = true; };
-    "${workConfigDir}/rules" = { source = ./config/rules; recursive = true; };
-    "${workConfigDir}/skills" = { source = ./config/skills; recursive = true; };
+    "${workConfigDir}/agents" = {
+      source = ./config/agents;
+      recursive = true;
+    };
+    "${workConfigDir}/rules" = {
+      source = ./config/rules;
+      recursive = true;
+    };
+    "${workConfigDir}/skills" = {
+      source = ./config/skills;
+      recursive = true;
+    };
   };
 
   programs.claude-code = {
@@ -77,14 +86,27 @@ in
 
     # MCP servers configuration — Nix store paths resolved at build time
     mcpServers = {
-      # playwright = {
-      #   type = "stdio";
-      #   command = "${pkgs.playwright-mcp}/bin/mcp-server-playwright";
-      #   args = [
-      #     "--executable-path"
-      #     "${pkgs.ungoogled-chromium}/bin/chromium"
-      #   ];
-      # };
+      # nixpkgs names this binary `playwright-mcp` (see meta.mainProgram), not
+      # `mcp-server-playwright` — the npm-era name. Pointing at the latter is
+      # why this server previously failed: the path simply does not exist, so
+      # every launch died with ENOENT before the MCP handshake. getExe reads
+      # mainProgram, so an upstream rename cannot silently break it again.
+      playwright = {
+        type = "stdio";
+        command = lib.getExe pkgs.playwright-mcp;
+        args = [
+          # Playwright normally downloads its own browser builds; on NixOS
+          # those are neither present nor runnable. Hand it the store chromium
+          # instead of letting it hunt for a ~/.cache/ms-playwright build.
+          "--executable-path"
+          "${pkgs.ungoogled-chromium}/bin/chromium"
+          # Snapshots and screenshots otherwise land in `./.playwright-mcp/`
+          # relative to the session cwd — i.e. dropped into whichever repo is
+          # open. Keep that scratch output in the cache dir instead.
+          "--output-dir"
+          "${config.xdg.cacheHome}/playwright-mcp"
+        ];
+      };
       datadog = {
         type = "http";
         url = "https://mcp.datadoghq.eu/api/unstable/mcp-server/mcp?toolsets=all";
@@ -114,6 +136,7 @@ in
         "gopls-lsp@claude-plugins-official" = true;
         "typescript-lsp@claude-plugins-official" = true;
         "pyright-lsp@claude-plugins-official" = true;
+        "figma@claude-plugins-official" = true;
       };
       extraKnownMarketplaces = {
         claude-plugins-official = {
