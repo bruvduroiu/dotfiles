@@ -6,15 +6,16 @@
     ../../theme
 
     # editors
+    ../../editors/helix
     ../../editors/nvim
 
     # programs
     ../../programs
     ../../programs/keepassxc.nix
     ../../programs/wayland
-    # Hyprland config: hand-written hyprland.lua shipped via HM's lua
-    # backend, with a Nix prelude for stylix colours (framework13-first).
-    ../../programs/wayland/hyprland.nix
+    ../../programs/wayland/niri.nix
+    ../../programs/wayland/swaylock.nix
+    ../../programs/wayland/swayidle.nix
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
     ../../programs/gpg.nix
@@ -23,7 +24,7 @@
     # terminal emulators
     ../../terminal/emulators/ghostty.nix
 
-    ../../services/wayland/hyprpaper.nix
+    ../../services/wayland/swaybg.nix
     ../../services/mako.nix
     ../../services/meeting-guard.nix
     ../../services/podman.nix

@@ -251,7 +251,7 @@
           icon = "switcher";
           placeholder = "Theme";
           prefix = "theme";
-          exec = "hyprland-theme-switcher";
+          exec = "theme-switch";
         };
         translation = {
           provider = "googlefree";

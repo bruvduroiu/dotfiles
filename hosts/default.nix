@@ -17,7 +17,9 @@
       ++ [
       ./framework13
 
-      "${mod}/programs/hyprland"
+      # Scrollable-tiling compositor (Hyprland config stays alongside,
+      # dormant — swap this import back to programs/hyprland to return)
+      "${mod}/programs/niri"
 
       # Home Manager (stable, follows nixpkgs)
       inputs.home-manager.nixosModules.home-manager

@@ -1,4 +1,4 @@
-{ inputs, pkgs, lib, ... }:
+{ config, inputs, pkgs, lib, ... }:
 
 let
   # Searchable keybind cheatsheet: decodes hyprctl's modmask bitfield into
@@ -120,6 +120,11 @@ in {
     enable = true;
     withUWSM = true;
   };
+
+  desktop.greetd.sessionCommand =
+    let
+      hyprlandDesktop = "${config.programs.hyprland.package}/share/wayland-sessions/hyprland.desktop";
+    in "${lib.getExe config.programs.uwsm.package} start -eD Hyprland ${hyprlandDesktop}";
 
   environment.variables = {
     NIXOS_OZONE_WL = "1";

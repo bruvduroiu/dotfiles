@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 let
   theme-switch = pkgs.writeShellScriptBin "theme-switch" ''
@@ -22,6 +27,12 @@ let
     fi
 
     echo "$target" > "$CURRENT_FILE"
+
+    # Under niri, freeze the screen and crossfade to the recoloured session
+    # instead of flashing element-by-element while services restart.
+    if [ -n "''${NIRI_SOCKET:-}" ]; then
+      niri msg action do-screen-transition --delay-ms 800 2>/dev/null || true
+    fi
 
     # --- Activate NixOS specialisation ---
     # This restarts services (hyprpaper, mako, etc.) with the correct
@@ -52,6 +63,13 @@ let
     echo "$nvim_theme" > "$THEME_DIR/nvim-theme"
     echo "$nvim_bg" > "$THEME_DIR/nvim-bg"
 
+    # --- Helix ---
+    # Themed by the Stylix helix target, so the specialisation switch above
+    # already rewrote the theme file; SIGUSR1 makes running instances re-read
+    # their config. The HM wrapper renames the binary, hence the two process
+    # names.
+    pkill -USR1 -x 'hx|\.hx-wrapped' 2>/dev/null || true
+
     # Live-switch all running Neovim instances
     for server in /run/user/$(id -u)/nvim.*.0 /tmp/nvim.*/0; do
       [ -S "$server" ] || continue
@@ -63,7 +81,8 @@ let
     notify-send -t 2000 "Theme" "Switched to $target mode" 2>/dev/null || true
   '';
 
-in {
+in
+{
   imports = [ ./stylix.nix ];
 
   home.packages = [ theme-switch ];

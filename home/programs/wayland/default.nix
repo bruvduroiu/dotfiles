@@ -4,8 +4,8 @@
   imports = [
     ./walker.nix
     ./waybar
-    ./hyprlock.nix
-    ./hypridle.nix
+    # lock/idle are per-compositor: hyprlock/hypridle are imported by the
+    # Hyprland profiles (iso), swaylock/swayidle by framework13 (niri).
     ./wf-recorder.nix
   ];
 

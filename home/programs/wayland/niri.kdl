@@ -1,0 +1,469 @@
+// Niri config — plain KDL, the native format.
+//
+// Wiring: niri.nix ships this file verbatim as ~/.config/niri/config.kdl
+// and generates the stylix.kdl include (border/tab colours). `niri validate`
+// gates it at build time; niri live-reloads both files on change.
+//
+// Reference: the niri wiki checkout at <repo>/niri/docs/wiki, and
+// `niri msg --help` / `niri msg pick-window` for live introspection.
+//
+// framework13-first, like hyprland.lua was: monitors and workspace pins
+// live here for now.
+
+include "stylix.kdl" // generated border/tab colours (see niri.nix)
+
+// ----- input ----------------------------------------------------------
+input {
+    keyboard {
+        // Must match fcitx expectations (see system/core) — fcitx can't
+        // push layouts into the compositor.
+        xkb {
+            layout "us"
+        }
+    }
+    touchpad {
+        tap
+        natural-scroll
+        dwt
+        // Hyprland carried a hand-rolled libinput custom accel curve;
+        // niri only offers adaptive/flat + accel-speed. Tune to taste.
+        accel-profile "adaptive"
+    }
+    // hover-focus without the view yanking sideways at screen edges
+    focus-follows-mouse max-scroll-amount="0%"
+    // Makes focus-workspace on the current workspace bounce back —
+    // Mod+M / Mod+B become toggles like Hyprland's special workspaces,
+    // and Mod+1 twice returns where you came from.
+    workspace-auto-back-and-forth
+}
+
+// ----- outputs (framework13) ------------------------------------------
+// Positions are LOGICAL px: DP-4 is 3840 wide at scale 1, so eDP-1 starts
+// at x=3840 (matches the old Hyprland 3840x0).
+output "DP-4" {
+    mode "3840x2160"
+    scale 1
+    position x=0 y=0
+    variable-refresh-rate on-demand=true
+    focus-at-startup
+}
+output "eDP-1" {
+    scale 1.3333
+    position x=3840 y=0
+    variable-refresh-rate on-demand=true
+}
+
+// ----- layout ---------------------------------------------------------
+layout {
+    gaps 16
+    center-focused-column "on-overflow"
+    always-center-single-column
+
+    // The old scrolling-layout explicit_column_widths, now first-class:
+    // Mod+R / Mod+Shift+R cycle these.
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
+    }
+    default-column-width {
+        proportion 0.5
+    }
+
+    // 1px border on every window (colours from stylix.kdl) — tried the
+    // niri focus ring, preferred the Hyprland-style border on all windows.
+    focus-ring {
+        off
+    }
+    border {
+        width 1
+    }
+
+    // Tabbed columns replace Hyprland groups; the indicator is the strip
+    // that replaces the groupbar (no text titles in niri).
+    tab-indicator {
+        hide-when-single-tab
+        place-within-column
+        position "top"
+        gap 2
+        width 3
+    }
+
+    struts {
+        left 16
+        right 16
+        top 16
+        bottom 16
+    }
+}
+
+// ----- named workspaces -----------------------------------------------
+// The five daily workspaces are all named — niri's native way to get a
+// static, predictable strip (declaration order = strip order). Mod+1..5
+// jump by name via niri-ws; Mod+6..9 count unnamed overflow workspaces.
+// Output pins mirror the old Hyprland layout: 1-3 external, 4-5 laptop
+// panel (everything falls back to eDP-1 undocked).
+workspace "web" {
+    open-on-output "DP-4"
+}
+workspace "code" {
+    open-on-output "DP-4"
+}
+workspace "aux" {
+    open-on-output "DP-4"
+}
+workspace "chat" {
+    open-on-output "eDP-1"
+    layout {
+        struts {
+            left 64
+            right 64
+            top 64
+            bottom 64
+        }
+    }
+}
+workspace "work" {
+    open-on-output "eDP-1"
+    layout {
+        struts {
+            left 64
+            right 64
+            top 64
+            bottom 64
+        }
+    }
+}
+
+// ----- misc -----------------------------------------------------------
+prefer-no-csd
+screenshot-path "~/Pictures/Screenshots/%Y-%m-%d_%H-%M-%S.png"
+
+cursor {
+    // XCursor theme from home.pointerCursor (home/default.nix); the
+    // hyprcursor variant is only used by the dormant Hyprland session.
+    xcursor-theme "BreezeX-RosePine-Linux"
+    xcursor-size 24
+    hide-when-typing
+}
+
+// No animations — tried the full minimal set, then workspace-switch
+// alone, settled on none.
+animations {
+    off
+}
+
+hotkey-overlay {
+    // Mod+Slash shows it (replaces the hypr-binds-menu script).
+    skip-at-startup
+}
+
+environment {
+    XMODIFIERS "@im=fcitx"
+}
+
+// ----- autostart ------------------------------------------------------
+// fcitx5 stays owned by the NixOS i18n XDG-autostart systemd unit —
+// niri-session activates xdg-desktop-autostart.target, same as UWSM did.
+// waybar is a systemd user unit (waybar/default.nix) so HM activations
+// restart it with fresh config — do not spawn it here too.
+spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
+spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
+spawn-at-startup "swaylock" "-f"
+spawn-at-startup "firefox"
+spawn-at-startup "obsidian"
+
+// ----- keybinds -------------------------------------------------------
+// Mouse move/resize (Mod+LMB / Mod+RMB drags) are built in.
+binds {
+    // compositor
+    Mod+Ctrl+Alt+Q { quit; }
+    Mod+Q { close-window; }
+    Mod+Shift+Escape { spawn "systemctl" "suspend"; }
+    Mod+Shift+Ctrl+Escape { spawn "systemctl" "poweroff"; }
+    Mod+Slash { show-hotkey-overlay; }
+    // Escape hatch when a VM or remote-desktop app grabs all shortcuts;
+    // allow-inhibiting=false so the grab itself can't swallow this bind.
+    Mod+Ctrl+Escape allow-inhibiting=false hotkey-overlay-title="Un-grab keyboard shortcuts" { toggle-keyboard-shortcuts-inhibit; }
+    Mod+O { toggle-overview; }
+
+    // focus (vim), axis-aligned with niri's model: H/L walk columns,
+    // J/K walk the vertical workspace strip. The -or-last/-or-first
+    // variants wrap around (Hyprland's wrap_focus).
+    Mod+H { focus-column-left-or-last; }
+    Mod+L { focus-column-right-or-first; }
+    Mod+K { focus-workspace-up; }
+    Mod+J { focus-workspace-down; }
+    Mod+D { spawn "niri-focus-urgent"; }
+
+    // move, same axes: Shift+H/L move the column sideways, Shift+J/K
+    // carry it to the workspace below/above
+    Mod+Shift+H { move-column-left; }
+    Mod+Shift+L { move-column-right; }
+    Mod+Shift+K { move-column-to-workspace-up; }
+    Mod+Shift+J { move-column-to-workspace-down; }
+
+    // within-column (stacked/tabbed windows): focus and reorder
+    Mod+Ctrl+K { focus-window-up; }
+    Mod+Ctrl+J { focus-window-down; }
+    Mod+Ctrl+Shift+K { move-window-up; }
+    Mod+Ctrl+Shift+J { move-window-down; }
+
+    // column membership (was scrolling `move ±col`)
+    Mod+Comma { consume-or-expel-window-left; }
+    Mod+Period { consume-or-expel-window-right; }
+
+    // column widths / fit (was colresize + fit)
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-column-width-back; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+C { maximize-column; }
+    Mod+Shift+C { center-visible-columns; }
+    Mod+Ctrl+C { expand-column-to-available-width; }
+
+    // scrolling extras (were swapcol / promote / center)
+    Mod+Shift+U { swap-window-left; }
+    Mod+Shift+O { swap-window-right; }
+    Mod+Ctrl+U { move-column-to-first; }
+    Mod+Ctrl+O { center-column; }
+
+    // fullscreen / floating / tabs (was fullscreen / float / groups)
+    Mod+Shift+F { fullscreen-window; }
+    Mod+F { toggle-window-floating; }
+    Mod+Shift+Space { switch-focus-between-floating-and-tiling; }
+    Mod+G { toggle-column-tabbed-display; }
+
+    // utilities
+    Mod+Return { spawn "ghostty"; }
+    Mod+Y { spawn "ghostty" "-e" "yazi"; }
+    Mod+Space { spawn "walker"; }
+    // allow-when-locked: if swaylock ever dies (red locked screen), this
+    // same key revives it. allow-inhibiting=false: a VM/remote-desktop
+    // holding the shortcuts-inhibitor can never block locking.
+    Mod+Ctrl+Q allow-when-locked=true allow-inhibiting=false { spawn "swaylock" "-f"; }
+
+    // walker providers
+    Mod+Ctrl+V { spawn "walker" "-m" "clipboard"; }
+    Mod+W { spawn "walker" "-m" "windows"; }
+    Mod+Ctrl+Period { spawn "walker" "-m" "symbols"; }
+    Mod+Ctrl+N { spawn "walker" "-m" "todo"; }
+
+    // notifications
+    Mod+Shift+D { spawn-sh "makoctl mode -t dnd; pkill -RTMIN+9 waybar"; }
+    Mod+Ctrl+D { spawn "mako-history-menu"; }
+
+    // launchers (was the Mod+X submap; niri has no submaps)
+    Mod+Alt+A hotkey-overlay-title="OpenRouter chat" { spawn "firefox" "--new-tab" "https://openrouter.ai/chat"; }
+    Mod+Alt+B hotkey-overlay-title="Browser" { spawn "firefox"; }
+    Mod+Alt+W hotkey-overlay-title="Work browser" { spawn "firefox" "-P" "work" "--no-remote"; }
+    Mod+Alt+H hotkey-overlay-title="Ghost browser" { spawn "mullvad-browser"; }
+    Mod+Alt+O hotkey-overlay-title="Obsidian" { spawn "obsidian"; }
+    Mod+Alt+R hotkey-overlay-title="Newsboat" { spawn "ghostty" "-e" "newsboat"; }
+    Mod+Alt+Slash hotkey-overlay-title="KeePassXC" { spawn "keepassxc"; }
+
+    // workspaces: dynamic per-monitor strip, indices are positions
+    Mod+BracketLeft { focus-workspace-up; }
+    Mod+BracketRight { focus-workspace-down; }
+    Mod+Escape { focus-workspace-previous; }
+    Mod+WheelScrollDown cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp cooldown-ms=150 { focus-workspace-up; }
+
+    // screencast target: share exactly one window in meetings (red ring
+    // marks the window being cast; see the is-window-cast-target rule)
+    Mod+S hotkey-overlay-title="Cast this window" { set-dynamic-cast-window; }
+    Mod+Shift+S hotkey-overlay-title="Cast whole monitor" { set-dynamic-cast-monitor; }
+    Mod+Ctrl+S hotkey-overlay-title="Stop dynamic cast" { clear-dynamic-cast-target; }
+
+    // monitors
+    Mod+Shift+BracketLeft { focus-monitor-left; }
+    Mod+Shift+BracketRight { focus-monitor-right; }
+    Mod+Shift+Alt+BracketLeft { move-workspace-to-monitor-left; }
+    Mod+Shift+Alt+BracketRight { move-workspace-to-monitor-right; }
+
+    // theme toggle
+    Mod+F5 { spawn "theme-switch"; }
+
+    // screenshot (grim + satty pipeline, unchanged)
+    Print { spawn "screenshot" "full"; }
+    Shift+Print { spawn "screenshot" "area"; }
+
+    // screen recording
+    Mod+Print { spawn "wf-recorder-toggle"; }
+    Mod+Shift+Print { spawn "wf-recorder-toggle" "area"; }
+
+    // locked / repeating media + brightness
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "-l" "1" "@DEFAULT_AUDIO_SINK@" "5%+"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
+    XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "-c" "backlight" "s" "10%+"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "-c" "backlight" "s" "10%-"; }
+    XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
+    XF86AudioPause allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioPrev allow-when-locked=true { spawn "playerctl" "previous"; }
+
+    // workspaces 1..9: switch / move / move-silent. Via niri-ws, not raw
+    // indices: declared named workspaces (chat/work) always occupy the top
+    // of the strip, so raw `focus-workspace 1` would land on "work".
+    // niri-ws maps N to the Nth UNNAMED workspace on the focused output.
+    Mod+1 { spawn "niri-ws" "focus" "1"; }
+    Mod+2 { spawn "niri-ws" "focus" "2"; }
+    Mod+3 { spawn "niri-ws" "focus" "3"; }
+    Mod+4 { spawn "niri-ws" "focus" "4"; }
+    Mod+5 { spawn "niri-ws" "focus" "5"; }
+    Mod+6 { spawn "niri-ws" "focus" "6"; }
+    Mod+7 { spawn "niri-ws" "focus" "7"; }
+    Mod+8 { spawn "niri-ws" "focus" "8"; }
+    Mod+9 { spawn "niri-ws" "focus" "9"; }
+    Mod+Shift+1 { spawn "niri-ws" "move" "1"; }
+    Mod+Shift+2 { spawn "niri-ws" "move" "2"; }
+    Mod+Shift+3 { spawn "niri-ws" "move" "3"; }
+    Mod+Shift+4 { spawn "niri-ws" "move" "4"; }
+    Mod+Shift+5 { spawn "niri-ws" "move" "5"; }
+    Mod+Shift+6 { spawn "niri-ws" "move" "6"; }
+    Mod+Shift+7 { spawn "niri-ws" "move" "7"; }
+    Mod+Shift+8 { spawn "niri-ws" "move" "8"; }
+    Mod+Shift+9 { spawn "niri-ws" "move" "9"; }
+    Mod+Ctrl+1 { spawn "niri-ws" "move-silent" "1"; }
+    Mod+Ctrl+2 { spawn "niri-ws" "move-silent" "2"; }
+    Mod+Ctrl+3 { spawn "niri-ws" "move-silent" "3"; }
+    Mod+Ctrl+4 { spawn "niri-ws" "move-silent" "4"; }
+    Mod+Ctrl+5 { spawn "niri-ws" "move-silent" "5"; }
+    Mod+Ctrl+6 { spawn "niri-ws" "move-silent" "6"; }
+    Mod+Ctrl+7 { spawn "niri-ws" "move-silent" "7"; }
+    Mod+Ctrl+8 { spawn "niri-ws" "move-silent" "8"; }
+    Mod+Ctrl+9 { spawn "niri-ws" "move-silent" "9"; }
+
+    // Mod+Tab / Alt+Tab: left to the built-in recent-windows MRU switcher.
+}
+
+// ----- window rules ---------------------------------------------------
+// Later rules override earlier ones per-property. Find app-ids with
+// `niri msg pick-window`.
+
+// scrolling column widths (were scrolling_width rules)
+window-rule {
+    match app-id=r#"(?i)^(firefox|org\.mozilla\.firefox|firefox-esr|firefox-bin|chromium|chromium-browser|google-chrome)"#
+    default-column-width {
+        proportion 0.66667
+    }
+}
+window-rule {
+    match app-id=r#"^com\.mitchellh\.ghostty$"#
+    default-column-width {
+        proportion 0.5
+    }
+}
+window-rule {
+    match app-id=r#"^obsidian$"#
+    default-column-width {
+        proportion 0.33333
+    }
+}
+
+// comms → named workspaces, hidden from screencasts
+window-rule {
+    match app-id=r#"(?i)^discord"#
+    match app-id=r#"^org\.telegram\.desktop$"#
+    match app-id=r#"(?i)^signal"#
+    open-on-workspace "chat"
+    default-column-width {
+        proportion 0.5
+    }
+    block-out-from "screencast"
+}
+window-rule {
+    match app-id=r#"(?i)^thunderbird"#
+    match app-id=r#"(?i)^slack"#
+    match app-id=r#"(?i)^mattermost\.desktop"#
+    open-on-workspace "work"
+    default-column-width {
+        proportion 0.33333
+    }
+    block-out-from "screencast"
+}
+
+// startup layout: browser + notes land on the web workspace (which pins
+// itself to the external panel when docked)
+window-rule {
+    match at-startup=true app-id=r#"(?i)^(firefox|org\.mozilla\.firefox)"#
+    match at-startup=true app-id=r#"^obsidian$"#
+    open-on-workspace "web"
+}
+
+// Grayjay: was ws4/monocle on the laptop panel
+window-rule {
+    match title=r#"^Grayjay$"#
+    open-maximized true
+    open-on-output "eDP-1"
+}
+
+// satty annotation editor
+window-rule {
+    match app-id=r#"^com\.gabm\.satty$"#
+    open-floating true
+    default-column-width {
+        proportion 0.8
+    }
+    default-window-height {
+        proportion 0.8
+    }
+}
+
+// subtle inactive dim (was opacity "1.0 0.97")
+window-rule {
+    match is-active=false
+    opacity 0.97
+}
+
+// picture-in-picture: floating bottom-right, no focus steal, always opaque
+window-rule {
+    match title=r#"^Picture-in-Picture$"#
+    open-floating true
+    open-focused false
+    default-column-width {
+        fixed 300
+    }
+    default-window-height {
+        fixed 169
+    }
+    default-floating-position x=20 y=20 relative-to="bottom-right"
+    opacity 1.0
+}
+
+// Firefox/Thunderbird draw their own 1px dark border under niri's,
+// muddying the stylix border — clip them to their geometry.
+window-rule {
+    match app-id=r#"(?i)^(firefox|org\.mozilla\.firefox)"#
+    match app-id=r#"(?i)^thunderbird"#
+    clip-to-geometry true
+}
+
+// red ring on the window currently being screencast via the dynamic
+// cast target (Mod+S) — visible reminder of what the meeting sees
+window-rule {
+    match is-window-cast-target=true
+    border {
+        active-color "#d75f5f"
+        inactive-color "#d75f5f"
+    }
+}
+
+// ----- layer rules ----------------------------------------------------
+// Notifications carry message content — keep them out of screencasts,
+// same as the chat/work/KeePassXC window rules ("notifications" is
+// mako's layer-shell namespace).
+layer-rule {
+    match namespace="^notifications$"
+    block-out-from "screencast"
+}
+
+// ----- switch events --------------------------------------------------
+// Runs even when the session is already locked; niri powers the panel
+// off/on with the lid by itself.
+switch-events {
+    lid-close { spawn "sh" "-c" "pgrep -x swaylock || swaylock -f"; }
+}

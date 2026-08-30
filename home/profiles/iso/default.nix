@@ -9,6 +9,8 @@
 
     # Wayland/Hyprland essentials
     ../../programs/wayland
+    ../../programs/wayland/hyprlock.nix
+    ../../programs/wayland/hypridle.nix
     ../../programs/gtk.nix
     ../../programs/gpg.nix
 

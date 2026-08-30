@@ -1,6 +1,10 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
+  # This file serves both compositors: framework13 runs niri, iso still
+  # runs Hyprland — only the workspace/submap cluster differs.
+  isHyprland = config.wayland.windowManager.hyprland.enable;
+
   c = config.lib.stylix.colors.withHashtag;
   isDark = config.stylix.polarity == "dark";
   bgAlpha = if isDark then "0.6" else "0.85";
@@ -129,9 +133,66 @@ let
           done
     '';
   };
+  # niri column dots: the focused workspace's name plus one dot per column
+  # (filled = focused column), so the horizontal shape of the scrolling
+  # strip is visible at a glance — the one thing niri hides. Floating
+  # windows show as a dim "+n" (they don't take part in column nav).
+  # Same architecture as the old monocle-indicator: any window/workspace
+  # event on the niri event stream triggers a cheap re-query; no polling.
+  niri-columns = pkgs.writeShellApplication {
+    name = "waybar-niri-columns";
+    runtimeInputs = with pkgs; [ jq niri ];
+    text = ''
+      emit() {
+        jq -cn \
+          --argjson ws "$(niri msg --json workspaces)" \
+          --argjson win "$(niri msg --json windows)" \
+          --arg accent '${monocleAccent}' --arg dim '${monocleDimAlpha}' '
+          (first($ws[] | select(.is_focused))) as $fw
+          | ($fw.name // ($fw.idx | tostring)) as $label
+          | [$win[] | select(.workspace_id == $fw.id)] as $wins
+          | [$wins[] | select(.layout.pos_in_scrolling_layout != null)] as $tiled
+          | ([$tiled[] | .layout.pos_in_scrolling_layout[0]] | unique | sort) as $cols
+          | (first($wins[] | select(.is_focused)) // null) as $focw
+          | (($focw.layout.pos_in_scrolling_layout // [-1])[0]) as $fcol
+          | ([$wins[] | select(.layout.pos_in_scrolling_layout == null)] | length) as $nfloat
+          | ($cols | map(
+              if . == $fcol
+              then "<span color=\($accent | tojson)>󰝥</span>"
+              else "<span color=\($accent | tojson) alpha=\($dim | tojson)>󰝦</span>"
+              end) | join(" ")) as $dots
+          | ($tiled | sort_by(.layout.pos_in_scrolling_layout)
+             | map((if .is_focused then "● " else "○ " end) + (.title // .app_id // "?"))
+             | join("\n")) as $tip
+          | { text: ($label
+                     + (if $dots == "" then "" else "  " + $dots end)
+                     + (if $nfloat > 0
+                        then "  <span alpha=\($dim | tojson)>+\($nfloat)</span>"
+                        else "" end)),
+              tooltip: (if $tip == "" then "empty" else $tip end) }'
+      }
+      emit || true
+      niri msg --json event-stream | while read -r ev; do
+        case "$ev" in
+          *Window*|*Workspace*) emit || true ;;
+        esac
+      done
+    '';
+  };
 in {
+  # Same login race as swaybg: graphical-session.target can fire before
+  # niri exports WAYLAND_DISPLAY into the user manager. Retry calmly.
+  systemd.user.services.waybar = lib.mkIf (!isHyprland) {
+    Unit.StartLimitIntervalSec = 0;
+    Service.RestartSec = 2;
+  };
+
   programs.waybar = {
     enable = true;
+    # Systemd-managed on niri: every HM activation restarts the unit, so
+    # config changes actually land (a spawned waybar lives on with the
+    # config it read at login). Hyprland hosts keep their exec-once spawn.
+    systemd.enable = !isHyprland;
     # Theme variables come from stylix and so must be generated here; every
     # structural rule lives in ./style.css (pure CSS, referencing these names).
     # GTK CSS @define-color accepts color expressions, so the two alpha scalars
@@ -153,8 +214,25 @@ in {
       spacing = 5;
       margin = "0";
       modules-left = ["clock" "custom/timew" "custom/playerctl"];
-      modules-center = ["hyprland/submap" "hyprland/workspaces" "custom/monocle"];
+      # niri: column dots + focused title. The stock niri/workspaces module
+      # is deliberately absent — named workspaces always exist, so it
+      # renders permanent squatter entries with no way to filter them.
+      modules-center = if isHyprland
+        then ["hyprland/submap" "hyprland/workspaces" "custom/monocle"]
+        else ["custom/niri-columns"];
       modules-right = ["custom/fcitx" "pulseaudio" "battery" "power-profiles-daemon" "custom/wireguard" "network" "group/hardware" "custom/gpu" "temperature" "idle_inhibitor" "custom/dnd" "privacy"];
+      # workspace label + live column dots (see niri-columns above);
+      # scroll walks the columns, click opens the overview
+      "custom/niri-columns" = {
+        format = "{}";
+        return-type = "json";
+        exec = "${niri-columns}/bin/waybar-niri-columns";
+        on-click = "niri msg action toggle-overview";
+        on-scroll-up = "niri msg action focus-column-left";
+        on-scroll-down = "niri msg action focus-column-right";
+        tooltip = true;
+      };
+
       "hyprland/workspaces" = {
         format = "{icon}";
         format-icons = {

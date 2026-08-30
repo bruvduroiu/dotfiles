@@ -2,10 +2,17 @@
 
 let
   cfg = config.desktop.greetd;
-  hyprlandDesktop = "${config.programs.hyprland.package}/share/wayland-sessions/hyprland.desktop";
-  sessionCommand = "${lib.getExe config.programs.uwsm.package} start -eD Hyprland ${hyprlandDesktop}";
+  sessionCommand = cfg.sessionCommand;
 in {
   options.desktop.greetd = {
+    sessionCommand = lib.mkOption {
+      type = lib.types.str;
+      description = ''
+        Command greetd runs to start the Wayland session. Set by the active
+        compositor module (system/programs/hyprland or system/programs/niri).
+      '';
+    };
+
     user = lib.mkOption {
       type = lib.types.str;
       default = "bogdan";
