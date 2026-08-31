@@ -50,6 +50,15 @@
 
   boot = {
     kernelPackages = lib.mkForce inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.linuxPackages_latest;
+
+    # The nixos-hardware framework-amd-ai-300-series module sets
+    # amdgpu.dcdebugmask=0x10 (disable PSR) against panel flicker, but the
+    # BOE 2.8K panel negotiates eDP Panel Replay, which 0x10 doesn't cover —
+    # its selective-update rectangles flash on screen. 0x410 also disables
+    # Replay (0x400); mkAfter puts it after the module's 0x10 on the
+    # cmdline, and the last assignment of a module param wins. If rectangles
+    # persist, the next escalation is 0x610 (adds PSR-SU, 0x200).
+    kernelParams = lib.mkAfter [ "amdgpu.dcdebugmask=0x410" ];
   };
 
   # System configuration

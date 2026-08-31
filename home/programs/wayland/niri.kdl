@@ -234,8 +234,10 @@ binds {
     Mod+G { toggle-column-tabbed-display; }
 
     // utilities
-    Mod+Return { spawn "ghostty"; }
-    Mod+Y { spawn "ghostty" "-e" "yazi"; }
+    // +new-window goes through D-Bus to the resident systemd-managed
+    // instance (~20ms) instead of cold-starting GTK per window (~300ms).
+    Mod+Return { spawn "ghostty" "+new-window"; }
+    Mod+Y { spawn "ghostty" "+new-window" "-e" "yazi"; }
     Mod+Space { spawn "walker"; }
     // allow-when-locked: if swaylock ever dies (red locked screen), this
     // same key revives it. allow-inhibiting=false: a VM/remote-desktop
@@ -258,7 +260,7 @@ binds {
     Mod+Alt+W hotkey-overlay-title="Work browser" { spawn "firefox" "-P" "work" "--no-remote"; }
     Mod+Alt+H hotkey-overlay-title="Ghost browser" { spawn "mullvad-browser"; }
     Mod+Alt+O hotkey-overlay-title="Obsidian" { spawn "obsidian"; }
-    Mod+Alt+R hotkey-overlay-title="Newsboat" { spawn "ghostty" "-e" "newsboat"; }
+    Mod+Alt+R hotkey-overlay-title="Newsboat" { spawn "ghostty" "+new-window" "-e" "newsboat"; }
     Mod+Alt+Slash hotkey-overlay-title="KeePassXC" { spawn "keepassxc"; }
 
     // workspaces: dynamic per-monitor strip, indices are positions
