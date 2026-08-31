@@ -1,7 +1,8 @@
-{ config
-, lib
-, pkgs
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 
 let
@@ -16,7 +17,7 @@ let
   appDefaults = {
     defaultViewMode = "preview";
     tabSize = 2;
-    vimMode = true;
+    vimMode = false;
     focusNewTab = true;
     propertiesInDocument = "visible";
     foldHeading = true;
@@ -37,32 +38,6 @@ let
     showUnsupportedFiles = true;
   };
 
-  website = "${config.home.homeDirectory}/development/bruvduroiu/website";
-  blogsFolder = "${config.home.homeDirectory}/Documents/Keep/4 - Blogs";
-
-  # Single action: mirror the vault's `4 - Blogs` folder into the Hugo repo's content/.
-  # Everything else (build, commit, push, local preview) is handled manually outside
-  # Obsidian. rsync --delete gives true mirror semantics (deletions propagate); cp -a
-  # would leave ghosts of deleted posts behind.
-  blog-sync = pkgs.writeShellApplication {
-    name = "blog-sync";
-    runtimeInputs = with pkgs; [ rsync ];
-    text = ''
-      vault="${blogsFolder}"
-      repo="${website}"
-
-      # Safety: refuse to mirror an unseeded vault — rsync --delete would otherwise
-      # wipe every post in the repo.
-      if [ ! -d "$vault/blog" ] || [ ! -f "$vault/_index.md" ]; then
-        echo "blog-sync: '4 - Blogs' looks unseeded (missing blog/ or _index.md); aborting." >&2
-        exit 1
-      fi
-
-      rsync -a --delete --exclude='.obsidian' "$vault/" "$repo/content/"
-      echo "blog-sync: mirrored 4 - Blogs -> $repo/content"
-    '';
-  };
-
   # One Shell-commands `data.json` command entry. Mirrors the plugin's
   # newShellCommandConfiguration() exactly — the module writes data.json as a
   # read-only store symlink, and Shell commands uses the loaded file as-is (it only
@@ -77,10 +52,19 @@ let
     ignore_error_codes = [ ];
     input_contents.stdin = null;
     output_handlers = {
-      stdout = { handler = "ignore"; convert_ansi_code = true; };
-      stderr = { handler = "notification"; convert_ansi_code = true; };
+      stdout = {
+        handler = "ignore";
+        convert_ansi_code = true;
+      };
+      stderr = {
+        handler = "notification";
+        convert_ansi_code = true;
+      };
     };
-    output_wrappers = { stdout = null; stderr = null; };
+    output_wrappers = {
+      stdout = null;
+      stderr = null;
+    };
     output_channel_order = "stdout-first";
     output_handling_mode = "buffered";
     execution_notification_mode = null;
@@ -104,7 +88,10 @@ let
     name = "NixOS /bin/sh";
     description = "POSIX sh via /bin/sh — built-in shells hardcode nonexistent /bin/bash and /bin/dash on NixOS.";
     binary_path = "/bin/sh";
-    shell_arguments = [ "-c" "{{shell_command_content}}" ];
+    shell_arguments = [
+      "-c"
+      "{{shell_command_content}}"
+    ];
     host_platform = "linux";
     host_platform_configurations = { };
     shell_platform = null;
@@ -123,7 +110,9 @@ let
     preview_variables_in_command_palette = true;
     show_autocomplete_menu = true;
     working_directory = "";
-    default_shells = { linux = nixShellId; };
+    default_shells = {
+      linux = nixShellId;
+    };
     environment_variable_path_augmentations = { };
     show_installation_warnings = true;
     error_message_duration = 20;
@@ -138,12 +127,11 @@ let
       prefix = "Re-execute: ";
     };
     max_visible_lines_in_shell_command_fields = false;
-    shell_commands = [
-      (mkShellCommand "blog-sync" "Blog: sync vault -> repo content" "${blog-sync}/bin/blog-sync")
-    ] ++ lib.optionals mdCfg.obsidian.enable [
+    shell_commands = lib.optionals mdCfg.obsidian.enable [
       # {{file_path:absolute}} → the active note; md2pdf writes <note>.pdf beside it.
       (mkShellCommand "md2pdf-export" "Export: note -> PDF (md2pdf)"
-        "${mdCfg.package}/bin/md2pdf --theme ${mdCfg.defaultTheme} {{file_path:absolute}}")
+        "${mdCfg.package}/bin/md2pdf --theme ${mdCfg.defaultTheme} {{file_path:absolute}}"
+      )
     ];
     prompts = [ ];
     builtin_variables = { };
@@ -157,11 +145,10 @@ let
   };
 in
 {
-  # Scripts, templates, and bases are stored here as version-controlled backup.
-  # They live in the vault directly (synced via Syncthing).
-
-  # blog-sync is also exposed on PATH for use outside Obsidian.
-  home.packages = [ blog-sync ];
+  # scripts/ holds version-controlled backups of files that live in the Keep
+  # vault directly (synced via Syncthing) — `extraFiles` can only target
+  # .obsidian/, not vault content. The Blog vault has no such backups: its
+  # template lives in the website repo itself (content/templates/).
 
   programs.obsidian = {
     enable = true;
@@ -173,22 +160,14 @@ in
         settings = {
           app = appDefaults // {
             attachmentFolderPath = "9 - Attachments";
-            # All new notes land in 5 - Main Notes. Blogs start there too but the Blog Post
-            # template immediately tp.file.move()s them into 4 - Blogs/blog/<slug>/.
+            # All new notes land in 5 - Main Notes.
             newFileLocation = "folder";
             newFileFolderPath = "5 - Main Notes";
           };
           # Declarative custom hotkeys (.obsidian/hotkeys.json). Shell-commands command
           # ids are `obsidian-shellcommands:shell-command-<id>`; Templater registers each
           # enabled template-hotkey as `templater-obsidian:<vault-relative path>`.
-          hotkeys = {
-            "obsidian-shellcommands:shell-command-blog-sync" = [
-              { modifiers = [ "Mod" "Shift" ]; key = "P"; }
-            ];
-            "templater-obsidian:9 - Templates/Blog Post.md" = [
-              { modifiers = [ "Mod" "Shift" ]; key = "B"; }
-            ];
-          } // lib.optionalAttrs mdCfg.obsidian.enable {
+          hotkeys = lib.optionalAttrs mdCfg.obsidian.enable {
             "obsidian-shellcommands:shell-command-md2pdf-export" = [ mdCfg.obsidian.hotkey ];
           };
           corePlugins = [
@@ -224,8 +203,6 @@ in
                 command_palette = true;
                 templates_folder = "9 - Templates";
                 user_scripts_folder = "9 - Scripts";
-                # Register the Blog Post template as a hotkeyable command.
-                enabled_templates_hotkeys = [ "9 - Templates/Blog Post.md" ];
               };
             }
             {
@@ -247,15 +224,88 @@ in
                     id = "protomaps";
                     name = "Protomaps";
                     lightTiles = "https://tiles.openfreemap.org/styles/liberty";
-                    darkTiles  = "https://tiles.openfreemap.org/styles/dark";
+                    darkTiles = "https://tiles.openfreemap.org/styles/dark";
                   }
                 ];
               };
             }
             {
-              # Single rsync command (see blog-sync above).
+              # Helix keybindings in the editor (codemirror-helix), so the vault
+              # matches hx and the fish-helix command line. Deliberately no
+              # `settings` — the module only writes data.json when settings are
+              # given, and the plugin's defaults are what we want.
+              #
+              # Requires `app.vimMode = false` (appDefaults above): Obsidian's
+              # built-in vim mode is a separate CodeMirror keymap and the two
+              # fight over the same keys.
+              pkg = pkgs.callPackage ./plugins/helix.nix { };
+            }
+          ]
+          ++ lib.optionals mdCfg.obsidian.enable [
+            {
+              # Shell commands exists solely to run md2pdf on the active note.
               pkg = pkgs.callPackage ./plugins/shellcommands.nix { };
               settings = shellcommandsSettings;
+            }
+          ];
+        };
+      };
+
+      # The blog is edited in place: the vault IS the Hugo repo's content/ tree.
+      # No sync step — Hugo/CI reads the same files Obsidian writes. .obsidian/ is
+      # gitignored in the website repo and Hugo skips dotfiles, and the Blog Post
+      # template lives in content/templates/ (version-controlled there, excluded
+      # from the site via `ignoreFiles` in hugo.yaml).
+      Blog = {
+        enable = true;
+        target = "development/bruvduroiu/website/content";
+        settings = {
+          app = appDefaults // {
+            # Posts are Hugo page bundles (blog/<slug>/index.md); pasted images
+            # must land beside the note, not in a vault-wide attachments folder.
+            attachmentFolderPath = "./";
+          };
+          hotkeys = {
+            "templater-obsidian:templates/Blog Post.md" = [
+              {
+                modifiers = [
+                  "Mod"
+                  "Shift"
+                ];
+                key = "B";
+              }
+            ];
+          };
+          corePlugins = [
+            "backlink"
+            "command-palette"
+            "editor-status"
+            "file-explorer"
+            "file-recovery"
+            "global-search"
+            "outgoing-link"
+            "outline"
+            "page-preview"
+            "slash-command"
+            "switcher"
+            "word-count"
+          ];
+          communityPlugins = [
+            {
+              pkg = pkgs.callPackage ./plugins/templater.nix { };
+              settings = {
+                auto_jump_to_cursor = true;
+                syntax_highlighting = true;
+                command_palette = true;
+                templates_folder = "templates";
+                # Register the Blog Post template as a hotkeyable command.
+                enabled_templates_hotkeys = [ "templates/Blog Post.md" ];
+              };
+            }
+            {
+              # Same editor keybindings as the Keep vault (needs vimMode = false,
+              # which appDefaults provides).
+              pkg = pkgs.callPackage ./plugins/helix.nix { };
             }
           ];
         };
