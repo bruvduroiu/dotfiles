@@ -151,6 +151,19 @@ in
           "Bash(git status)"
           "Bash(git diff:*)"
           "Bash(git log:*)"
+          # jj orientation commands — read-only, so sessions in colocated
+          # repos can answer "what did I change" without prompting.
+          "Bash(jj st)"
+          "Bash(jj status)"
+          "Bash(jj diff:*)"
+          "Bash(jj log:*)"
+          "Bash(jj show:*)"
+          # Parallel-agent orientation: who else is working, where, and what
+          # happened — all read-only.
+          "Bash(jj workspace list)"
+          "Bash(jj workspace root)"
+          "Bash(jj op log:*)"
+          "Bash(jj resolve --list)"
           "Bash(npm run lint)"
           "Bash(npm run test:*)"
           "Bash(cargo build)"
@@ -163,6 +176,16 @@ in
         ask = [
           "Bash(git push:*)"
           "Bash(git commit:*)"
+          # Creating/describing revisions is allowed with eyes on it; history
+          # surgery (squash/abandon/undo/rebase/push) stays human-only — see
+          # the jj-first section of CLAUDE.md.
+          "Bash(jj new:*)"
+          "Bash(jj describe:*)"
+          # Parallel-agent workspace ops: `add` mutates the repo (new revision
+          # + op log entry), `update-stale` rewrites the local working copy.
+          # `jj workspace forget` stays human-only — see CLAUDE.md.
+          "Bash(jj workspace add:*)"
+          "Bash(jj workspace update-stale)"
           "Bash(rm -rf:*)"
           "Bash(cargo publish:*)"
           "Bash(npm publish:*)"

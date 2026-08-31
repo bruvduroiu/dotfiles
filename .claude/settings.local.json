@@ -5,7 +5,8 @@
       "Bash(nmcli connection show:*)",
       "Bash(iw dev:*)",
       "Bash(pmtiles tile:*)",
-      "Bash(nix-shell:*)"
+      "Bash(nix-shell:*)",
+      "WebFetch(domain:code.claude.com)"
     ],
     "deny": [
       "Read(./secrets/**)"

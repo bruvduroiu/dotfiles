@@ -101,6 +101,64 @@ Packages are declared, not installed: system-wide in `system/`, user-level in
 `home/`, host overrides in `hosts/<host>/`. Adding a tool means editing the right
 `.nix` file, not running an installer.
 
+## Version control: jj-first
+
+When a repo has a `.jj` directory, it is a Jujutsu repo colocated with git
+(`.git` alongside `.jj`). jj is authoritative; treat git as a read-only view.
+
+- Orient with `jj st`, `jj diff`, `jj log`, `jj show` — not `git status` /
+  `git diff` / `git add`.
+- Work lands in the working-copy revision `@`, which jj snapshots
+  automatically. There is no staging area and nothing to commit. **Never run
+  `git commit`, `git add`, or `git stash`** — a git-side commit in a
+  colocated repo diverges from jj's view and has to be reconciled.
+- **Never rewrite or land history**: no `jj squash`, `jj abandon`, `jj undo`,
+  `jj rebase`, `jj op restore`, or `jj git push`. The human reviews the diff
+  and carves `@` into revisions themselves (split/absorb/tug/push).
+- Starting a substantial task on a dirty `@` that isn't yours? Suggest (or,
+  if asked, run) `jj new -m "claude: <task>"` first so the session's work is
+  isolated in its own revision. `jj describe` may update that revision's
+  message; leave every other revision's message alone.
+
+### Parallel agents: one workspace per agent
+
+Multiple agent sessions may work the same repo at once. The unit of isolation
+is the **jj workspace** (`jj workspace add`): shaped like a git worktree, but
+all workspaces share one repo and one operation log, and each has its own
+working-copy revision — shown as `<name>@` in `jj log`. Concurrent jj
+commands from *different* workspaces are safe; the op log merges them. Two
+agents snapshotting the **same directory** are not: never share a working
+copy with another agent.
+
+- Each parallel session gets a workspace, created off trunk (this mutates
+  the repo — ask, or let the human pre-create it):
+
+  ```
+  jj workspace add --name claude-<task> -r 'trunk()' \
+      -m "claude: <task>" ../<repo>.claude-<task>
+  ```
+
+  Then work entirely inside that directory. Its `@` is yours alone; every
+  single-`@` rule above applies there unchanged.
+- Secondary workspaces have no `.git` — git commands fail in them. That is
+  fine: git was a read-only view anyway. Orient with jj only.
+- Other agents' in-flight work is already visible — `jj log` shows every
+  workspace's `<name>@`. There is nothing to fetch, pull, or sync.
+- **Conflicts are data, not failures.** Integrating parallel lines is
+  `jj new claude-a@ claude-b@ -m "claude: merge a+b"` — it always succeeds.
+  Conflicted files carry markers; `jj st` lists them and
+  `jj log -r 'conflicts()'` finds them repo-wide. Resolve by editing the
+  files in that merge revision — the snapshot picks it up. There is no
+  `--abort`, no `MERGE_HEAD`, no "commit your changes first".
+- A workspace can go **stale** (jj says so explicitly) when its `@`'s
+  ancestry is rewritten from another workspace. Recovery is
+  `jj workspace update-stale`, then re-read `jj diff` before continuing.
+  Never delete and re-create a workspace over staleness.
+- Don't stack on another agent's live `@`: it is amended on every snapshot,
+  so the child rebases constantly and its workspace goes stale on repeat.
+  Build on a described, finished revision instead.
+- `jj workspace forget`, like all history surgery, stays human-only.
+
 ## Development practices
 
 - Verify a command's tool is reachable (`command -v`, or just wrap it in
