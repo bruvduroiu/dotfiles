@@ -1,11 +1,14 @@
-{ ... }:
+{ config, ... }:
 
 {
   programs.ghostty = {
     enable = true;
+    enableFishIntegration = true;
     settings = {
+      theme = "light:Rose Pine Dawn,dark:Rose Pine";
       cursor-style = "block";
       mouse-hide-while-typing = true;
+      quit-after-last-window-closed = false;
       background-blur = 10;
       unfocused-split-opacity = 0.7;
       window-padding-x = 0;
@@ -64,4 +67,10 @@
       ];
     };
   };
+
+  # Declarative `systemctl enable --user app-com.mitchellh.ghostty.service`:
+  # start the (windowless, --initial-window=false) instance at login so the
+  # GTK startup cost is paid once, hidden behind session bring-up.
+  xdg.configFile."systemd/user/graphical-session.target.wants/app-com.mitchellh.ghostty.service".source =
+    "${config.programs.ghostty.package}/share/systemd/user/app-com.mitchellh.ghostty.service";
 }

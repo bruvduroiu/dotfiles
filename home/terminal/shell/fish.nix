@@ -1,7 +1,13 @@
-{ config, lib, pkgs, ... }: let
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+let
   eza_opts = lib.strings.concatStringsSep " " config.programs.eza.extraOptions;
-  fd_opts = lib.strings.concatStringsSep " " ["--hidden"];
-  delta_opts = lib.strings.concatStringsSep " " ["--paging=never"];
+  fd_opts = lib.strings.concatStringsSep " " [ "--hidden" ];
+  delta_opts = lib.strings.concatStringsSep " " [ "--paging=never" ];
 
   # Helix-style modal editing for the fish command line. Not in nixpkgs, and it
   # needs no build step — home-manager's `plugins` option only ever prepends
@@ -22,12 +28,30 @@ in
     fish = {
       enable = true;
       plugins = [
-        { name = "done"; src = pkgs.fishPlugins.done.src; }
-        { name = "fzf-fish"; src = pkgs.fishPlugins.fzf-fish.src; }
-        { name = "forgit"; src = pkgs.fishPlugins.forgit.src; }
-        { name = "hydro"; src = pkgs.fishPlugins.hydro.src; }
-        { name = "fzf"; src = pkgs.fishPlugins.fzf.src; }
-        { name = "fish-helix"; src = fish-helix; }
+        {
+          name = "done";
+          src = pkgs.fishPlugins.done.src;
+        }
+        {
+          name = "fzf-fish";
+          src = pkgs.fishPlugins.fzf-fish.src;
+        }
+        {
+          name = "forgit";
+          src = pkgs.fishPlugins.forgit.src;
+        }
+        {
+          name = "hydro";
+          src = pkgs.fishPlugins.hydro.src;
+        }
+        {
+          name = "fzf";
+          src = pkgs.fishPlugins.fzf.src;
+        }
+        {
+          name = "fish-helix";
+          src = fish-helix;
+        }
       ];
       shellInit = ''
         if test -f ${config.sops.secrets.openrouter_api_key.path}
@@ -38,6 +62,9 @@ in
         end
         if test -f ${config.sops.secrets.alphavantage_api_key.path}
           set -gx ALPHAVANTAGE_API_KEY (cat ${config.sops.secrets.alphavantage_api_key.path})
+        end
+        if test -f ${config.sops.secrets.abliteration_api_key.path}
+          set -gx ABLITERATION_API_KEY (cat ${config.sops.secrets.abliteration_api_key.path})
         end
       '';
       interactiveShellInit = ''

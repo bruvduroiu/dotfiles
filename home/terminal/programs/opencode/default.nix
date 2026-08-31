@@ -1,7 +1,8 @@
-{ config
-, lib
-, pkgs
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 
 let
@@ -46,7 +47,13 @@ in
       #   opencode auth login  ->  openai  ->  ChatGPT Pro/Plus (browser)
       # The token lands in ~/.local/share/opencode/auth.json, outside the store.
       # Pick `ChatGPT Pro/Plus (headless)` instead when logging in over SSH.
-      enabled_providers = [ "openai" "deepseek" "openrouter" "zai-coding-plan" ];
+      enabled_providers = [
+        "openai"
+        "deepseek"
+        "openrouter"
+        "zai-coding-plan"
+        "abliteration"
+      ];
       provider = {
         deepseek = {
           options = {
@@ -63,6 +70,19 @@ in
         zai-coding-plan = {
           options = {
             apiKey = "{file:${config.sops.secrets.zai_api_key.path}}";
+          };
+        };
+        abliteration = {
+          npm = "@ai-sdk/openai-compatible";
+          name = "Abliteration";
+          options = {
+            baseURL = "https://api.abliteration.ai/v1";
+            apiKey = "{file:${config.sops.secrets.abliteration_api_key.path}}";
+          };
+          models = {
+            abliterated-model-large-v2 = {
+              name = "Abliterated Large v2";
+            };
           };
         };
       };

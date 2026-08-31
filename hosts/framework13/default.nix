@@ -56,9 +56,17 @@
     # BOE 2.8K panel negotiates eDP Panel Replay, which 0x10 doesn't cover —
     # its selective-update rectangles flash on screen. 0x410 also disables
     # Replay (0x400); mkAfter puts it after the module's 0x10 on the
-    # cmdline, and the last assignment of a module param wins. If rectangles
-    # persist, the next escalation is 0x610 (adds PSR-SU, 0x200).
-    kernelParams = lib.mkAfter [ "amdgpu.dcdebugmask=0x410" ];
+    # cmdline, and the last assignment of a module param wins.
+    #
+    # 0x410 alone didn't clear the rectangles (2026-09-01), so also disable
+    # scatter-gather display: with sg_display on auto the APU scans the
+    # framebuffer out of scattered system-RAM pages, and bandwidth hiccups
+    # show as exactly these transient rectangles. Next rung if it persists:
+    # dcdebugmask 0xC10 (adds IPS, 0x800).
+    kernelParams = lib.mkAfter [
+      "amdgpu.dcdebugmask=0x410"
+      "amdgpu.sg_display=0"
+    ];
   };
 
   # System configuration

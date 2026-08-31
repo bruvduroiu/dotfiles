@@ -6,7 +6,9 @@
       "Bash(iw dev:*)",
       "Bash(pmtiles tile:*)",
       "Bash(nix-shell:*)",
-      "WebFetch(domain:code.claude.com)"
+      "WebFetch(domain:code.claude.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.gtk.org)"
     ],
     "deny": [
       "Read(./secrets/**)"

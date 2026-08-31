@@ -280,8 +280,8 @@ in {
         return-type = "json";
         exec = "${wireguard-indicator}/bin/waybar-wireguard-indicator";
         interval = 10;
-        on-click = "ghostty -e watch -n1 sudo wg show";
-        on-click-right = "ghostty -e mullvad-jump pick";
+        on-click = "ghostty +new-window -e watch -n1 sudo wg show";
+        on-click-right = "ghostty +new-window -e mullvad-jump pick";
       };
 
       # visible only while a submap (resize/launch/place) is active
@@ -371,20 +371,20 @@ in {
         format = "󰘚 {usage}%";
         tooltip = true;
         interval = 1;
-        on-click = "ghostty -e btop";
+        on-click = "ghostty +new-window -e btop";
       };
 
       memory = {
         format = "󰍛 {used:0.1f}G/{total:0.1f}G";
         interval = 1;
-        on-click = "ghostty -e btop";
+        on-click = "ghostty +new-window -e btop";
       };
 
       temperature = {
         critical-threshold = 80;
         format = "{icon} {temperatureC}°C";
         format-icons = ["󱃃" "󰔏" "󱃂"];
-        on-click = "ghostty -e s-tui";
+        on-click = "ghostty +new-window -e s-tui";
       };
 
       battery = {
@@ -407,7 +407,7 @@ in {
         format-disconnected = "󰖪 Disconnected";
         format-alt = "{ifname}: {ipaddr}/{cidr}";
         tooltip-format = "{ifname}: {ipaddr}";
-        on-click = "ghostty -e sudo nmtui";
+        on-click = "ghostty +new-window -e sudo nmtui";
       };
 
       power-profiles-daemon = {
@@ -455,7 +455,7 @@ in {
         interval = 30;
         format = "󰋊 {percentage_used}%";
         path = "/";
-        on-click = "ghostty -e gdu /";
+        on-click = "ghostty +new-window -e gdu /";
       };
 
       privacy = {

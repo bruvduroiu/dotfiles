@@ -58,6 +58,11 @@
     sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
   };
 
+  # Self-hosted api.abliteration.ai key (used by the opencode `abliteration` provider)
+  sops.secrets.abliteration_api_key = {
+    sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+  };
+
   # Alpha Vantage key (used by portfolio-update-prices)
   sops.secrets.alphavantage_api_key = {
     sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";

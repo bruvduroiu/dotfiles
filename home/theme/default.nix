@@ -47,6 +47,23 @@ let
     # --- Waybar ---
     pkill -SIGUSR2 waybar 2>/dev/null || true
 
+    # --- Ghostty ---
+    # The light:/dark: conditional theme follows the color-scheme change the
+    # switch above published, but only for pristine surfaces: once a TUI has
+    # set or reset a color via OSC (helix and claude both do), ghostty stores
+    # a fixed per-surface override that BOTH soft and hard reloads keep
+    # (ghostty-org/ghostty#10398, #12708). Re-sending the OSC resets makes
+    # each surface re-copy the now-current theme defaults.
+    sleep 0.5
+    for gpid in $(pgrep ghostty || true); do
+      for cpid in $(pgrep -P "$gpid" || true); do
+        t=$(ps -o tty= -p "$cpid" | tr -d ' ')
+        if [ -n "$t" ] && [ "$t" != "?" ]; then
+          printf '\033]104\007\033]110\007\033]111\007\033]112\007' > "/dev/$t" 2>/dev/null || true
+        fi
+      done
+    done
+
     # --- GTK / portal color-scheme ---
     # Handled by the specialisation switch above: Stylix's GNOME target writes
     # org/gnome/desktop/interface/color-scheme per polarity (see theme/stylix.nix),
