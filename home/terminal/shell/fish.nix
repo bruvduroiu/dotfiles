@@ -66,6 +66,17 @@ in
         tfp = "terraform plan";
         tfa = "terraform apply";
       };
+      # jj-first daily drivers. Abbreviations, not aliases: they expand
+      # in-place, so history records the real command. The git aliases above
+      # stay for non-jj repos but are legacy.
+      shellAbbrs = {
+        js = "jj st";
+        jl = "jj log";
+        jd = "jj diff";
+        jdt = "jj dt"; # difftastic skim pass (see jj.nix merge-tools.difft)
+        jsp = "jj split";
+        jn = "jj new";
+      };
       functions = {
         # Re-applied by fish every time $fish_key_bindings changes, right after
         # the bindings function has run. fish_helix_key_bindings erases the
