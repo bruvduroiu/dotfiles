@@ -9,7 +9,7 @@ in {
   ];
 
   home.sessionVariables = {
-    EDITOR = "nvim";
+    # EDITOR/VISUAL come from programs.helix.defaultEditor (home/editors/helix).
     # Use pinentry-qt for age-plugin-yubikey (PIV) PIN prompts
     PINENTRY_PROGRAM = "${pkgs.pinentry-qt}/bin/pinentry-qt";
     # Explicit path to age keys for SOPS (needed for YubiKey plugin discovery)

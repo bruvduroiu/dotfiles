@@ -92,10 +92,11 @@ in
           # Alt+V drops the command line into real Helix. fish-helix implements
           # motions and select->act, but has no match/surround support at all
           # (no `mi(`, `ma(`, `mr'"`, `ms`) and no multiple cursors, so anything
-          # structural on a long command is done here instead. Alt+E is left
-          # alone and still opens $EDITOR (nvim).
+          # structural on a long command is done here instead.
           # edit_command_buffer is fish's builtin and honours VISUAL, so this
-          # needs no wrapper function of its own.
+          # needs no wrapper function of its own. Since VISUAL is now hx too
+          # (programs.helix.defaultEditor), Alt+E lands in the same editor; the
+          # explicit binding stays so it holds if the default ever changes.
           for mode in insert default visual
             bind -M $mode \ev "VISUAL=${config.programs.helix.package}/bin/hx edit_command_buffer"
           end

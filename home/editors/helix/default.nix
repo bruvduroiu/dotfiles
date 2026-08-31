@@ -20,6 +20,11 @@
   programs.helix = {
     enable = true;
 
+    # Sets EDITOR and VISUAL to `hx` via home.sessionVariables. Nothing else may
+    # define those (home/terminal/default.nix used to set EDITOR = "nvim") — the
+    # option is a plain definition, so a second one is an eval conflict.
+    defaultEditor = true;
+
     # Theme comes from the Stylix helix target (rose-pine / rose-pine-dawn per
     # specialisation polarity, opacity included). theme-switch sends SIGUSR1 to
     # running instances, which makes Helix re-read its config after the
@@ -89,10 +94,14 @@
           # vim-be-fast navigation hierarchy. :sh output lands in a
           # (plain-text) popup; anything interactive — describe, split,
           # squash -i — is jjui's job in another pane.
+          # Popups are for orientation only; reading a diff properly is the
+          # changed-file picker (Space-g) + ]g/[g hunk hops, or jjui.
           space.v = {
             j = ":sh jj st";
             l = ":sh jj log -n 15";
             d = ":sh jj diff";
+            s = ":sh jj diff --stat";
+            D = ":sh jj diff -r @-";
             n = [
               ":sh jj new"
               ":reload-all"
