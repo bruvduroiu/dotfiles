@@ -126,6 +126,15 @@ in {
     XMODIFIERS = "@im=fcitx";
   };
 
+  # Serve the Settings portal from ONE impl. The niri module's default
+  # (default=gnome;gtk) lets both gnome and gtk answer
+  # org.freedesktop.portal.Settings, so every theme-switch broadcasts duplicate
+  # SettingChanged signals; Electron ≥39 (Chromium 142) resolves them out of
+  # order and stops following dark/light changes at runtime
+  # (electron/electron#48736). Hyprland only ever had the gtk impl, which is
+  # why theme-switch worked there. Merges into the module's niri entry.
+  xdg.portal.config.niri."org.freedesktop.impl.portal.Settings" = [ "gtk" ];
+
   # PAM entry for swaylock (HM, home/programs/wayland/swaylock.nix);
   # fprintd being enabled makes fingerprint auth available in the stack.
   security.pam.services.swaylock = { };

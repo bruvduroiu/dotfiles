@@ -36,6 +36,23 @@
             # Per-program IM state: chat apps stay in chewing, terminals stay
             # in English — switching focus doesn't drag the mode along.
             Behavior.ShareInputState = "Program";
+
+            # Kill the bare-Shift_L "alt trigger". fcitx5 ships it enabled, and
+            # it activates the group's *default* IM — which is chewing, not
+            # keyboard-us: with >1 item fcitx5 forces DefaultIM to item[1] and
+            # rewrites ~/.config/fcitx5/profile to say so, so pinning
+            # DefaultIM=keyboard-us here would just get normalised away. One
+            # stray Shift tap therefore dropped a terminal into Bopomofo, and
+            # chewing eats Esc into its preedit-clear — Helix and fish-helix
+            # both lose normal mode while every other app looks fine.
+            # Ctrl+Space (Hotkey/TriggerKeys) still toggles deliberately.
+            #
+            # `Key = ""` is how fcitx5 itself serialises an empty key list
+            # (cf. the EnumerateForwardKeys= lines it writes); a populated list
+            # is a [Hotkey/AltTriggerKeys] subsection instead, and an empty
+            # subsection would NOT clear the default — fcitx5's ini reader only
+            # materialises a node when it sees a key=value line.
+            Hotkey.AltTriggerKeys = "";
           };
 
           inputMethod = {
