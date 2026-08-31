@@ -12,27 +12,55 @@
       window-padding-y = 0;
       shell-integration = "fish";
 
-      # Splits
       keybind = [
-        "ctrl+a>v=new_split:left"
-        "ctrl+a>n=new_split:down"
-        "ctrl+a>z=toggle_split_zoom"
-        "alt+h=goto_split:left"
-        "alt+l=goto_split:right"
-        "alt+j=goto_split:down"
-        "alt+k=goto_split:up"
-        "ctrl+a>l=resize_split:right,60"
-        "ctrl+a>h=resize_split:left,60"
-        "ctrl+a>j=resize_split:down,60"
-        "ctrl+a>k=resize_split:up,60"
-        # Tabs
-        "cmd+t=new_tab"
-        "cmd+w=close_tab"
-        "ctrl+tab=next_tab"
-        "ctrl+shift>tab=previous_tab"
-        "ctrl+a>d=close_surface"
-        # Terminal
-        "global:cmd+grave_accent=toggle_quick_terminal"
+        "clear"
+
+        # clipboard
+        "performable:ctrl+shift+c=copy_to_clipboard"
+        "performable:ctrl+shift+v=paste_from_clipboard"
+        "ctrl+insert=copy_to_clipboard"
+        "shift+insert=paste_from_selection"
+        "copy=copy_to_clipboard"
+        "paste=paste_from_clipboard"
+
+        # selection
+        "ctrl+shift+a=select_all"
+        "performable:shift+up=adjust_selection:up"
+        "performable:shift+down=adjust_selection:down"
+        "performable:shift+left=adjust_selection:left"
+        "performable:shift+right=adjust_selection:right"
+
+        # scrollback. jump_to_prompt rides the fish shell-integration above.
+        "performable:shift+page_up=scroll_page_up"
+        "performable:shift+page_down=scroll_page_down"
+        "performable:shift+home=scroll_to_top"
+        "performable:shift+end=scroll_to_bottom"
+        "ctrl+shift+page_up=jump_to_prompt:-1"
+        "ctrl+shift+page_down=jump_to_prompt:1"
+
+        # search. `escape` does NOT self-scope to the search overlay; it is
+        # bound unconditionally. What keeps it off vim/helix is the
+        # `performable:` prefix: end_search reports "not performed" when no
+        # search is active, and a performable bind only consumes the key when
+        # the action actually ran — so escape falls through to the TTY.
+        # Ghostty's own defaults carry this flag (Config.zig, putFlags with
+        # .performable = true); `clear` above drops the defaults, so
+        # re-declaring these binds means re-declaring the flag too.
+        "performable:ctrl+shift+f=start_search"
+        "performable:escape=end_search"
+
+        # font size — the one bare-ctrl exception. ctrl+= is the unshifted
+        # plus key, so zooming in needs no shift.
+        "ctrl+plus=increase_font_size:1"
+        "ctrl+equal=increase_font_size:1"
+        "ctrl+minus=decrease_font_size:1"
+        "ctrl+zero=reset_font_size"
+
+        # ghostty itself
+        "ctrl+shift+n=new_window"
+        "ctrl+shift+p=toggle_command_palette"
+        "ctrl+shift+comma=reload_config"
+        "ctrl+shift+i=inspector:toggle"
       ];
     };
   };
