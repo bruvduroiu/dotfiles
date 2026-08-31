@@ -3,6 +3,10 @@
 let
   conf = config.xdg.configHome;
   home = config.home.homeDirectory;
+  # Databases live here, deliberately outside ~/Documents: that tree is the
+  # "docs" Syncthing folder and a restic backup path, and hister holds both
+  # files open read-write. Created by StateDirectory= on the unit below.
+  stateDir = "${config.xdg.stateHome}/hister";
   yamlFormat = pkgs.formats.yaml { };
 
   settings = {
@@ -14,7 +18,10 @@ let
     };
     server = {
       address = "127.0.0.1:4433";
-      database = "${home}/Documents/hister.db";
+      # vectors.sqlite3 is not separately configurable: the sqlite vector store
+      # joins "vectors.sqlite3" onto this file's own directory
+      # (server/vectorstore/sqlite.go), so this one path relocates both.
+      database = "${stateDir}/hister.db";
     };
     indexer = {
       detect_languages = true;
@@ -81,6 +88,10 @@ in
     };
     Service = {
       ExecStart = "${pkgs.hister}/bin/hister listen";
+      # Declaratively creates ${stateDir} (systemd >= 250 honours this for user
+      # units, resolving it under $XDG_STATE_HOME) so the databases have a home
+      # without an activation script.
+      StateDirectory = "hister";
       Restart = "on-failure";
       RestartSec = 5;
     };

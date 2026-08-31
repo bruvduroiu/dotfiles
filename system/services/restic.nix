@@ -18,6 +18,78 @@ let
 
   # SFTP command with sshpass for password authentication
   sftpCommand = "${pkgs.sshpass}/bin/sshpass -f ${config.sops.secrets.sftp_password.path} ssh ${storageBoxUser}@${storageBoxHost} -p 23 -o StrictHostKeyChecking=accept-new -s sftp";
+
+  # Syncthing folder ids covering the backup paths above (Pictures is not
+  # synced). See home/services/syncthing.nix.
+  pausedFolders = [ "docs" "passwords" ];
+
+  # This module is only in the `laptop` list (system/default.nix), so Home
+  # Manager is always present and its config can be read directly. hister's
+  # locations are derived from the module that owns them rather than copied,
+  # because the databases have already moved once — a hardcoded duplicate here
+  # would have silently dropped them from the backup at that moment.
+  hm = config.home-manager.users.bogdan;
+
+  histerPaths = [
+    # app.directory: compressed HTML previews and favicons (the bulk), the
+    # bleve full-text indexes, rules.json and .secret_key.
+    "${hm.xdg.configHome}/hister"
+    # server.database plus the vectors.sqlite3 it sits next to.
+    "${hm.xdg.stateHome}/hister"
+  ];
+
+  # hister keeps sqlite, bolt and bleve segment files open read-write, so a
+  # live copy would capture a torn set spread across three storage engines.
+  # Upstream's guidance is explicit: "For a complete server backup, stop Hister
+  # and back up the entire app.directory" (docs/data-lifecycle).
+  histerControl = pkgs.writeShellApplication {
+    name = "restic-hister-control";
+    runtimeInputs = [ pkgs.systemd ];
+    text = ''
+      action="''${1:-}"
+      case "$action" in
+        stop | start) ;;
+        *)
+          echo "usage: restic-hister-control stop|start" >&2
+          exit 2
+          ;;
+      esac
+
+      # $UID is a bash builtin, so this resolves without depending on any
+      # binary being on the PATH sudo hands us.
+      export XDG_RUNTIME_DIR="/run/user/$UID"
+
+      if ! systemctl --user "$action" hister.service; then
+        echo "restic: failed to $action hister.service" >&2
+      fi
+    '';
+  };
+
+  # Syncthing 2.0 removed `cli operations pause|resume`; the equivalent is now
+  # the per-folder `paused` config flag. Keeping the call behind one script
+  # matters because sudoers matches the command line verbatim — the old rules
+  # kept authorising a command that had stopped existing, so the backup failed
+  # on a CLI usage error that only ever surfaced in the unit's post-stop log.
+  syncthingPause = pkgs.writeShellApplication {
+    name = "restic-syncthing-pause";
+    runtimeInputs = [ pkgs.syncthing ];
+    text = ''
+      state="''${1:-}"
+      case "$state" in
+        true | false) ;;
+        *)
+          echo "usage: restic-syncthing-pause true|false" >&2
+          exit 2
+          ;;
+      esac
+
+      for folder in ${lib.escapeShellArgs pausedFolders}; do
+        if ! syncthing cli config folders "$folder" paused set "$state"; then
+          echo "restic: failed to set paused=$state on syncthing folder $folder" >&2
+        fi
+      done
+    '';
+  };
 in {
   # Create restic system user and group
   users.users.restic = {
@@ -55,14 +127,18 @@ in {
     };
   };
 
-  # The backup prepare/cleanup hooks run as the restic user but must pause
-  # bogdan's syncthing; allow exactly those two commands without password
+  # The backup prepare/cleanup hooks run as the restic user but must quiesce
+  # bogdan's syncthing and hister; allow exactly those invocations, and only
+  # those, without a password. sudoers matches the whole command line, so each
+  # argument spelling needs its own entry.
   security.sudo.extraRules = [{
     users = [ "restic" ];
     runAs = "bogdan";
-    commands = [
-      { command = "${pkgs.syncthing}/bin/syncthing cli operations pause"; options = [ "NOPASSWD" ]; }
-      { command = "${pkgs.syncthing}/bin/syncthing cli operations resume"; options = [ "NOPASSWD" ]; }
+    commands = map (command: { inherit command; options = [ "NOPASSWD" ]; }) [
+      "${lib.getExe syncthingPause} true"
+      "${lib.getExe syncthingPause} false"
+      "${lib.getExe histerControl} stop"
+      "${lib.getExe histerControl} start"
     ];
   }];
 
@@ -86,7 +162,7 @@ in {
       "/home/bogdan/Passwords"
       # Add more paths as needed:
       # "/home/bogdan/.local/share/keyrings"
-    ];
+    ] ++ histerPaths;
 
     # Exclusions
     exclude = [
@@ -120,17 +196,25 @@ in {
       "sftp.command='${sftpCommand}'"
     ];
 
-    # Syncthing pause/resume hooks
-    # Syncthing runs as user bogdan via home-manager, so we use sudo
+    # Quiesce hooks. Both services run as bogdan under home-manager, so we go
+    # through sudo. Every call is `|| true`: a writer that cannot be stilled
+    # should degrade the snapshot's consistency, never cancel the backup.
     backupPrepareCommand = ''
       # Pause Syncthing to ensure file consistency
-      # Must use the setuid wrapper; the nix store sudo binary cannot elevate
-      /run/wrappers/bin/sudo -u bogdan ${pkgs.syncthing}/bin/syncthing cli operations pause || true
+      # Must use the setuid wrapper; the nix store sudo binary cannot elevate.
+      # -H sets HOME to bogdan's so the syncthing CLI finds the config holding
+      # the GUI address and API key.
+      /run/wrappers/bin/sudo -H -u bogdan ${lib.getExe syncthingPause} true || true
+
+      # Stop hister so its sqlite/bolt/bleve files are closed and consistent.
+      /run/wrappers/bin/sudo -H -u bogdan ${lib.getExe histerControl} stop || true
     '';
 
     backupCleanupCommand = ''
-      # Resume Syncthing after backup (runs even on failure)
-      /run/wrappers/bin/sudo -u bogdan ${pkgs.syncthing}/bin/syncthing cli operations resume || true
+      # Restart both after the backup (runs even on failure), hister first so
+      # it is collecting again as early as possible.
+      /run/wrappers/bin/sudo -H -u bogdan ${lib.getExe histerControl} start || true
+      /run/wrappers/bin/sudo -H -u bogdan ${lib.getExe syncthingPause} false || true
     '';
 
     # Schedule: daily at 02:00
