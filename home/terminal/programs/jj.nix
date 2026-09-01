@@ -79,14 +79,6 @@
       aliases = {
         # Drag the nearest bookmark up to the parent of @ — the standard
         # "point my branch at what I just finished" move before jj git push.
-        tug = [
-          "bookmark"
-          "move"
-          "--from"
-          "closest_bookmark(@-)"
-          "--to"
-          "@-"
-        ];
         dt = [
           "diff"
           "--tool"
