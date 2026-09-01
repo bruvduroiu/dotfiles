@@ -4,21 +4,16 @@
   fetchurl,
   autoPatchelfHook,
   makeWrapper,
-  # Language servers spawned from $PATH by the *-lsp Claude Code plugins.
-  # The plugins ship no binaries of their own — they shell out to these.
   nodejs,
   typescript,
   typescript-language-server,
   gopls,
   go,
   pyright,
+  version,
+  hashes,
 }:
 let
-  version = "2.1.226";
-
-  # Servers the typescript-lsp / gopls-lsp / pyright-lsp plugins expect on PATH.
-  # nodejs backs the JS-based servers; `typescript` provides tsserver; `go`
-  # lets gopls run `go list` for full analysis.
   lspServers = [
     typescript-language-server
     typescript
@@ -28,19 +23,15 @@ let
     nodejs
   ];
 
-  # Platform-specific binary info from manifest.json
-  platforms = {
-    "x86_64-linux" = {
-      platform = "linux-x64";
-      hash = "sha256-TpvsEXfOlpDovZiLcQrCQQXnDaQo3QlMWty754alVVU=";
-    };
-    "aarch64-linux" = {
-      platform = "linux-arm64";
-      hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-    };
+  # Nix system -> the release bucket's platform directory name.
+  platformDirs = {
+    "x86_64-linux" = "linux-x64";
+    "aarch64-linux" = "linux-arm64";
   };
 
-  platformInfo = platforms.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
+  inherit (stdenv.hostPlatform) system;
+  platformDir = platformDirs.${system} or (throw "Unsupported system: ${system}");
+  hash = hashes.${system} or (throw "No hash provided for system: ${system}");
   bucket = "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases";
 in
 stdenv.mkDerivation {
@@ -48,21 +39,22 @@ stdenv.mkDerivation {
   inherit version;
 
   src = fetchurl {
-    url = "${bucket}/${version}/${platformInfo.platform}/claude";
-    hash = platformInfo.hash;
+    url = "${bucket}/${version}/${platformDir}/claude";
+    inherit hash;
   };
 
   # Don't try to unpack - it's a single binary
   dontUnpack = true;
 
-  # Linux needs autoPatchelfHook to fix the interpreter;
+  # autoPatchelfHook rewrites the prebuilt binary's ELF interpreter;
   # makeWrapper puts the LSP servers on claude's PATH.
-  nativeBuildInputs = [ makeWrapper ] ++ lib.optionals stdenv.isLinux [ autoPatchelfHook ];
+  nativeBuildInputs = [
+    makeWrapper
+    autoPatchelfHook
+  ];
 
   # autoPatchelfHook needs these for dynamic linking
-  buildInputs = lib.optionals stdenv.isLinux [
-    stdenv.cc.cc.lib
-  ];
+  buildInputs = [ stdenv.cc.cc.lib ];
 
   installPhase = ''
     runHook preInstall
@@ -87,7 +79,7 @@ stdenv.mkDerivation {
     homepage = "https://claude.ai/claude-code";
     license = lib.licenses.unfree;
     mainProgram = "claude";
-    platforms = builtins.attrNames platforms;
+    platforms = builtins.attrNames platformDirs;
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
   };
 }

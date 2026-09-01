@@ -16,7 +16,13 @@
           // {
             colors = import "${self}/lib/colors" prev.lib;
           };
-        claude-code = prev.callPackage "${self}/pkgs/claude.nix" {};
+        claude-code = prev.callPackage "${self}/pkgs/claude.nix" {
+          version = "2.1.257";
+          hashes = {
+            "x86_64-linux" = "sha256-mmS9qdhyKh+gW++aWWHQfgMxuZWX7ani9qcy86D/fwU=";
+            "aarch64-linux" = "sha256-IvfUjxcZOVLDwtC4vy8x2yzQj9X7CaN0+jIUlrcR0Bc=";
+          };
+        };
         # 26.05 pins codex 0.133; the config.toml schema this repo writes
         # (permission profiles, `web_search` modes, `tui.notification_method`)
         # only exists from ~0.140 onwards. Same treatment as opencode below.
