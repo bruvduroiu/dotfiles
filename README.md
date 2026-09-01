@@ -2,7 +2,7 @@
 
 ## Why?
 
-- A single repository that manages all my machines: Framework13, Steam Deck, other potential servers
+- A single repository that manages all my machines: Framework13, and Steam Deck
 - Must be able to:
     - apply configuration to any machine from my main Framework13 laptop
     - encrypt and store secrets I might need here
@@ -28,15 +28,14 @@ Shell: [fish](https://fishshell.com/)
 - sane scripting
 - user friendly
 
-Text Editor: [neovim](https://neovim.io/)
-- vi-movements
-- great community, loads of completions
+Text Editor: [helix](https://helix-editor.com/)
+- better movements
+- batteries included (LSP, Treesitter, ...)
 
 Secrets Management: [sops-nix](https://github.com/Mic92/sops-nix)
 - easy to manage AGE keys
 - easy to integrate into my git repository (RIP me when we get quantum chips breaking encryption)
 
-Code Completion & Language Servers: Neovim LSP & [Mason](https://github.com/williamboman/mason.nvim)
 Colorscheme: [Rosé Pine](https://rosepinetheme.com/)
 
 ## Rice 米

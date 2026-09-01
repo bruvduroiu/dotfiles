@@ -1,4 +1,9 @@
-{ config, lib, pkgs, inputs, ... }:
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
   # Interactive TUI (log browsing, describe, squash, rebase) — the
@@ -29,7 +34,10 @@
 
       ui = {
         # Use delta for diffs (consistent with git delta integration)
-        diff-formatter = [ "delta" "--color-only" ];
+        diff-formatter = [
+          "delta"
+          "--color-only"
+        ];
         pager = "delta";
         default-command = "log";
       };
@@ -61,14 +69,29 @@
       # the first read of a large agent-generated diff, delta the close read.
       merge-tools.difft = {
         program = lib.getExe pkgs.difftastic;
-        diff-args = [ "--color=always" "$left" "$right" ];
+        diff-args = [
+          "--color=always"
+          "$left"
+          "$right"
+        ];
       };
 
       aliases = {
         # Drag the nearest bookmark up to the parent of @ — the standard
         # "point my branch at what I just finished" move before jj git push.
-        tug = [ "bookmark" "move" "--from" "closest_bookmark(@-)" "--to" "@-" ];
-        dt = [ "diff" "--tool" "difft" ];
+        tug = [
+          "bookmark"
+          "move"
+          "--from"
+          "closest_bookmark(@-)"
+          "--to"
+          "@-"
+        ];
+        dt = [
+          "diff"
+          "--tool"
+          "difft"
+        ];
       };
     };
   };
