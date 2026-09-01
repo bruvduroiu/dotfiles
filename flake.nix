@@ -1,9 +1,10 @@
 {
   description = "Framework 13 NixOS Configuration";
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
-      systems = ["x86_64-linux"];
+  outputs =
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" ];
       perSystem = { pkgs, system, ... }: {
         _module.args.pkgs = import inputs.nixpkgs {
           inherit system;
@@ -18,7 +19,7 @@
       };
 
       imports = [
-        ./hosts 
+        ./hosts
       ];
     };
 
@@ -40,6 +41,8 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
+    helix.url = "github:helix-editor/helix";
+
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -154,5 +157,6 @@
       url = "github:abenz1267/walker";
       inputs.elephant.follows = "elephant";
     };
-    yazi.url = "github:sxyazi/yazi";  };
+    yazi.url = "github:sxyazi/yazi";
+  };
 }
