@@ -146,6 +146,10 @@ in
           set_color normal
           echo -n ' '
         '';
+        jss = ''
+          jj log -r 'trunk()..@' --no-graph \
+            -T 'commit_id.short() ++ " " ++ description.first_line() ++ "\n"' $argv
+        '';
         gdt = ''
           git diff-tree --no-commit-id --name-only -r $argv
         '';
