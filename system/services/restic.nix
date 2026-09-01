@@ -23,6 +23,33 @@ let
   # synced). See home/services/syncthing.nix.
   pausedFolders = [ "docs" "passwords" ];
 
+  # A stale exclusive lock left behind on 2026-07-15 blocked every backup and
+  # every integrity check until 2026-09-02 — 49 days — and nothing said so:
+  # the units failed into the journal and the only visible symptom was hister
+  # being stopped by the prepare hook. Any unattended job needs a way to reach
+  # the human, so both restic units hang OnFailure off this template.
+  #
+  # It runs as bogdan to inherit the session bus mako listens on. Notifications
+  # survive in mako's history pool, so an 02:00 failure is still readable at
+  # breakfast. Everything degrades to `true`: a failure handler that itself
+  # fails must never mask the failure it was reporting.
+  notifyFailure = pkgs.writeShellApplication {
+    name = "systemd-notify-failure";
+    runtimeInputs = [ pkgs.libnotify pkgs.systemd ];
+    text = ''
+      unit="''${1:?usage: systemd-notify-failure <unit>}"
+
+      # Last few lines of the failed unit, so the notification carries the
+      # actual error rather than just the unit name.
+      detail="$(journalctl -u "$unit" -n 4 --no-pager -o cat 2>/dev/null \
+        | grep -viE '^(sudo|pam_unix)' | tail -2 || true)"
+
+      export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
+      notify-send -u critical -a restic -t 0 \
+        "Backup job failed: $unit" "''${detail:-see journalctl -u $unit}" || true
+    '';
+  };
+
   # This module is only in the `laptop` list (system/default.nix), so Home
   # Manager is always present and its config can be read directly. hister's
   # locations are derived from the module that owns them rather than copied,
@@ -177,8 +204,20 @@ in {
       "**/.thumbnails"
     ];
 
-    # Retention policy: 7 daily, 4 weekly, 6 monthly, 1 yearly
+    # Retention policy: 7 daily, 4 weekly, 6 monthly, 1 yearly.
+    #
+    # `--group-by host` is load-bearing, not cosmetic. restic defaults to
+    # `host,paths`, so every edit to `paths` above opens a *new* retention
+    # bucket and strands the old one: as of 2026-09-02 this repo held five
+    # buckets (Documents+Pictures; +password.kdbx; +Passwords; Passwords
+    # without kdbx; +hister), each independently under its keep counts, so
+    # nothing had aged out since 2025-12 and the policy below was inert.
+    #
+    # Grouping by host alone makes retention mean what it reads as. It also
+    # means the first run after this lands will delete the historical
+    # snapshots the old grouping preserved — see docs before switching.
     pruneOpts = [
+      "--group-by host"
       "--keep-daily 7"
       "--keep-weekly 4"
       "--keep-monthly 6"
@@ -187,7 +226,6 @@ in {
 
     # Extra arguments for restic backup
     extraBackupArgs = [
-      "--limit-upload=5000"  # 5 MB/s upload limit
       "--verbose"
     ];
 
@@ -225,10 +263,25 @@ in {
     };
   };
 
+  # Desktop notification for a failed unit. Instantiated as
+  # notify-failure@<unit>.service — %n expands to the failing unit's full name,
+  # so one template covers both restic jobs and anything added later.
+  systemd.services."notify-failure@" = {
+    description = "Desktop notification that %i failed";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "bogdan";
+      # journal read access for the excerpt the notification carries
+      SupplementaryGroups = [ "systemd-journal" ];
+      ExecStart = "${lib.getExe notifyFailure} %i";
+    };
+  };
+
   # Ensure restic service waits for sops secrets
   systemd.services.restic-backups-hetzner = {
     after = [ "sops-nix.service" "network-online.target" ];
     wants = [ "sops-nix.service" "network-online.target" ];
+    onFailure = [ "notify-failure@%n.service" ];
 
     # Allow the restic user to access bogdan's home directory
     serviceConfig = {
@@ -241,6 +294,7 @@ in {
     description = "Restic backup integrity check";
     after = [ "sops-nix.service" "network-online.target" ];
     wants = [ "network-online.target" ];
+    onFailure = [ "notify-failure@%n.service" ];
 
     serviceConfig = {
       Type = "oneshot";
