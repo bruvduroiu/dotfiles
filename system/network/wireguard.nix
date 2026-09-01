@@ -343,6 +343,14 @@ in {
       }
     ];
 
+    security.sudo.extraConfig = ''
+      Cmnd_Alias WAYBAR_WG_POLL = ${pkgs.wireguard-tools}/bin/wg show wg0 dump${
+        lib.optionalString mullvadEnabled
+          ", ${pkgs.wireguard-tools}/bin/wg show wg-mullvad dump"
+      }
+      Defaults!WAYBAR_WG_POLL !syslog, !pam_session
+    '';
+
     # ── DNS ──────────────────────────────────────────────────────────────────
     # Mullvad DNS for everything (when enabled), replacing Tailscale's MagicDNS.
     # Local hostnames resolved via /etc/hosts (networking.hosts).

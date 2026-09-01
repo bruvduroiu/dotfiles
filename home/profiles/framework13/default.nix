@@ -30,7 +30,6 @@
     ../../services/podman.nix
     ../../services/gpg.nix
     ../../services/syncthing.nix
-    ../../services/trayscale.nix
     ../../services/media/playerctl.nix
 
     # Private home manager configuration

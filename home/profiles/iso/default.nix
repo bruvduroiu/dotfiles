@@ -19,7 +19,6 @@
     ../../services/mako.nix
     ../../services/gpg.nix
     ../../services/media/playerctl.nix
-    ../../services/trayscale.nix
 
     # Tailscale auto-auth (prompts for YubiKey PIN after login)
     ./tailscale.nix

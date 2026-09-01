@@ -326,7 +326,7 @@ in {
       "custom/timew" = {
         format = "󰔟 {}";
         exec = "timew get dom.active.json | jq -r '.tags | join(\" \")'";
-        exec-if = "timew get dom.active";
+        exec-if = "test \"$(timew get dom.active)\" = 1";
         interval = 10;
       };
 
