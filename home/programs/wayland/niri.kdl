@@ -38,19 +38,35 @@ input {
 }
 
 // ----- outputs (framework13) ------------------------------------------
-// Positions are LOGICAL px: DP-4 is 3840 wide at scale 1, so eDP-1 starts
-// at x=3840 (matches the old Hyprland 3840x0).
-output "DP-4" {
+// Matched by "make model serial" (straight out of `niri msg outputs`),
+// NOT by connector: the Asus comes up as DP-3 or DP-4 depending on which
+// port it's plugged into, and niri silently ignores an output block whose
+// name doesn't match — taking mode, scale, position AND the workspace
+// pins below down with it. Connector names stay for the built-in panel,
+// which is always eDP-1.
+//
+// Positions are LOGICAL px: the Asus is 3840 wide at scale 1, so eDP-1
+// starts at x=3840 (matches the old Hyprland 3840x0).
+//
+// "Primary" is not a niri concept — it is these two properties: this
+// output takes focus at startup, and workspaces 1-3 pin to it (below).
+// Undocked, both degrade to eDP-1 on their own: an `open-on-output`
+// naming an absent output is ignored, and `focus-at-startup` entries are
+// tried in config order, so eDP-1's copy only ever applies when the Asus
+// isn't there.
+output "ASUSTek COMPUTER INC ASUS VG289 0x000024DB" {
     mode "3840x2160"
     scale 1
     position x=0 y=0
-    variable-refresh-rate on-demand=true
+    // no variable-refresh-rate: this panel reports vrr_supported=false
     focus-at-startup
 }
 output "eDP-1" {
     scale 1.3333
     position x=3840 y=0
     variable-refresh-rate on-demand=true
+    // Second in config order = laptop-only fallback for startup focus.
+    focus-at-startup
 }
 
 // ----- layout ---------------------------------------------------------
@@ -101,15 +117,17 @@ layout {
 // static, predictable strip (declaration order = strip order). Mod+1..5
 // jump by name via niri-ws; Mod+6..9 count unnamed overflow workspaces.
 // Output pins mirror the old Hyprland layout: 1-3 external, 4-5 laptop
-// panel (everything falls back to eDP-1 undocked).
+// panel. Undocked, the external pins name an output that is not there,
+// so those workspaces open on eDP-1; since niri 25.02 named workspaces
+// stick to their configured output and go back to it on re-dock.
 workspace "web" {
-    open-on-output "DP-4"
+    open-on-output "ASUSTek COMPUTER INC ASUS VG289 0x000024DB"
 }
 workspace "code" {
-    open-on-output "DP-4"
+    open-on-output "ASUSTek COMPUTER INC ASUS VG289 0x000024DB"
 }
 workspace "aux" {
-    open-on-output "DP-4"
+    open-on-output "ASUSTek COMPUTER INC ASUS VG289 0x000024DB"
 }
 workspace "chat" {
     open-on-output "eDP-1"
@@ -194,11 +212,13 @@ binds {
     Mod+K { focus-workspace-up; }
     Mod+J { focus-workspace-down; }
     Mod+D { spawn "niri-focus-urgent"; }
-
     // move, same axes: Shift+H/L move the column sideways, Shift+J/K
-    // carry it to the workspace below/above
-    Mod+Shift+H { move-column-left; }
-    Mod+Shift+L { move-column-right; }
+    // carry it to the workspace below/above. H/L overflow: pushing a
+    // column past the edge of the workspace lands it on the adjacent
+    // monitor, so the common "send this to the other screen" needs no
+    // new chord (at the edge, plain move-column-left was a no-op).
+    Mod+Shift+H { move-column-left-or-to-monitor-left; }
+    Mod+Shift+L { move-column-right-or-to-monitor-right; }
     Mod+Shift+K { move-column-to-workspace-up; }
     Mod+Shift+J { move-column-to-workspace-down; }
 
@@ -276,11 +296,17 @@ binds {
     Mod+Shift+S hotkey-overlay-title="Cast whole monitor" { set-dynamic-cast-monitor; }
     Mod+Ctrl+S hotkey-overlay-title="Stop dynamic cast" { clear-dynamic-cast-target; }
 
-    // monitors
-    Mod+Shift+BracketLeft { focus-monitor-left; }
-    Mod+Shift+BracketRight { focus-monitor-right; }
-    Mod+Shift+Alt+BracketLeft { move-workspace-to-monitor-left; }
-    Mod+Shift+Alt+BracketRight { move-workspace-to-monitor-right; }
+    // monitors — brackets are the monitor keys, and the modifier says
+    // what travels: nothing / the column / the whole workspace. All
+    // three-key, same pair, so there's one thing to remember.
+    // For a tabbed column, swap move-column- for move-window- to peel
+    // off just the focused window.
+    Mod+Shift+BracketLeft  hotkey-overlay-title="Focus monitor left" { focus-monitor-left; }
+    Mod+Shift+BracketRight hotkey-overlay-title="Focus monitor right" { focus-monitor-right; }
+    Mod+Ctrl+BracketLeft   hotkey-overlay-title="Send window to monitor left" { move-column-to-monitor-left; }
+    Mod+Ctrl+BracketRight  hotkey-overlay-title="Send window to monitor right" { move-column-to-monitor-right; }
+    Mod+Alt+BracketLeft    hotkey-overlay-title="Send workspace to monitor left" { move-workspace-to-monitor-left; }
+    Mod+Alt+BracketRight   hotkey-overlay-title="Send workspace to monitor right" { move-workspace-to-monitor-right; }
 
     // theme toggle
     Mod+F5 { spawn "theme-switch"; }
