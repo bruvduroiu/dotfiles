@@ -13,10 +13,13 @@ pkgs.buildNpmPackage rec {
   pnpmDeps = pkgs.fetchPnpmDeps {
     inherit pname version src;
     fetcherVersion = 3;
-    hash = "sha256-OFB8ImD0BM8TSSHI1qLRy/snTdBh0Z8w7dv+PrSXKLk=";
+    hash = "sha256-B5whh5/4Zk5x/PF9z71Y1A9e+FDwg2XywQ9EXHbtPng=";
   };
 
-  nativeBuildInputs = with pkgs; [ nodejs pnpm ]; # pnpmConfigHook needs pnpm on PATH (pnpm.configHook used to add it)
+  nativeBuildInputs = with pkgs; [
+    nodejs
+    pnpm
+  ]; # pnpmConfigHook needs pnpm on PATH (pnpm.configHook used to add it)
 
   npmConfigHook = pkgs.pnpmConfigHook;
   npmDeps = pnpmDeps;

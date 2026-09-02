@@ -8,7 +8,8 @@
       "Bash(nix-shell:*)",
       "WebFetch(domain:code.claude.com)",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:docs.gtk.org)"
+      "WebFetch(domain:docs.gtk.org)",
+      "Bash(nmcli -f GENERAL.DEVICE,GENERAL.STATE,GENERAL.CONNECTION device show wlp192s0)"
     ],
     "deny": [
       "Read(./secrets/**)"

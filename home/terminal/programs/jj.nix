@@ -9,7 +9,10 @@
   # Interactive TUI (log browsing, describe, squash, rebase) — the
   # diffview/fugitive stand-in until Helix grows a plugin system; the Helix
   # Space-j menu covers only the non-interactive jj commands.
-  home.packages = [ pkgs.jjui ];
+  home.packages = with pkgs; [
+    jjui
+    lazyjj
+  ];
 
   programs.jujutsu = {
     enable = true;
