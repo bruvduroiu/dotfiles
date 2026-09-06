@@ -6,6 +6,10 @@ let
   # the settings.json registration graph that actually makes them fire.
   claudeHooks = import ./hooks.nix { inherit pkgs; };
 
+  # Helper scripts that live inside a skill dir (so the skill can be handed
+  # to a colleague as-is) and are also built into PATH binaries here.
+  claudeScripts = import ./scripts.nix { inherit pkgs lib; };
+
   # Second Claude account on this machine. ~/.claude stays the personal
   # profile; work gets its own config dir, selected via CLAUDE_CONFIG_DIR.
   #
@@ -28,7 +32,7 @@ let
   '';
 in
 {
-  home.packages = [ claude-work ];
+  home.packages = [ claude-work ] ++ builtins.attrValues claudeScripts.packages;
 
   # `programs.claude-code` materialises exactly one configDir, so a session
   # launched under a different CLAUDE_CONFIG_DIR would start with *nothing*
@@ -163,7 +167,15 @@ in
           "Bash(jj workspace list)"
           "Bash(jj workspace root)"
           "Bash(jj op log:*)"
+          "Bash(jj op show:*)"
           "Bash(jj resolve --list)"
+          # Stack review reads (jj-stack* skills): what changed since a
+          # reviewer last looked, where bookmarks point, which forge.
+          "Bash(jj interdiff:*)"
+          "Bash(jj evolog:*)"
+          "Bash(jj bookmark list:*)"
+          "Bash(jj git remote list)"
+          "Bash(jj-stack-check:*)"
           "Bash(npm run lint)"
           "Bash(npm run test:*)"
           "Bash(cargo build)"
@@ -186,6 +198,23 @@ in
           # `jj workspace forget` stays human-only — see CLAUDE.md.
           "Bash(jj workspace add:*)"
           "Bash(jj workspace update-stale)"
+          # Stack surgery, authorised only while a /jj-stack* skill is
+          # running and only on `trunk()..@ & mine()` — see the exception in
+          # CLAUDE.md. Each one still prompts so the human sees every rewrite.
+          # abandon/undo/op restore are deliberately absent: human-only.
+          "Bash(jj split:*)"
+          "Bash(jj restore:*)"
+          "Bash(jj rebase:*)"
+          "Bash(jj absorb:*)"
+          "Bash(jj squash:*)"
+          "Bash(jj bookmark set:*)"
+          "Bash(jj bookmark delete:*)"
+          "Bash(jj git fetch:*)"
+          "Bash(jj git push:*)"
+          # Forge CLIs: PR creation, comments, base retargeting.
+          "Bash(gh pr:*)"
+          "Bash(glab mr:*)"
+          "Bash(fj pr:*)"
           "Bash(rm -rf:*)"
           "Bash(cargo publish:*)"
           "Bash(npm publish:*)"

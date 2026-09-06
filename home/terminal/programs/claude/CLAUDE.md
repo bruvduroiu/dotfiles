@@ -115,6 +115,15 @@ When a repo has a `.jj` directory, it is a Jujutsu repo colocated with git
 - **Never rewrite or land history**: no `jj squash`, `jj abandon`, `jj undo`,
   `jj rebase`, `jj op restore`, or `jj git push`. The human reviews the diff
   and carves `@` into revisions themselves (split/absorb/tug/push).
+- **The one exception: the `/jj-stack`, `/jj-stack-push` and `/jj-stack-sync`
+  skills.** When the human invokes one, rewriting is authorised for that
+  skill's duration, bounded as its SKILL.md says: only revisions in
+  `trunk()..@ & mine()`, only by naming revsets (`split`, `restore --from`,
+  `rebase -r/-b`, `absorb`, `squash --into`, `bookmark set`, `git push -b
+  'glob:…'`), never `jj edit`, never another author's revision, and
+  `abandon`/`undo`/`op restore` stay human-only. Print the `jj op log` id
+  first so the human has a one-command undo. If `@` grows past ~400
+  changed lines, *suggest* `/jj-stack`; never run it unasked.
 - Starting a substantial task on a dirty `@` that isn't yours? Suggest (or,
   if asked, run) `jj new -m "claude: <task>"` first so the session's work is
   isolated in its own revision. `jj describe` may update that revision's
