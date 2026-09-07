@@ -16,8 +16,37 @@ let
     exec /run/wrappers/bin/restic "$@"
   '';
 
-  # SFTP command with sshpass for password authentication
-  sftpCommand = "${pkgs.sshpass}/bin/sshpass -f ${config.sops.secrets.sftp_password.path} ssh ${storageBoxUser}@${storageBoxHost} -p 23 -o StrictHostKeyChecking=accept-new -s sftp";
+  # SFTP command with sshpass for password authentication.
+  #
+  # ServerAlive* is load-bearing, not tuning. On 2026-09-05 the Storage Box
+  # dropped a six-minute-old check connection ("closed by remote host"); every
+  # later operation returned `ssh command exited: exit status 255`, including
+  # the one that would have removed the check's own lock. Keepalives every 30s,
+  # giving up after three minutes of silence, turn a dead transport into a
+  # prompt clean failure rather than a long stretch of doomed retries.
+  sftpCommand = "${pkgs.sshpass}/bin/sshpass -f ${config.sops.secrets.sftp_password.path} ssh ${storageBoxUser}@${storageBoxHost} -p 23 -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 -o ServerAliveCountMax=6 -s sftp";
+
+  # Clearing a leaked lock before doing anything else.
+  #
+  # The NixOS module already emits `restic unlock` — but as the *second* of
+  # three ExecStart= lines (backup, unlock, forget --prune), and systemd
+  # abandons the rest of the list at the first non-zero exit. A stale lock
+  # fails `backup` with exit 11, so the unlock that would clear it never runs.
+  # The repo stays wedged until a human notices, which is exactly what happened
+  # on 2026-07-15 (49 days) and again on 2026-09-05.
+  #
+  # Running it in the prepare step puts it ahead of the thing it unblocks.
+  # `unlock` without --remove-all only removes locks whose owning process is
+  # gone, so a genuinely concurrent run is left alone — that case is handled by
+  # --retry-lock below instead.
+  resticUnlock = pkgs.writeShellApplication {
+    name = "restic-unlock-stale";
+    text = ''
+      # RESTIC_REPOSITORY and RESTIC_PASSWORD_FILE come from the unit's
+      # Environment=, which systemd applies to ExecStartPre as well.
+      /run/wrappers/bin/restic unlock -o sftp.command='${sftpCommand}'
+    '';
+  };
 
   # Syncthing folder ids covering the backup paths above (Pictures is not
   # synced). See home/services/syncthing.nix.
@@ -227,6 +256,12 @@ in {
     # Extra arguments for restic backup
     extraBackupArgs = [
       "--verbose"
+      # restic's default is no retries at all — the journal's "repo already
+      # locked, waiting up to 0s for the lock" is that default talking. The
+      # prepare step above handles *stale* locks; this handles a live one,
+      # i.e. the weekly check still running when the daily backup fires. Their
+      # timers (02:00 ±1h and Sun 03:00 ±1h) overlap by construction.
+      "--retry-lock 10m"
     ];
 
     # Extra options (SFTP connection with password via sshpass)
@@ -238,6 +273,12 @@ in {
     # through sudo. Every call is `|| true`: a writer that cannot be stilled
     # should degrade the snapshot's consistency, never cancel the backup.
     backupPrepareCommand = ''
+      # Clear any lock left behind by a run that lost its transport. First,
+      # before the quiesce, so a hanging unlock does not hold hister down with
+      # it. `|| true` because a network failure here fails the backup a moment
+      # later anyway, with a better message than this step could give.
+      ${lib.getExe resticUnlock} || true
+
       # Pause Syncthing to ensure file consistency
       # Must use the setuid wrapper; the nix store sudo binary cannot elevate.
       # -H sets HOME to bogdan's so the syncthing CLI finds the config holding
@@ -292,7 +333,11 @@ in {
   # Weekly integrity check service
   systemd.services.restic-check-hetzner = {
     description = "Restic backup integrity check";
-    after = [ "sops-nix.service" "network-online.target" ];
+    # Ordered after the backup so that when both land in one transaction the
+    # backup — the job that actually protects data — gets the lock first. This
+    # only orders a shared transaction; the overlapping-timer case is covered
+    # by --retry-lock on both units.
+    after = [ "sops-nix.service" "network-online.target" "restic-backups-hetzner.service" ];
     wants = [ "network-online.target" ];
     onFailure = [ "notify-failure@%n.service" ];
 
@@ -307,9 +352,25 @@ in {
       export RESTIC_REPOSITORY="${repository}"
       export RESTIC_PASSWORD_FILE="${config.sops.secrets.restic_password.path}"
 
-      # Run integrity check with 1% data sampling
+      # This unit is the one that leaked the lock on 2026-09-05, and nothing
+      # downstream of a failed check ever cleans up after it. Same reasoning as
+      # the backup's prepare step.
+      ${lib.getExe resticUnlock} || true
+
+      # Run integrity check with 1% data sampling.
+      #
+      # --retry-lock waits out a live lock (a long backup) instead of failing
+      # instantly, which is restic's default.
+      #
+      # A caveat for whoever reads a future failure: when the transport dies
+      # mid-check, the truncated `List(data)` makes restic report nearly every
+      # pack as "does not exist" and conclude "The repository is damaged and
+      # must be repaired". On 2026-09-05 that was 8771 of ~9282 packs, all of
+      # them accompanied by `ssh command exited: exit status 255`. Confirm with
+      # a clean-network re-run before believing it.
       /run/wrappers/bin/restic check \
         --read-data-subset=1% \
+        --retry-lock 10m \
         -o sftp.command='${sftpCommand}'
     '';
   };
