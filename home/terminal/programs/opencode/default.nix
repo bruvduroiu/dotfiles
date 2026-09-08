@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -7,8 +8,14 @@
 
 let
   lspDeps = import ./lsp-deps.nix { inherit pkgs; };
+  secretsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
 in
 {
+  sops.secrets = {
+    figma_oauth_client_id.sopsFile = secretsFile;
+    figma_oauth_client_secret.sopsFile = secretsFile;
+  };
+
   programs.opencode = {
     enable = true;
     enableMcpIntegration = true;
@@ -109,6 +116,15 @@ in
           type = "remote";
           url = "https://mcp.notion.com/mcp";
           enabled = true;
+        };
+        figma = {
+          type = "remote";
+          url = "https://mcp.figma.com/mcp";
+          enabled = true;
+          oauth = {
+            clientId = "{file:${config.sops.secrets.figma_oauth_client_id.path}}";
+            clientSecret = "{file:${config.sops.secrets.figma_oauth_client_secret.path}}";
+          };
         };
       };
 
