@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a
@@ -155,6 +160,10 @@ in
           "Bash(git status)"
           "Bash(git diff:*)"
           "Bash(git log:*)"
+          "Bash(jj new:*)"
+          "Bash(jj describe:*)"
+          "Bash(jj workspace add:*)"
+          "Bash(jj workspace update-stale)"
           # jj orientation commands — read-only, so sessions in colocated
           # repos can answer "what did I change" without prompting.
           "Bash(jj st)"
@@ -188,16 +197,6 @@ in
         ask = [
           "Bash(git push:*)"
           "Bash(git commit:*)"
-          # Creating/describing revisions is allowed with eyes on it; history
-          # surgery (squash/abandon/undo/rebase/push) stays human-only — see
-          # the jj-first section of CLAUDE.md.
-          "Bash(jj new:*)"
-          "Bash(jj describe:*)"
-          # Parallel-agent workspace ops: `add` mutates the repo (new revision
-          # + op log entry), `update-stale` rewrites the local working copy.
-          # `jj workspace forget` stays human-only — see CLAUDE.md.
-          "Bash(jj workspace add:*)"
-          "Bash(jj workspace update-stale)"
           # Stack surgery, authorised only while a /jj-stack* skill is
           # running and only on `trunk()..@ & mine()` — see the exception in
           # CLAUDE.md. Each one still prompts so the human sees every rewrite.
