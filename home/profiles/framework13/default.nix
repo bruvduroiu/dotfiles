@@ -13,6 +13,7 @@
     ../../programs/wayland
     ../../programs/wayland/noctalia-templates.nix
     ../../programs/wayland/noctalia-plugins.nix
+    ../../programs/wayland/noctalia-calendar.nix
     ../../programs/wayland/niri.nix
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
