@@ -1,7 +1,7 @@
 # Scripts that ship inside a skill directory *and* as binaries on PATH.
 #
 # A skill's SKILL.md may reference a helper script. Kept next to the skill
-# (config/skills/<name>/scripts/*.sh) it travels with the skill when the
+# (../coding-agents/skills/<name>/scripts/*.sh) it travels with the skill when the
 # directory is copied to a colleague and runs with plain `bash`. Built here
 # with writeShellApplication it also becomes an executable store path with
 # pinned deps and a build-time shellcheck — the same pattern as hooks.nix,
@@ -21,7 +21,7 @@ let
       text = lib.removePrefix "#!/usr/bin/env bash\n" (builtins.readFile file);
     };
 
-  jjStackCheck = mkScript "jj-stack-check" ./config/skills/jj-stack/scripts/stack-check.sh [
+  jjStackCheck = mkScript "jj-stack-check" ../coding-agents/skills/jj-stack/scripts/stack-check.sh [
     pkgs.jujutsu
     pkgs.coreutils
     pkgs.gnugrep

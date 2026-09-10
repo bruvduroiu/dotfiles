@@ -6,6 +6,8 @@
 }:
 
 let
+  codingAgents = import ../coding-agents { inherit lib pkgs; };
+
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a
   # writeShellApplication (deps pinned, shellchecked at build time) and exports
   # the settings.json registration graph that actually makes them fire.
@@ -51,12 +53,12 @@ in
   home.file = {
     "${workConfigDir}/settings.json".source =
       config.home.file."${config.programs.claude-code.configDir}/settings.json".source;
-    "${workConfigDir}/CLAUDE.md".source = ./CLAUDE.md;
+    "${workConfigDir}/CLAUDE.md".source = codingAgents.context;
     # recursive: recreate the directory and symlink each file individually,
     # so the directory itself stays writable — `/agents` can still add one at
     # runtime. A bare `source = ./dir` would symlink the whole read-only dir.
     "${workConfigDir}/agents" = {
-      source = ./config/agents;
+      source = codingAgents.claudeAgents;
       recursive = true;
     };
     "${workConfigDir}/rules" = {
@@ -64,7 +66,7 @@ in
       recursive = true;
     };
     "${workConfigDir}/skills" = {
-      source = ./config/skills;
+      source = codingAgents.skills;
       recursive = true;
     };
   };
@@ -82,16 +84,16 @@ in
     # `memory.source`/`memory.text` were collapsed into a single `context`
     # option (either lines or a path); a path still lands as a symlink, a
     # string would be written inline.
-    context = ./CLAUDE.md;
+    context = codingAgents.context;
 
     # agentsDir/rulesDir are dir-path options in 26.05 (no warning).
-    agentsDir = ./config/agents;
+    agentsDir = codingAgents.claudeAgents;
     rulesDir = ./config/rules; # replaces the old home.file.".claude/rules" workaround
     # No hooksDir: it only symlinks the scripts into ~/.claude/hooks as 0444
     # (not executable, and not registered anywhere). settings.hooks below points
     # at the built store paths instead — see hooks.nix.
     # skillsDir was renamed to `skills` in 26.05 (accepts a dir path or attrset).
-    skills = ./config/skills;
+    skills = codingAgents.skills;
 
     # MCP servers configuration — Nix store paths resolved at build time
     mcpServers = {

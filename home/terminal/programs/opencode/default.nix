@@ -7,6 +7,7 @@
 }:
 
 let
+  codingAgents = import ../coding-agents { inherit lib pkgs; };
   lspDeps = import ./lsp-deps.nix { inherit pkgs; };
   secretsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
 in
@@ -33,13 +34,12 @@ in
       "4096"
     ];
 
-    agents = {
+    agents = codingAgents.opencodeAgents // {
       plan = ./agents/plan.md;
       code = ./agents/code.md;
-      code-review = ./agents/code-review.md;
     };
 
-    skills = { };
+    skills = codingAgents.skills;
 
     settings = {
       # `openai` here is the ChatGPT Plus/Pro (Codex) subscription, not an API
@@ -129,7 +129,9 @@ in
       };
 
       autoshare = false;
-      autoupdate = true;
+      # The package is upgraded through nixpkgs, not by mutating the store.
+      autoupdate = false;
+      instructions = [ codingAgents.context ];
       # gpt-5.5 rather than the newer gpt-5.6-sol: under OAuth opencode
       # hard-allow-lists gpt-5.5, so it is the one Codex-subscription model
       # guaranteed to survive the provider's model filter. gpt-5.6-sol is

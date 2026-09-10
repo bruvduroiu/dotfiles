@@ -8,7 +8,7 @@ scripts/
 # Skill helper scripts are source, not scratch: SKILL.md files reference them
 # and home/terminal/programs/claude/scripts.nix builds them into PATH binaries.
 # An ignored file is invisible to jj *and* to the git-backed flake.
-!home/terminal/programs/claude/config/skills/*/scripts/
+!home/terminal/programs/coding-agents/skills/*/scripts/
 docs/
 /niri/
 result

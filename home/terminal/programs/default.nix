@@ -7,7 +7,7 @@
     ./btop.nix
     ./claude
     ./cli.nix
-    ./codex.nix
+    ./codex
     ./delta.nix
     ./direnv.nix
     ./eza.nix
