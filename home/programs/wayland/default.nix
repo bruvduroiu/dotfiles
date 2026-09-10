@@ -2,10 +2,7 @@
 
 {
   imports = [
-    ./walker.nix
-    ./waybar
-    # lock/idle are per-compositor: hyprlock/hypridle are imported by the
-    # Hyprland profiles (iso), swaylock/swayidle by framework13 (niri).
+    ./noctalia.nix
     ./wf-recorder.nix
   ];
 
@@ -18,7 +15,7 @@
 
     wl-clipboard
 
-    # standalone bluetooth TUI (deliberately no waybar module / tray)
+    # Standalone Bluetooth TUI
     bluetui
   ];
 

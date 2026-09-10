@@ -27,26 +27,24 @@
     opacity.terminal = 0.9;
   };
 
-  # Light mode specialisation — switch via:
-  #   sudo /nix/var/nix/profiles/system/specialisation/light/bin/switch-to-configuration switch
-  specialisation.light.configuration = {
-    stylix = {
-      image = lib.mkForce "${self}/home/wallpapers/taipei-toner-4k-positive.png";
-      base16Scheme = lib.mkForce "${pkgs.base16-schemes}/share/themes/rose-pine-dawn.yaml";
-      polarity = lib.mkForce "light";
-    };
+  # Noctalia owns runtime dark/light switching; Stylix remains the static
+  # baseline for applications without a native Noctalia integration.
+  services.power-profiles-daemon.enable = true;
+  i18n.inputMethod.fcitx5.settings.addons.classicui.globalSection = {
+    Theme = lib.mkForce "noctalia";
+    DarkTheme = lib.mkForce "noctalia";
   };
 
-  # Allow passwordless theme switching
-  security.sudo.extraRules = [
-    {
-      groups = [ "wheel" ];
-      commands = [
-        { command = "/nix/var/nix/profiles/system/specialisation/light/bin/switch-to-configuration switch"; options = [ "NOPASSWD" ]; }
-        { command = "/nix/var/nix/profiles/system/bin/switch-to-configuration switch"; options = [ "NOPASSWD" ]; }
-      ];
-    }
-  ];
+  # Noctalia uses login for passwords and fprintd directly for biometrics.
+  # Keep PAM from claiming the same reader (also makes TTY login password-only).
+  security.pam.services.login.fprintAuth = false;
+
+  nix.settings = {
+    extra-substituters = [ "https://noctalia.cachix.org" ];
+    extra-trusted-public-keys = [
+      "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+    ];
+  };
 
   boot = {
     kernelPackages = lib.mkForce inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system}.linuxPackages_latest;

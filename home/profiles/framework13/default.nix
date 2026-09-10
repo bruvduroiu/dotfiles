@@ -2,8 +2,6 @@
 
 {
   imports = [
-    # theme
-    ../../theme
 
     # editors
     ../../editors/helix
@@ -13,9 +11,9 @@
     ../../programs
     ../../programs/keepassxc.nix
     ../../programs/wayland
+    ../../programs/wayland/noctalia-templates.nix
+    ../../programs/wayland/noctalia-plugins.nix
     ../../programs/wayland/niri.nix
-    ../../programs/wayland/swaylock.nix
-    ../../programs/wayland/swayidle.nix
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
     ../../programs/gpg.nix
@@ -24,9 +22,6 @@
     # terminal emulators
     ../../terminal/emulators/ghostty.nix
 
-    ../../services/wayland/swaybg.nix
-    ../../services/mako.nix
-    ../../services/meeting-guard.nix
     ../../services/podman.nix
     ../../services/gpg.nix
     ../../services/syncthing.nix

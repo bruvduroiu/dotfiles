@@ -17,8 +17,7 @@
       ++ [
       ./framework13
 
-      # Scrollable-tiling compositor (Hyprland config stays alongside,
-      # dormant — swap this import back to programs/hyprland to return)
+      # Scrollable-tiling compositor; Noctalia supplies the desktop shell.
       "${mod}/programs/niri"
 
       # Home Manager (stable, follows nixpkgs)
@@ -35,7 +34,9 @@
 
       {
         home-manager = {
-          users.bogdan.imports = homeImports."bogdan@framework13";
+          users.bogdan.imports = homeImports."bogdan@framework13" ++ [
+            ../home/programs/wayland/noctalia-stylix.nix
+          ];
           extraSpecialArgs = specialArgs;
           backupFileExtension = ".hm-backup";
           sharedModules = [

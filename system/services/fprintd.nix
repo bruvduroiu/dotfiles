@@ -1,8 +1,5 @@
 {
   services.fprintd.enable = true;
-
-  # Configure PAM for hyprlock to use fingerprint authentication
-  security.pam.services.hyprlock = {
-    fprintAuth = true;
-  };
+  # Noctalia uses fprintd directly and PAM only for passwords.
+  security.pam.services.login.fprintAuth = false;
 }

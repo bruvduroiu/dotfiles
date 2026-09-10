@@ -35,7 +35,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    elephant.url = "github:abenz1267/elephant";
 
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -54,15 +53,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    hypridle = {
-      url = "github:hyprwm/hypridle";
-      inputs = {
-        hyprlang.follows = "hyprland/hyprlang";
-        hyprutils.follows = "hyprland/hyprutils";
-        nixpkgs.follows = "hyprland/nixpkgs";
-        systems.follows = "hyprland/systems";
-      };
-    };
 
     # Hyprland
     hyprland.url = "github:hyprwm/hyprland";
@@ -72,28 +62,7 @@
       inputs.nixpkgs.follows = "hyprland/nixpkgs";
     };
 
-    hyprlock = {
-      url = "github:hyprwm/hyprlock";
-      inputs = {
-        hyprgraphics.follows = "hyprland/hyprgraphics";
-        hyprlang.follows = "hyprland/hyprlang";
-        hyprutils.follows = "hyprland/hyprutils";
-        nixpkgs.follows = "hyprland/nixpkgs";
-        systems.follows = "hyprland/systems";
-      };
-    };
 
-    hyprpaper = {
-      url = "github:hyprwm/hyprpaper";
-      inputs = {
-        aquamarine.follows = "hyprland/aquamarine";
-        hyprgraphics.follows = "hyprland/hyprgraphics";
-        hyprlang.follows = "hyprland/hyprlang";
-        hyprutils.follows = "hyprland/hyprutils";
-        nixpkgs.follows = "hyprland/nixpkgs";
-        systems.follows = "hyprland/systems";
-      };
-    };
 
     # Ephemeral root with selective persistence (for phantom USB)
     impermanence.url = "github:nix-community/impermanence";
@@ -121,6 +90,13 @@
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    # Keep upstream's nixpkgs pin so Noctalia's binary cache can be used.
+    noctalia-templates = {
+      url = "github:noctalia-dev/community-templates/cdb77210cd9c4fa9ccc5673523b57d2a6b76e804";
+      flake = false;
+    };
+    noctalia.url = "github:noctalia-dev/noctalia/cachix";
 
     nur = {
       url = "github:nix-community/NUR";
@@ -152,10 +128,6 @@
     stylix = {
       url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    walker = {
-      url = "github:abenz1267/walker";
-      inputs.elephant.follows = "elephant";
     };
     yazi.url = "github:sxyazi/yazi";
   };

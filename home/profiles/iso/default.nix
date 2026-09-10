@@ -9,14 +9,10 @@
 
     # Wayland/Hyprland essentials
     ../../programs/wayland
-    ../../programs/wayland/hyprlock.nix
-    ../../programs/wayland/hypridle.nix
     ../../programs/gtk.nix
     ../../programs/gpg.nix
 
     # Desktop services
-    ../../services/wayland/hyprpaper.nix
-    ../../services/mako.nix
     ../../services/gpg.nix
     ../../services/media/playerctl.nix
 

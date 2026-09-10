@@ -13,7 +13,7 @@
 
 -- ----- variables ------------------------------------------------------
 local mod = "SUPER"
-local menu = "walker"
+local menu = "noctalia msg panel-toggle launcher"
 local terminal = "uwsm app -- ghostty"
 local fileManager = "uwsm app -- yazi"
 local browser = "uwsm app -- firefox"
@@ -43,11 +43,6 @@ hl.device({
 -- ----- autostart ------------------------------------------------------
 hl.on("hyprland.start", function()
 	hl.exec_cmd("uwsm finalize")
-	hl.exec_cmd("uwsm app -- waybar")
-	hl.exec_cmd("uwsm app -- wl-paste --type text --watch cliphist store")
-	hl.exec_cmd("uwsm app -- wl-paste --type image --watch cliphist store")
-	hl.exec_cmd("hyprlock")
-	hl.exec_cmd("uwsm app -- mako")
 	-- fcitx5 is owned by the NixOS i18n.inputMethod XDG-autostart systemd
 	-- unit (app-org.fcitx.Fcitx5@autostart.service). Launching it again
 	-- here raced that unit via --replace and left the survivor with an
@@ -286,20 +281,16 @@ hl.bind(mod .. " + ALT + G", hl.dsp.exec_cmd("hyprctl dispatch lockgroups toggle
 hl.bind(mod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mod .. " + y", hl.dsp.exec_cmd(fileManager))
 hl.bind(mod .. " + SPACE", hl.dsp.exec_cmd(menu))
-hl.bind(mod .. " + CTRL + Q", hl.dsp.exec_cmd("hyprlock"))
+hl.bind(mod .. " + CTRL + Q", hl.dsp.exec_cmd("noctalia msg session lock"))
 
--- walker providers
-hl.bind(mod .. " + CTRL + V", hl.dsp.exec_cmd("walker -m clipboard"))
-hl.bind(mod .. " + W", hl.dsp.exec_cmd("walker -m windows"))
-hl.bind(mod .. " + CTRL + period", hl.dsp.exec_cmd("walker -m symbols"))
-hl.bind(mod .. " + CTRL + N", hl.dsp.exec_cmd("walker -m todo"))
-
--- keybind cheatsheet
-hl.bind(mod .. " + slash", hl.dsp.exec_cmd("hypr-binds-menu"))
+-- Noctalia panels
+hl.bind(mod .. " + CTRL + V", hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"))
+hl.bind(mod .. " + W", hl.dsp.exec_cmd("noctalia msg window-switcher"))
+hl.bind(mod .. " + CTRL + period", hl.dsp.exec_cmd("noctalia msg panel-toggle launcher /emo "))
 
 -- notifications
-hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("makoctl mode -t dnd; pkill -RTMIN+9 waybar"))
-hl.bind(mod .. " + CTRL + D", hl.dsp.exec_cmd("mako-history-menu"))
+hl.bind(mod .. " + SHIFT + D", hl.dsp.exec_cmd("noctalia msg notification-dnd-toggle"))
+hl.bind(mod .. " + CTRL + D", hl.dsp.exec_cmd("noctalia msg panel-open control-center notifications"))
 
 -- move focus
 hl.bind(mod .. " + h", hl.dsp.focus({ direction = "left" }))
@@ -347,7 +338,7 @@ hl.bind(mod .. " + period", hl.dsp.layout("move +col"))
 hl.bind(mod .. " + comma", hl.dsp.layout("move -col"))
 
 -- theme toggle
-hl.bind(mod .. " + F5", hl.dsp.exec_cmd("theme-switch"))
+hl.bind(mod .. " + F5", hl.dsp.exec_cmd("noctalia msg theme-mode-toggle"))
 
 -- screenshot
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd("screenshot area"))
@@ -655,3 +646,20 @@ hl.workspace_rule({ workspace = "2", monitor = "DP-4" })
 hl.workspace_rule({ workspace = "3", monitor = "DP-4" })
 hl.workspace_rule({ workspace = "4", monitor = "eDP-1", default = true })
 hl.workspace_rule({ workspace = "5", monitor = "eDP-1" })
+
+-- Noctalia panels and actions (shared mnemonic keys with Niri).
+hl.bind(mod .. " + CTRL + SPACE", hl.dsp.exec_cmd("noctalia msg panel-toggle control-center"))
+hl.bind(mod .. " + CTRL + A", hl.dsp.exec_cmd("noctalia msg panel-open control-center audio"))
+hl.bind(mod .. " + CTRL + B", hl.dsp.exec_cmd("noctalia msg panel-open control-center bluetooth"))
+hl.bind(mod .. " + CTRL + N", hl.dsp.exec_cmd("noctalia msg panel-open control-center network"))
+hl.bind(mod .. " + CTRL + M", hl.dsp.exec_cmd("noctalia msg panel-open control-center media"))
+hl.bind(mod .. " + CTRL + P", hl.dsp.exec_cmd("noctalia msg panel-open control-center power"))
+hl.bind(mod .. " + CTRL + T", hl.dsp.exec_cmd("noctalia msg panel-open control-center calendar"))
+hl.bind(mod .. " + CTRL + W", hl.dsp.exec_cmd("noctalia msg panel-open control-center weather"))
+hl.bind(mod .. " + CTRL + I", hl.dsp.exec_cmd("noctalia msg panel-open control-center system"))
+hl.bind(mod .. " + CTRL + F5", hl.dsp.exec_cmd("noctalia msg panel-toggle wallpaper"))
+hl.bind(mod .. " + CTRL + Comma", hl.dsp.exec_cmd("noctalia msg settings-toggle"))
+hl.bind(mod .. " + CTRL + SHIFT + Q", hl.dsp.exec_cmd("noctalia msg panel-toggle session"))
+hl.bind(mod .. " + CTRL + SHIFT + I", hl.dsp.exec_cmd("noctalia msg caffeine-toggle"))
+hl.bind(mod .. " + CTRL + SHIFT + D", hl.dsp.exec_cmd("noctalia msg notification-invoke-latest"))
+hl.bind(mod .. " + CTRL + SHIFT + BackSpace", hl.dsp.exec_cmd("noctalia msg notification-clear-active"))

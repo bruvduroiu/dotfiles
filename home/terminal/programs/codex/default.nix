@@ -39,6 +39,8 @@ let
       notifications = true;
       notification_method = "auto";
       notification_condition = "unfocused";
+    } // lib.optionalAttrs ((config.programs.noctalia.settings.theme.templates.user or { }) ? codex) {
+      theme = "noctalia";
     };
 
     file_opener = "none";

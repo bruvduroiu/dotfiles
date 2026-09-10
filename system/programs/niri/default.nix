@@ -2,7 +2,7 @@
 
 let
   # Jump to the urgent window if any (ghostty bell → xdg-activation → niri
-  # marks urgent → red workspace in waybar), else bounce to the last-focused
+  # marks urgent), else bounce to the last-focused
   # window. Replaces Hyprland's `focus({ urgent_or_last = true })`.
   niri-focus-urgent = pkgs.writeShellApplication {
     name = "niri-focus-urgent";
@@ -52,30 +52,6 @@ let
     '';
   };
 
-  # Notification control centre: mako history via dbus (this makoctl version
-  # only prints human-readable text), formatted into walker dmenu.
-  # Selecting an entry copies its text to the clipboard.
-  mako-history-menu = pkgs.writeShellApplication {
-    name = "mako-history-menu";
-    runtimeInputs = [ pkgs.jq ];
-    text = ''
-      selection=$(
-        busctl --user -j call org.freedesktop.Notifications /fr/emersion/Mako \
-          fr.emersion.Mako ListHistory \
-          | jq -r '
-              .data[0][] |
-              (if ."app-name".data != "" then ."app-name".data else ."desktop-entry".data end)
-              + ": " + .summary.data
-              + (if .body.data != "" then " — " + (.body.data | gsub("\n"; " ")) else "" end)
-            ' \
-          | walker -d -p "Notifications"
-      )
-      if [ -n "$selection" ]; then
-        printf '%s' "$selection" | wl-copy
-      fi
-    '';
-  };
-
   # Screenshots: grim captures, satty edits. "area" opens the annotation
   # editor (Ctrl+C copy / Ctrl+S save / copy also saves); "full" goes
   # straight to clipboard + file. niri implements wlr-screencopy, so the
@@ -114,7 +90,6 @@ in {
       # niri spawns xwayland-satellite on demand for X11 clients; it only
       # needs to be reachable on PATH.
       pkgs.xwayland-satellite
-      mako-history-menu
       niri-focus-urgent
       niri-ws
       screenshot
@@ -126,18 +101,9 @@ in {
     XMODIFIERS = "@im=fcitx";
   };
 
-  # Serve the Settings portal from ONE impl. The niri module's default
-  # (default=gnome;gtk) lets both gnome and gtk answer
-  # org.freedesktop.portal.Settings, so every theme-switch broadcasts duplicate
-  # SettingChanged signals; Electron ≥39 (Chromium 142) resolves them out of
-  # order and stops following dark/light changes at runtime
-  # (electron/electron#48736). Hyprland only ever had the gtk impl, which is
-  # why theme-switch worked there. Merges into the module's niri entry.
+  # One Settings portal publishes Noctalia's GTK dark/light preference.
+  # Multiple implementations cause duplicate appearance notifications.
   xdg.portal.config.niri."org.freedesktop.impl.portal.Settings" = [ "gtk" ];
-
-  # PAM entry for swaylock (HM, home/programs/wayland/swaylock.nix);
-  # fprintd being enabled makes fingerprint auth available in the stack.
-  security.pam.services.swaylock = { };
 
   desktop.greetd.sessionCommand = "${pkgs.niri}/bin/niri-session";
 }

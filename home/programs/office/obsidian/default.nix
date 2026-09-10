@@ -316,7 +316,7 @@ in
       appearance = {
         baseFontSize = lib.mkForce 16;
         # "Adapt to system": Electron tracks the portal colour-scheme
-        # (org.freedesktop.appearance) live, so theme-switch flips
+        # (org.freedesktop.appearance) live, so the desktop theme flips
         # Obsidian's base theme with no restart — the stylix
         # specialisation already toggles the dconf key it reads.
         theme = "system";

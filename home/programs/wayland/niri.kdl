@@ -1,16 +1,7 @@
-// Niri config — plain KDL, the native format.
-//
-// Wiring: niri.nix ships this file verbatim as ~/.config/niri/config.kdl
-// and generates the stylix.kdl include (border/tab colours). `niri validate`
-// gates it at build time; niri live-reloads both files on change.
-//
-// Reference: the niri wiki checkout at <repo>/niri/docs/wiki, and
-// `niri msg --help` / `niri msg pick-window` for live introspection.
-//
-// framework13-first, like hyprland.lua was: monitors and workspace pins
-// live here for now.
-
-include "stylix.kdl" // generated border/tab colours (see niri.nix)
+// Niri owns the layout and keybinds; Noctalia owns the runtime palette.
+// The optional include is created by Noctalia's built-in Niri template.
+// Niri can start before the shell has generated it on first login.
+include optional=true "noctalia.kdl"
 
 // ----- input ----------------------------------------------------------
 input {
@@ -85,7 +76,7 @@ layout {
     }
     default-column-width { proportion 0.5; }
 
-    // 1px border on every window (colours from stylix.kdl) — tried the
+    // 1px border on every window (colours from Noctalia) — tried the
     // niri focus ring, preferred the Hyprland-style border on all windows.
     focus-ring {
         off
@@ -158,7 +149,7 @@ screenshot-path "~/Pictures/Screenshots/%Y-%m-%d_%H-%M-%S.png"
 
 cursor {
     // XCursor theme from home.pointerCursor (home/default.nix); the
-    // hyprcursor variant is only used by the dormant Hyprland session.
+    // hyprcursor variant is used by the portable Hyprland profiles.
     xcursor-theme "BreezeX-RosePine-Linux"
     xcursor-size 24
     hide-when-typing
@@ -168,6 +159,14 @@ cursor {
 // alone, settled on none.
 animations {
     off
+}
+
+// Flat Rosé Pine overview, with Noctalia's separate backdrop disabled.
+overview {
+    backdrop-color "#26233a"
+    workspace-shadow {
+        off
+    }
 }
 
 hotkey-overlay {
@@ -182,11 +181,7 @@ environment {
 // ----- autostart ------------------------------------------------------
 // fcitx5 stays owned by the NixOS i18n XDG-autostart systemd unit —
 // niri-session activates xdg-desktop-autostart.target, same as UWSM did.
-// waybar is a systemd user unit (waybar/default.nix) so HM activations
-// restart it with fresh config — do not spawn it here too.
-spawn-sh-at-startup "wl-paste --type text --watch cliphist store"
-spawn-sh-at-startup "wl-paste --type image --watch cliphist store"
-spawn-at-startup "swaylock" "-f"
+// Noctalia is a systemd user unit and owns clipboard history and locking.
 spawn-at-startup "firefox"
 spawn-at-startup "obsidian"
 
@@ -196,8 +191,8 @@ binds {
     // compositor
     Mod+Ctrl+Alt+Q { quit; }
     Mod+Q { close-window; }
-    Mod+Shift+Escape { spawn "systemctl" "suspend"; }
-    Mod+Shift+Ctrl+Escape { spawn "systemctl" "poweroff"; }
+    Mod+Shift+Escape { spawn "noctalia" "msg" "session" "lock-and-suspend"; }
+    Mod+Shift+Ctrl+Escape { spawn "noctalia" "msg" "session" "shutdown"; }
     Mod+Slash { show-hotkey-overlay; }
     // Escape hatch when a VM or remote-desktop app grabs all shortcuts;
     // allow-inhibiting=false so the grab itself can't swallow this bind.
@@ -258,23 +253,32 @@ binds {
     // instance (~20ms) instead of cold-starting GTK per window (~300ms).
     Mod+Return { spawn "ghostty" "+new-window"; }
     Mod+Y { spawn "ghostty" "+new-window" "-e" "yazi"; }
-    Mod+Space { spawn "walker"; }
-    // allow-when-locked: if swaylock ever dies (red locked screen), this
-    // same key revives it. allow-inhibiting=false: a VM/remote-desktop
-    // holding the shortcuts-inhibitor can never block locking.
-    Mod+Ctrl+Q allow-when-locked=true allow-inhibiting=false { spawn "swaylock" "-f"; }
-
-    // walker providers
-    Mod+Ctrl+V { spawn "walker" "-m" "clipboard"; }
-    Mod+W { spawn "walker" "-m" "windows"; }
-    Mod+Ctrl+Period { spawn "walker" "-m" "symbols"; }
-    Mod+Ctrl+N { spawn "walker" "-m" "todo"; }
-
-    // notifications
-    Mod+Shift+D { spawn-sh "makoctl mode -t dnd; pkill -RTMIN+9 waybar"; }
-    Mod+Ctrl+D { spawn "mako-history-menu"; }
+    Mod+Space hotkey-overlay-title="Noctalia launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    Mod+Ctrl+Q allow-when-locked=true allow-inhibiting=false { spawn "noctalia" "msg" "session" "lock"; }
+    Mod+Ctrl+V { spawn "noctalia" "msg" "panel-toggle" "clipboard"; }
+    Mod+W { spawn "noctalia" "msg" "window-switcher"; }
+    Mod+Ctrl+Period { spawn "noctalia" "msg" "panel-toggle" "launcher" "/emo "; }
+    Mod+Shift+D { spawn "noctalia" "msg" "notification-dnd-toggle"; }
+    Mod+Ctrl+D { spawn "noctalia" "msg" "panel-open" "control-center" "notifications"; }
+    Mod+Ctrl+Space hotkey-overlay-title="Control center" { spawn "noctalia" "msg" "panel-toggle" "control-center"; }
 
     // launchers (was the Mod+X submap; niri has no submaps)
+    // Noctalia: Mod+Ctrl opens panels; arrows/Alt+hjkl navigate inside them.
+    Mod+Ctrl+A hotkey-overlay-title="Audio" { spawn "noctalia" "msg" "panel-open" "control-center" "audio"; }
+    Mod+Ctrl+B hotkey-overlay-title="Bluetooth" { spawn "noctalia" "msg" "panel-open" "control-center" "bluetooth"; }
+    Mod+Ctrl+N hotkey-overlay-title="Network" { spawn "noctalia" "msg" "panel-open" "control-center" "network"; }
+    Mod+Ctrl+M hotkey-overlay-title="Media" { spawn "noctalia" "msg" "panel-open" "control-center" "media"; }
+    Mod+Ctrl+P hotkey-overlay-title="Power" { spawn "noctalia" "msg" "panel-open" "control-center" "power"; }
+    Mod+Ctrl+T hotkey-overlay-title="Calendar" { spawn "noctalia" "msg" "panel-open" "control-center" "calendar"; }
+    Mod+Ctrl+W hotkey-overlay-title="Weather" { spawn "noctalia" "msg" "panel-open" "control-center" "weather"; }
+    Mod+Ctrl+I hotkey-overlay-title="System monitor" { spawn "noctalia" "msg" "panel-open" "control-center" "system"; }
+    Mod+Ctrl+F5 hotkey-overlay-title="Wallpaper picker" { spawn "noctalia" "msg" "panel-toggle" "wallpaper"; }
+    Mod+Ctrl+Comma hotkey-overlay-title="Noctalia settings" { spawn "noctalia" "msg" "settings-toggle"; }
+    Mod+Ctrl+Shift+Q hotkey-overlay-title="Session menu" { spawn "noctalia" "msg" "panel-toggle" "session"; }
+    Mod+Ctrl+Shift+I hotkey-overlay-title="Toggle caffeine" { spawn "noctalia" "msg" "caffeine-toggle"; }
+    Mod+Ctrl+Shift+D hotkey-overlay-title="Open latest notification" { spawn "noctalia" "msg" "notification-invoke-latest"; }
+    Mod+Ctrl+Shift+BackSpace hotkey-overlay-title="Dismiss notification toasts" { spawn "noctalia" "msg" "notification-clear-active"; }
+
     Mod+Alt+A hotkey-overlay-title="OpenRouter chat" { spawn "firefox" "--new-tab" "https://openrouter.ai/chat"; }
     Mod+Alt+B hotkey-overlay-title="Browser" { spawn "firefox"; }
     Mod+Alt+W hotkey-overlay-title="Work browser" { spawn "firefox" "-P" "work" "--no-remote"; }
@@ -309,7 +313,7 @@ binds {
     Mod+Alt+BracketRight   hotkey-overlay-title="Send workspace to monitor right" { move-workspace-to-monitor-right; }
 
     // theme toggle
-    Mod+F5 { spawn "theme-switch"; }
+    Mod+F5 { spawn "noctalia" "msg" "theme-mode-toggle"; }
 
     // screenshot (grim + satty pipeline, unchanged)
     Print { spawn "screenshot" "full"; }
@@ -320,12 +324,14 @@ binds {
     Mod+Shift+Print { spawn "wf-recorder-toggle" "area"; }
 
     // locked / repeating media + brightness
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "-l" "1" "@DEFAULT_AUDIO_SINK@" "5%+"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "5%-"; }
-    XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-    XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
-    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "-c" "backlight" "s" "10%+"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "-c" "backlight" "s" "10%-"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-up"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-down"; }
+    XF86AudioMute allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "noctalia" "msg" "mic-mute"; }
+    // Laptop brightness keys always target its panel, even when a docked
+    // external monitor without brightness control has keyboard focus.
+    XF86MonBrightnessUp allow-when-locked=true { spawn "noctalia" "msg" "brightness-up" "eDP-1"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "noctalia" "msg" "brightness-down" "eDP-1"; }
     XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
     XF86AudioPause allow-when-locked=true { spawn "playerctl" "play-pause"; }
     XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
@@ -479,17 +485,55 @@ window-rule {
 }
 
 // ----- layer rules ----------------------------------------------------
-// Notifications carry message content — keep them out of screencasts,
-// same as the chat/work/KeePassXC window rules ("notifications" is
-// mako's layer-shell namespace).
+// Client-requested blur should sample the content behind shell surfaces.
+// Requires Niri 26.04; the bar exception below keeps its gaps clear.
 layer-rule {
-    match namespace="^notifications$"
+    match namespace="^noctalia-"
+    background-effect {
+        xray false
+    }
+}
+
+layer-rule {
+    match namespace="^noctalia-window-switcher$"
+    background-effect {
+        blur true
+    }
+}
+
+// Noctalia 5.0.1 requests blur over the full bar, including transparent gaps.
+// Keep the capsule islands translucent without a continuous blurred strip.
+layer-rule {
+    match namespace="^noctalia-bar-default$"
+    background-effect {
+        blur false
+        xray false
+    }
+}
+
+// Notifications carry message content — keep them out of screencasts,
+// same as the chat/work/KeePassXC window rules.
+layer-rule {
+    match namespace="^noctalia-notification$"
     block-out-from "screencast"
 }
 
 // ----- switch events --------------------------------------------------
 // Runs even when the session is already locked; niri powers the panel
-// off/on with the lid by itself.
+// off/on with the lid by itself. Logind owns suspend; Noctalia also locks
+// before sleep. Keep this lock for docked cases where logind ignores the lid.
 switch-events {
-    lid-close { spawn "sh" "-c" "pgrep -x swaylock || swaylock -f"; }
+    lid-close { spawn "noctalia" "msg" "session" "lock"; }
+}
+
+window-rule {
+    match app-id=r#"^dev\.noctalia\.Noctalia$"#
+    open-floating true
+    default-column-width { fixed 1080; }
+    default-window-height { fixed 920; }
+}
+
+// Noctalia's notification actions and window switcher use XDG activation.
+debug {
+    honor-xdg-activation-with-invalid-serial
 }

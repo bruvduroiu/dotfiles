@@ -25,10 +25,7 @@
     # option is a plain definition, so a second one is an eval conflict.
     defaultEditor = true;
 
-    # Theme comes from the Stylix helix target (rose-pine / rose-pine-dawn per
-    # specialisation polarity, opacity included). theme-switch sends SIGUSR1 to
-    # running instances, which makes Helix re-read its config after the
-    # specialisation switch has rewritten the stylix theme.
+    # Noctalia declares and reloads the theme through ./noctalia.nix.
     settings = {
       editor = {
         line-number = "relative";

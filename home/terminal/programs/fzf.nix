@@ -4,7 +4,7 @@
     # ANSI-16 indexes and -1 (terminal default) instead of hex: fzf renders
     # with whatever palette the terminal currently shows, so it is always in
     # the right polarity — including inside shells that were already running
-    # when theme-switch flipped (their exported FZF_DEFAULT_OPTS is frozen,
+    # when the desktop theme changed (their exported FZF_DEFAULT_OPTS is frozen,
     # which is why stylix's hex target is disabled in theme/stylix.nix).
     # Same role mapping stylix used: iris for matches, gold for prompt/info,
     # foam for pointers.

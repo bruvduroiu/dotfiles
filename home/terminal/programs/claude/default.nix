@@ -257,7 +257,7 @@ in
       outputStyle = "Explanatory";
 
       # terminal BEL when a session needs attention → ghostty bell-features
-      # "attention" → hyprland urgent → red workspace button in waybar
+      # "attention" → hyprland urgent → urgent workspace indicator
       # (SUPER+D jumps to it). Default "auto" would send desktop notifications
       # in ghostty instead; the bell/urgency path is quieter and survives DND.
       preferredNotifChannel = "terminal_bell";

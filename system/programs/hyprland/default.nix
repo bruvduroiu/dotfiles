@@ -1,49 +1,6 @@
 { config, inputs, pkgs, lib, ... }:
 
 let
-  # Searchable keybind cheatsheet: decodes hyprctl's modmask bitfield into
-  # readable modifier names, then displays via walker's dmenu mode.
-  hypr-binds-menu = pkgs.writeShellApplication {
-    name = "hypr-binds-menu";
-    runtimeInputs = [ pkgs.jq ];
-    text = ''
-      hyprctl binds -j | jq -r '
-        .[] as $b |
-        ([["SUPER", 64], ["CTRL", 4], ["ALT", 8], ["SHIFT", 1]]
-         | map(select((($b.modmask / .[1]) | floor) % 2 == 1) | .[0])
-         | join("+")) as $mods |
-        (if $b.submap != "" then "[\($b.submap)] " else "" end)
-        + (if $mods == "" then "" else $mods + "+" end)
-        + $b.key + "  →  " + $b.dispatcher
-        + (if $b.arg != "" then " " + $b.arg else "" end)
-      ' | walker -d -p "Keybinds"
-    '';
-  };
-
-  # Notification control centre: mako history via dbus (this makoctl version
-  # only prints human-readable text), formatted into walker dmenu.
-  # Selecting an entry copies its text to the clipboard.
-  mako-history-menu = pkgs.writeShellApplication {
-    name = "mako-history-menu";
-    runtimeInputs = [ pkgs.jq ];
-    text = ''
-      selection=$(
-        busctl --user -j call org.freedesktop.Notifications /fr/emersion/Mako \
-          fr.emersion.Mako ListHistory \
-          | jq -r '
-              .data[0][] |
-              (if ."app-name".data != "" then ."app-name".data else ."desktop-entry".data end)
-              + ": " + .summary.data
-              + (if .body.data != "" then " — " + (.body.data | gsub("\n"; " ")) else "" end)
-            ' \
-          | walker -d -p "Notifications"
-      )
-      if [ -n "$selection" ]; then
-        printf '%s' "$selection" | wl-copy
-      fi
-    '';
-  };
-
   # Vim-style window marks ($mod N <letter> to set, $mod ' <letter> to jump).
   # Marks are window tags; "set" steals the letter from any previous holder
   # so each mark always points at exactly one window.
@@ -109,9 +66,7 @@ in {
   environment = {
     pathsToLink = ["/share/icons"];
     systemPackages = [
-      hypr-binds-menu
       hypr-mark
-      mako-history-menu
       screenshot
     ];
   };

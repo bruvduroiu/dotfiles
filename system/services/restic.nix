@@ -58,8 +58,8 @@ let
   # being stopped by the prepare hook. Any unattended job needs a way to reach
   # the human, so both restic units hang OnFailure off this template.
   #
-  # It runs as bogdan to inherit the session bus mako listens on. Notifications
-  # survive in mako's history pool, so an 02:00 failure is still readable at
+  # It runs as bogdan to inherit the session notification bus. Notifications
+  # survive in the shell's notification history, so an 02:00 failure is still readable at
   # breakfast. Everything degrades to `true`: a failure handler that itself
   # fails must never mask the failure it was reporting.
   notifyFailure = pkgs.writeShellApplication {

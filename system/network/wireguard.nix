@@ -36,11 +36,7 @@
 #   NO fail-closed fallback: when wg-mullvad goes down (clean or crash) its
 #   routes/rules disappear, table 2468 empties, and traffic falls through to
 #   the physical default route — i.e. it LEAKS your real IP/DNS. This is
-#   deliberate: tunnel state is surfaced in waybar (custom/wireguard) rather
-#   than enforced. Captive portals therefore "just work" with the tunnel down.
-#
-#   Waybar reads handshake freshness via `wg show wg-mullvad dump`; the
-#   passwordless sudo rule for exactly that command is defined below.
+#   deliberate: tunnel availability is not enforced. Captive portals therefore "just work" with the tunnel down.
 #
 # Relay selection — symbolic, resolved at every interface start:
 #   Mullvad retires relays and rotates their keys, so a pinned endpoint+key is
@@ -314,42 +310,13 @@ in {
           endpoint = mullvadEndpoint;
           # Without a keepalive the tunnel only handshakes once something
           # routes into it, so "idle" and "dead relay" look identical — both
-          # to waybar and to mullvad-jump's post-configure verification.
+          # to mullvad-jump's post-configure verification.
           # 25s also keeps the NAT mapping open. mullvad-jump sets the same
           # value on every peer it installs.
           persistentKeepalive = 25;
         };
       };
     };
-
-    # ── Waybar tunnel-state read access ──────────────────────────────────────
-    # The waybar custom/wireguard module polls handshake freshness on each
-    # tunnel to tell "up" from "up but not passing traffic". `wg show` needs
-    # root, so grant exactly these commands passwordless (interface-scoped,
-    # read-only). sudoers matches the full command line, so one entry per iface;
-    # the store path must match the waybar script's ${pkgs.wireguard-tools} EXACTLY.
-    security.sudo.extraRules = [
-      {
-        groups = [ "wheel" ];
-        commands = [
-          {
-            command = "${pkgs.wireguard-tools}/bin/wg show wg0 dump";
-            options = [ "NOPASSWD" ];
-          }
-        ] ++ lib.optional mullvadEnabled {
-          command = "${pkgs.wireguard-tools}/bin/wg show wg-mullvad dump";
-          options = [ "NOPASSWD" ];
-        };
-      }
-    ];
-
-    security.sudo.extraConfig = ''
-      Cmnd_Alias WAYBAR_WG_POLL = ${pkgs.wireguard-tools}/bin/wg show wg0 dump${
-        lib.optionalString mullvadEnabled
-          ", ${pkgs.wireguard-tools}/bin/wg show wg-mullvad dump"
-      }
-      Defaults!WAYBAR_WG_POLL !syslog, !pam_session
-    '';
 
     # ── DNS ──────────────────────────────────────────────────────────────────
     # Mullvad DNS for everything (when enabled), replacing Tailscale's MagicDNS.
@@ -377,7 +344,7 @@ in {
     # the uplinks' DHCP servers — they never preempt them, so the ISP still
     # sees every query (the leak this replaces). NB: with no kill switch,
     # when the tunnel is down the uplinks' DHCP resolvers take over — DNS
-    # leaks along with the rest of the traffic (by design; watch waybar).
+    # leaks along with the rest of the traffic (by design; check tunnel health explicitly).
     # With mullvad.enable = false none of that applies: there is no in-tunnel
     # resolver to bind, so DNS is whatever system/network/default.nix sets
     # (Quad9 over DoT) and these fallbacks stay as the last resort.

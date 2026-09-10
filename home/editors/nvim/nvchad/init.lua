@@ -30,7 +30,7 @@ require("lazy").setup({
 	{ import = "plugins" },
 }, lazy_config)
 
--- load theme (recompile to pick up external theme changes from theme-switch)
+-- Compile the declared NvChad theme.
 require("base46").compile()
 dofile(vim.g.base46_cache .. "defaults")
 dofile(vim.g.base46_cache .. "statusline")
