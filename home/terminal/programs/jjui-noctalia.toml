@@ -1,0 +1,104 @@
+# jjui theme rendered by Noctalia on every theme/mode change.
+#
+# jjui layers this file over its embedded default_dark/default_light theme,
+# then jj's own VCS colors, then any inline [ui.colors]. Because jjui picks
+# the embedded default from *its own* light/dark detection, every key those
+# two defaults disagree on is restated here — the rendered file is already
+# mode-correct, so jjui's detection must not be able to reintroduce the
+# opposite polarity.
+#
+# Selectors are hierarchical ("a b c" inherits "a b", then "a", then "b c"...),
+# so the generic keys below carry most of the UI and the qualified ones only
+# override what genuinely differs.
+#
+# Container colors are backgrounds, never text: using them as foregrounds is
+# what made the upstream Helix template unreadable. No global background is
+# set either, so the terminal's own (blurred) background stays visible;
+# only overlays that must occlude the log behind them get an opaque fill.
+
+# --- generic ----------------------------------------------------------------
+text = { fg = "{{colors.terminal_foreground.default.hex}}" }
+dimmed = { fg = "{{colors.outline.default.hex}}" }
+title = { fg = "{{colors.primary.default.hex}}", bold = true }
+shortcut = { fg = "{{colors.secondary.default.hex}}" }
+matched = { fg = "{{colors.terminal_normal_yellow.default.hex}}" }
+border = { fg = "{{colors.outline_variant.default.hex}}" }
+selected = { fg = "{{colors.on_surface.default.hex}}", bg = "{{colors.surface_container_high.default.hex}}", bold = true }
+success = { fg = "{{colors.terminal_normal_green.default.hex}}", bold = true }
+error = { fg = "{{colors.error.default.hex}}", bold = true }
+conflict = { fg = "{{colors.error.default.hex}}", bold = true }
+
+# --- jj entities ------------------------------------------------------------
+workspace = { fg = "{{colors.terminal_normal_blue.default.hex}}" }
+branch = { fg = "{{colors.terminal_bright_yellow.default.hex}}" }
+commit = { fg = "{{colors.terminal_normal_green.default.hex}}" }
+file = { fg = "{{colors.terminal_normal_yellow.default.hex}}" }
+change = { fg = "{{colors.terminal_normal_red.default.hex}}" }
+bookmark = { fg = "{{colors.terminal_normal_magenta.default.hex}}" }
+
+# jj's own `colors` config overrides these five; they are the fallback for a
+# repo that configures none.
+"diff added" = { fg = "{{colors.terminal_normal_green.default.hex}}" }
+"diff removed" = { fg = "{{colors.terminal_normal_red.default.hex}}" }
+"diff modified" = { fg = "{{colors.terminal_normal_yellow.default.hex}}" }
+"diff renamed" = { fg = "{{colors.terminal_normal_blue.default.hex}}" }
+"diff copied" = { fg = "{{colors.terminal_normal_cyan.default.hex}}" }
+
+# --- rebase / squash / duplicate markers ------------------------------------
+source_marker = { fg = "{{colors.terminal_background.default.hex}}", bg = "{{colors.terminal_normal_cyan.default.hex}}", bold = true }
+target_marker = { fg = "{{colors.terminal_background.default.hex}}", bg = "{{colors.terminal_normal_green.default.hex}}", bold = true }
+rebase = { bold = true }
+
+# --- revisions --------------------------------------------------------------
+revisions = { fg = "{{colors.terminal_foreground.default.hex}}" }
+"revisions selected" = { bg = "{{colors.surface_container.default.hex}}" }
+"revisions matched" = { underline = false, reverse = true }
+"revisions details selected" = { bg = "{{colors.surface_container_high.default.hex}}", bold = true }
+"revisions details selected dimmed" = { fg = "{{colors.on_surface_variant.default.hex}}" }
+
+# --- oplog / evolog ---------------------------------------------------------
+"oplog selected" = { bg = "{{colors.surface_container.default.hex}}", bold = true }
+"oplog matched" = { underline = false, reverse = true }
+evolog = { fg = "{{colors.terminal_foreground.default.hex}}" }
+"evolog selected" = { fg = "{{colors.on_surface.default.hex}}", bg = "{{colors.surface_container_high.default.hex}}", bold = true }
+
+# --- status bar -------------------------------------------------------------
+status = { bg = "{{colors.surface_container_low.default.hex}}" }
+"status title" = { fg = "{{colors.on_primary.default.hex}}", bg = "{{colors.primary.default.hex}}", bold = true }
+
+# --- revset editor ----------------------------------------------------------
+"revset text" = { fg = "{{colors.terminal_foreground.default.hex}}", bold = true }
+"revset completion" = { fg = "{{colors.terminal_foreground.default.hex}}", bg = "{{colors.surface_container.default.hex}}" }
+"revset completion matched" = { fg = "{{colors.terminal_normal_yellow.default.hex}}", bold = true, underline = true }
+"revset completion selected" = { fg = "{{colors.on_surface.default.hex}}", bg = "{{colors.surface_container_highest.default.hex}}", bold = true }
+"revset completion selected dimmed" = { fg = "{{colors.on_surface_variant.default.hex}}" }
+"revset completion selected text" = { fg = "{{colors.on_surface.default.hex}}" }
+"revset completion selected matched" = { fg = "{{colors.terminal_bright_yellow.default.hex}}", bold = true, underline = true }
+
+# --- menus / pickers / help / previews --------------------------------------
+menu = { bg = "{{colors.surface_container.default.hex}}" }
+"menu title" = { fg = "{{colors.on_secondary.default.hex}}", bg = "{{colors.secondary.default.hex}}", bold = true }
+"menu subtitle" = { fg = "{{colors.on_surface.default.hex}}", bold = true }
+"menu selected" = { fg = "{{colors.on_surface.default.hex}}", bg = "{{colors.surface_container_highest.default.hex}}", bold = true, underline = false }
+"menu selected shortcut" = { fg = "{{colors.secondary.default.hex}}" }
+
+"picker matched" = { fg = "{{colors.terminal_normal_yellow.default.hex}}", underline = true }
+"picker selected" = { fg = "{{colors.on_surface.default.hex}}", bg = "{{colors.surface_container_high.default.hex}}", bold = true, underline = false }
+"picker selected dimmed" = { fg = "{{colors.on_surface_variant.default.hex}}" }
+
+help = { bg = "{{colors.surface_container.default.hex}}" }
+"help title" = { fg = "{{colors.terminal_normal_green.default.hex}}", bold = true, underline = true }
+"help desc" = { fg = "{{colors.on_surface_variant.default.hex}}" }
+
+preview = { fg = "{{colors.terminal_foreground.default.hex}}" }
+
+# --- confirmations ----------------------------------------------------------
+confirmation = { bg = "{{colors.surface_container.default.hex}}" }
+"confirmation text" = { fg = "{{colors.primary.default.hex}}", bold = true }
+"confirmation border" = { fg = "{{colors.error.default.hex}}", bold = true }
+"confirmation selected" = { fg = "{{colors.on_surface.default.hex}}", bg = "{{colors.surface_container_highest.default.hex}}", bold = true }
+undo = { bg = "{{colors.surface_container.default.hex}}" }
+
+# --- flash / input ----------------------------------------------------------
+"flash selected" = { fg = "{{colors.primary.default.hex}}" }
+input = { fg = "{{colors.terminal_foreground.default.hex}}" }

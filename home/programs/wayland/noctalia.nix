@@ -22,6 +22,8 @@ in
   imports = [
     inputs.noctalia.homeModules.default
     ../../editors/helix/noctalia.nix
+    ../../terminal/programs/jj-noctalia.nix
+    ../../terminal/programs/btop-noctalia.nix
   ];
 
   programs.noctalia = {

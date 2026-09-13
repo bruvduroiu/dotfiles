@@ -1667,11 +1667,11 @@
     },
     "secrets": {
       "locked": {
-        "lastModified": 1789091341,
-        "narHash": "sha256-8Bp8RdHbcsewnfOn23ueIxhjhsGUkc+Xvywi9sp+Tgk=",
+        "lastModified": 1789277992,
+        "narHash": "sha256-LybxC9vVNX4Vr3pQoWQoxvYRvkkK84Iub7jcuj/aHm0=",
         "ref": "refs/heads/main",
-        "rev": "52b2896834a5276d704fbf060a8fc48c5fb772ab",
-        "revCount": 21,
+        "rev": "87a665f14091d32e86b2045c06ee7cefed151cd3",
+        "revCount": 22,
         "type": "git",
         "url": "ssh://forgejo@git.oolongtechnologies.io/bogdan/secrets.git"
       },

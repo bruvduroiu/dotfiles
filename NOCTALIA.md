@@ -182,12 +182,14 @@ Do not point generated output at an immutable Home Manager symlink.
 | GTK3/4, Ghostty, Niri | Built-in templates with declared imports. |
 | Helix | Corrected upstream template; transparent background and mode-aware diagnostic colors. Reloads open editors after rendering with SIGUSR1. |
 | bat | `noctalia` selected; cache rebuilt after rendering. |
+| btop | `color_theme = "noctalia"`. Stylix's target is off: it rendered from the build-time `stylix.polarity`, so btop stayed dark in light mode. Hot-reloads in place via SIGUSR2 (btop's own Ctrl+R path). `theme_background = false` is restated here, since it came from Stylix's opacity half. |
 | yazi | `noctalia` flavor for both modes, including syntax colors. |
 | Claude Code | Generated in personal and work profile theme directories. Select Noctalia with `/theme`; restart once if newly added. |
 | Codex | `tui.theme = "noctalia"`; start a new session to pick up syntax colors. |
 | Discord | Midnight community CSS generated for Vencord/Vesktop. Requires a compatible client/mod and enabling the theme; stock Discord cannot load it. |
 | fcitx5 | Classic UI theme selected on Framework; native D-Bus reload hook. |
 | fzf | Community color options read through `FZF_DEFAULT_OPTS_FILE` on each invocation. Open a fresh login shell after activation. |
+| jjui | `ui.theme = "noctalia"` reading a generated `themes/noctalia.toml`. Stylix's target is off: its static `ui.colors` is jjui's highest-priority layer and masked every other one. A running jjui recolors when the terminal reports the new polarity; otherwise reopen it. |
 | LibreOffice | Community extension generated in writable state. Close LibreOffice, run `noctalia msg templates-apply`, reopen. Applying while it is open skips installation. |
 | Obsidian | Enabled CSS snippet generated directly into the declared Keep and Blog vaults. |
 | OpenCode | Custom theme selected in `tui.json`. |
