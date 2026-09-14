@@ -14,7 +14,6 @@
   ];
 
   "bogdan@phantom" = [
-    ../.
     ./phantom
   ];
 }

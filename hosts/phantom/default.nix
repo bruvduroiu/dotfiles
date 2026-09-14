@@ -1,6 +1,6 @@
 # Phantom USB - Host-specific configuration
 # Minimal config - most functionality comes from system/default.nix phantom profile
-{ config, lib, pkgs, inputs, self, ... }:
+{ pkgs, ... }:
 
 {
   imports = [

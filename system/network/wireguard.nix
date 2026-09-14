@@ -115,6 +115,25 @@ in {
       example = "10.99.0.2";
       description = "This host's address on the 10.99.0.0/24 home overlay.";
     };
+    backend = lib.mkOption {
+      type = lib.types.enum [ "wg-quick" "networkmanager" ];
+      default = "wg-quick";
+      description = ''
+        Which stack owns wg0. Only wg0 — wg-mullvad is always wg-quick,
+        because its peer identity is resolved at runtime by `mullvad-jump`
+        and a NetworkManager profile can only carry a pinned endpoint+key
+        (see the relay-selection note in this file's header).
+
+        "networkmanager" exists for one reason: a NetworkManager *profile* is
+        the only form of tunnel that shows up in `nmcli connection show`, and
+        therefore the only form the Steam Deck's Gaming Mode VPN plugin
+        (TunnelDeck) can list or toggle. wg-quick creates the kernel device
+        directly, so NM sees a device with no connection and the plugin's
+        `['vpn','wireguard'].includes(type)` filter matches nothing.
+
+        The two backends are not stackable: both would try to create wg0.
+      '';
+    };
     mullvad.enable = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -162,6 +181,27 @@ in {
           needs the home overlay.
         '';
       }
+      {
+        # The NM backend feeds the key through a sops *template* (an env file
+        # consumed by envsubst), not through a key path handed to wg-quick.
+        # A host that supplies its own privateKeyFile — phantom, whose key
+        # lives on /persist rather than in sops — has no placeholder to render.
+        assertion = (cfg.backend == "networkmanager") -> (cfg.privateKeyFile == null);
+        message = ''
+          network.wireguard.backend = "networkmanager" on ${hostName} requires
+          the sops-provided key: the profile is rendered by envsubst from a
+          sops template, so there is nothing to substitute when
+          network.wireguard.privateKeyFile points at a file instead.
+        '';
+      }
+      {
+        assertion = (cfg.backend == "networkmanager")
+          -> config.networking.networkmanager.enable;
+        message = ''
+          network.wireguard.backend = "networkmanager" on ${hostName} but
+          networking.networkmanager.enable is off — nothing would create wg0.
+        '';
+      }
     ];
 
     # ── Secrets ──────────────────────────────────────────────────────────────
@@ -204,7 +244,7 @@ in {
     };
 
     # ── WireGuard interfaces ─────────────────────────────────────────────────
-    networking.wg-quick.interfaces = {
+    networking.wg-quick.interfaces = lib.optionalAttrs (cfg.backend == "wg-quick") {
       # Home hub overlay
       wg0 = {
         address = [ "${cfg.overlayIP}/32" ];
@@ -323,6 +363,75 @@ in {
         };
       };
     };
+
+    # ── wg0 as a NetworkManager profile (backend = "networkmanager") ─────────
+    # Same tunnel as the wg-quick wg0 above, expressed as an NM keyfile so it
+    # appears in `nmcli connection show` — see the `backend` option's docs.
+    #
+    # The key never reaches persistent storage. NixOS renders these profiles
+    # from a systemd unit that runs envsubst into
+    # /run/NetworkManager/system-connections (tmpfs, UMask 0177), substituting
+    # from EnvironmentFile; that file is itself a sops template under
+    # /run/secrets. So the chain is sops → tmpfs env file → tmpfs keyfile.
+    #
+    # DO NOT edit this profile with `nmcli connection modify` (TunnelDeck's
+    # "Disable IPv6" button does exactly that): NM responds by copying the
+    # profile — substituted private key and all — into
+    # /etc/NetworkManager/system-connections, which both defeats the tmpfs
+    # property above and leaves two same-named profiles behind. ipv6 is pinned
+    # to `disabled` below so there is no reason to press it.
+    sops.templates = lib.optionalAttrs (cfg.backend == "networkmanager") {
+      "wg0-nm.env" = {
+        content = "WG0_PRIVATE_KEY=${config.sops.placeholder.${wgSecret}}";
+        mode = "0400";
+        owner = "root";
+      };
+    };
+
+    networking.networkmanager.ensureProfiles =
+      lib.mkIf (cfg.backend == "networkmanager") {
+        environmentFiles = [ config.sops.templates."wg0-nm.env".path ];
+        profiles.wg0 = {
+          connection = {
+            id = "wg0";
+            type = "wireguard";
+            interface-name = "wg0";
+            # The overlay is this host's reason to be reachable; bring it up
+            # unattended. The Gaming Mode plugin can still take it down.
+            autoconnect = true;
+          };
+          wireguard = {
+            private-key = "$WG0_PRIVATE_KEY";
+            # 0 = the key is stored in the profile (no agent, no prompt).
+            # Gaming Mode has no secret agent to answer one.
+            private-key-flags = 0;
+            fwmark = wgFwmark;
+            mtu = 1360;
+          };
+          "wireguard-peer.${hubPublicKey}" = {
+            endpoint = hubEndpoint;
+            allowed-ips = lib.concatMapStrings (net: "${net};") hubNetworks;
+            persistent-keepalive = 25;
+          };
+          ipv4 = {
+            method = "manual";
+            address1 = "${cfg.overlayIP}/32";
+            # Replaces wg-quick's `table = "off"` + manual metric-4000 routes:
+            # NM derives routes from allowed-ips, so the metric is all that is
+            # needed for the connected LAN and DHCP option-121 routes to win at
+            # home. never-default is belt to the braces — none of hubNetworks
+            # is a default route, and neither backend should ever install one.
+            route-metric = 4000;
+            never-default = true;
+            # The overlay must not gate NetworkManager-wait-online: the hub is
+            # unreachable until the physical uplink is up.
+            may-fail = true;
+          };
+          # v4-only overlay. Also removes the one setting TunnelDeck offers to
+          # change, which is what would clone this profile into /etc.
+          ipv6.method = "disabled";
+        };
+      };
 
     # ── DNS ──────────────────────────────────────────────────────────────────
     # Mullvad DNS for everything (when enabled), replacing Tailscale's MagicDNS.
