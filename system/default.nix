@@ -15,8 +15,7 @@ let
     ./network
   ];
 
-  # Desktop environment (Hyprland-based systems)
-  # Extends base with graphics, audio, and Hyprland
+  # Desktop services; each host selects its compositor.
   desktop = base ++ [
     ./hardware/graphics.nix
     ./hardware/bluetooth.nix
@@ -74,18 +73,17 @@ let
     ./phantom/boot.nix           # Portable EFI boot with LUKS/FIDO2
     ./phantom/hardware.nix       # Universal hardware support
     ./phantom/impermanence.nix   # Ephemeral root with selective persistence
-    ./phantom/paranoid.nix       # Memory scrub, tailscale logout on shutdown
-    ./phantom/tailscale.nix      # Boot-time auto-connect (key on /persist)
+    ./phantom/paranoid.nix       # Memory cleanup on shutdown
+    ./phantom/wireguard.nix      # Boot-time home overlay (key on /persist)
     ./phantom/user.nix           # bogdan user with YubiKey auth
     ./phantom/packages.nix       # Portable hacking station tools
 
-    ./network/tailscale.nix      # Base Tailscale service
     ./services/yubikey.nix       # For runtime sops decryption
   ];
 
   # Steam Deck - minimal system modules
   # Hardware and Gaming Mode handled by Jovian-NixOS
-  # Does not extend desktop (uses Jovian's Plasma/Gaming Mode)
+  # Does not extend desktop (Jovian owns Gaming Mode and Niri session switching)
   steamdeck = base ++ [
     ./core/boot.nix
 

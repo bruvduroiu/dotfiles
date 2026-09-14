@@ -40,6 +40,7 @@
         hister = prev.callPackage "${self}/pkgs/hister.nix" {};
         md2pdf = prev.callPackage "${self}/pkgs/md2pdf" {};
         mullvad-jump = prev.callPackage "${self}/pkgs/mullvad-jump.nix" {};
+        phantom-unlock = prev.callPackage "${self}/pkgs/phantom-unlock.nix" {};
         invoice = prev.callPackage "${self}/pkgs/invoice.nix" {
           srcHash = "sha256-Qa7lTpRBB3m3GiK5mBkDMyg0InUqziUANf5Ds5XDnGg=";
           vendorHash = "sha256-mLn9hN7hd3MPYx0STiwCL8pTTYtDlycVkSLUEq8NZOE=";

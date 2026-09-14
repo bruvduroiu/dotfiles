@@ -22,21 +22,6 @@
     script = "true";
   };
 
-  # Tailscale logout on shutdown - immediately removes node from tailnet
-  systemd.services.tailscale-logout = {
-    description = "Logout from Tailscale on shutdown";
-    before = [ "shutdown.target" "reboot.target" "halt.target" ];
-    after = [ "tailscaled.service" ];
-    wantedBy = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      ExecStop = "${pkgs.tailscale}/bin/tailscale logout";
-    };
-    script = "true";
-  };
-
   # Lock LUKS volumes on suspend
   powerManagement.powerDownCommands = ''
     ${pkgs.cryptsetup}/bin/cryptsetup luksClose phantom-crypt || true

@@ -7,9 +7,10 @@ in {
   options.desktop.greetd = {
     sessionCommand = lib.mkOption {
       type = lib.types.str;
+      default = "${pkgs.niri}/bin/niri-session";
       description = ''
-        Command greetd runs to start the Wayland session. Set by the active
-        compositor module (system/programs/hyprland or system/programs/niri).
+        Command greetd runs to start the Wayland session. Defaults to Niri;
+        the Hyprland module overrides it for hosts using that compositor.
       '';
     };
 

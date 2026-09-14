@@ -24,8 +24,7 @@
     pciutils
     lshw
 
-    # Screenshot/clipboard (Hyprland)
-    inputs.hyprland-contrib.packages.${pkgs.stdenv.hostPlatform.system}.grimblast
+    # Screenshot/clipboard (Niri's screenshot helper is in the compositor module)
     wl-clipboard
     slurp
     grim

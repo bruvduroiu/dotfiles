@@ -6,10 +6,8 @@
     # Inherit the full framework13 experience
     ../framework13
 
-    # Override monitor config for unknown displays
-    ./hyprland.nix
   ];
 
-  # Phantom-specific home settings can go here
-  # Most config comes from framework13 profile
+  # Keep the shared bindings/layout without Framework's monitor placement.
+  desktop.niri.portable = true;
 }

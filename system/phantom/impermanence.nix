@@ -22,7 +22,6 @@
 
     directories = [
       "/var/lib/nixos"                         # User/group uid/gid mappings
-      "/var/lib/tailscale"
       "/var/lib/bluetooth"
       "/var/lib/systemd/coredump"
       "/etc/NetworkManager/system-connections"

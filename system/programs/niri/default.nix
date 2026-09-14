@@ -104,6 +104,4 @@ in {
   # One Settings portal publishes Noctalia's GTK dark/light preference.
   # Multiple implementations cause duplicate appearance notifications.
   xdg.portal.config.niri."org.freedesktop.impl.portal.Settings" = [ "gtk" ];
-
-  desktop.greetd.sessionCommand = "${pkgs.niri}/bin/niri-session";
 }

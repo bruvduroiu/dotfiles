@@ -112,13 +112,14 @@
     };
 
     # Phantom USB - ephemeral NixOS that leaves no trace
-    # LUKS-encrypted, impermanent root, Tailscale auto-connect
+    # LUKS-encrypted, impermanent root, WireGuard home overlay
     phantom = nixosSystem {
       inherit specialArgs;
       modules = phantom ++ [
         ./phantom
 
-        "${mod}/programs/hyprland"
+        "${mod}/programs/niri"
+        inputs.stylix.nixosModules.stylix
 
         # Declarative disk partitioning
         inputs.disko.nixosModules.disko
@@ -134,7 +135,9 @@
 
         {
           home-manager = {
-            users.bogdan.imports = homeImports."bogdan@phantom";
+            users.bogdan.imports = homeImports."bogdan@phantom" ++ [
+              ../home/programs/wayland/noctalia-stylix.nix
+            ];
             extraSpecialArgs = specialArgs;
             backupFileExtension = ".hm-backup";
             sharedModules = [

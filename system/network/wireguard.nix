@@ -105,6 +105,11 @@ let
   resolvectl = "${config.systemd.package}/bin/resolvectl";
 in {
   options.network.wireguard = {
+    privateKeyFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Runtime home-overlay key path; null uses SOPS, a custom path skips its key declaration.";
+    };
     overlayIP = lib.mkOption {
       type = lib.types.str;
       example = "10.99.0.2";
@@ -162,7 +167,7 @@ in {
     # ── Secrets ──────────────────────────────────────────────────────────────
     # Declared per enabled interface, never unconditionally: see the header
     # note on sops-install-secrets being all-or-nothing.
-    sops.secrets = {
+    sops.secrets = lib.optionalAttrs (cfg.privateKeyFile == null) {
       ${wgSecret} = {
         inherit sopsFile;
         mode = "0400";
@@ -203,7 +208,8 @@ in {
       # Home hub overlay
       wg0 = {
         address = [ "${cfg.overlayIP}/32" ];
-        privateKeyFile = config.sops.secrets.${wgSecret}.path;
+        privateKeyFile = if cfg.privateKeyFile == null
+          then config.sops.secrets.${wgSecret}.path else cfg.privateKeyFile;
         mtu = 1360;
         # Routes are added manually with a high metric so that, at home, the
         # directly-connected LAN route (NM metric ~100-600) and the DHCP
