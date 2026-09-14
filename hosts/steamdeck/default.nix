@@ -8,6 +8,9 @@ in
     ./hardware-configuration.nix
     ./transmission.nix
     ./kodi.nix
+    ../../system/programs/niri
+    ../../system/programs/fonts.nix
+    ../../system/services/brightnessctl.nix
   ];
 
   # Steam Deck hardware support via Jovian-NixOS
@@ -30,16 +33,19 @@ in
       autoStart = true;
       user = mainUser;
       
-      # Switch to Plasma desktop when using "Switch to Desktop" in Gaming Mode
-      desktopSession = "plasma";
+      # Jovian owns the session switch in both directions.
+      desktopSession = "niri";
     };
 
     steamos.useSteamOSConfig = true;
 
   };
 
-  # Plasma Desktop for "Switch to Desktop" functionality
-  services.desktopManager.plasma6.enable = true;
+  # Keep Nyx's vendored Jovian kernel, including its Valve patches.
+  # enableKernelPatches selects linuxPackages_jovian, including Deck drivers.
+  jovian.devices.steamdeck.enableKernelPatches = true;
+  services.upower.enable = true;
+  programs.dconf.enable = true;
 
   # System configuration
   networking.hostName = "steamdeck";
@@ -122,6 +128,13 @@ in
 
   # Packages
   environment.systemPackages = with pkgs; [
+    (makeDesktopItem {
+      name = "return-to-gaming-mode";
+      desktopName = "Return to Gaming Mode";
+      exec = "${pkgs.steamos-manager}/bin/steamosctl switch-to-game-mode";
+      icon = "steam";
+      categories = [ "Game" ];
+    })
     vim
     git
     htop

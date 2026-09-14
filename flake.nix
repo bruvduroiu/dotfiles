@@ -47,11 +47,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Home Manager for Steam Deck (follows unstable for Jovian-NixOS compatibility)
-    home-manager-unstable = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    # Steam Deck has an independent, jointly updated gaming stack.
+    # Preserve Nyx's pins so its binary cache can supply Jovian packages.
+    nyx.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+    nixpkgs-steamdeck.follows = "nyx/nixpkgs";
+    home-manager-steamdeck.follows = "nyx/home-manager";
 
 
     # Hyprland
@@ -72,9 +72,7 @@
     # upstream's lock, and following ours would force a full local rebuild
     hermes-agent.url = "github:NousResearch/hermes-agent";
 
-    # Steam Deck support via Jovian-NixOS
-    # Note: Don't override nixpkgs to ensure cache hits for pre-built binaries
-    jovian-nixos.url = "github:Jovian-Experiments/Jovian-NixOS";
+    # Jovian is vendored by Nyx; hosts/default.nix selects that matching module.
 
     mcp-servers-nix = {
       url = "github:natsukium/mcp-servers-nix";

@@ -10,6 +10,15 @@
     inherit (import mod) laptop steamdeck iso phantom;
 
     specialArgs = { inherit inputs self;};
+    # Shared modules may select unstable applications. Scope those selections
+    # to the Deck's pin without changing Framework or Phantom's package set.
+    deckSpecialArgs = {
+      inherit self;
+      inputs = inputs // {
+        nixpkgs-unstable = inputs.nixpkgs-steamdeck;
+        jovian-nixos = inputs.nyx.vendored.jovian;
+      };
+    };
   in {
     framework13 = nixosSystem {
       inherit specialArgs;
@@ -48,18 +57,18 @@
       ];
     };
 
-    # Steam Deck with Jovian-NixOS (requires nixpkgs-unstable)
-    steamdeck = inputs.nixpkgs-unstable.lib.nixosSystem {
-      inherit specialArgs;
+    # Nyx's vendored Jovian and its matching nixpkgs/Home Manager pins.
+    steamdeck = inputs.nixpkgs-steamdeck.lib.nixosSystem {
+      specialArgs = deckSpecialArgs;
       modules = steamdeck
       ++ [
       ./steamdeck
 
       # Jovian-NixOS for Steam Deck support
-      inputs.jovian-nixos.nixosModules.default
+      inputs.nyx.vendored.jovian.nixosModules.default
+      inputs.nyx.nixosModules.default
 
-      # Home Manager (unstable, follows nixpkgs-unstable for Jovian compatibility)
-      inputs.home-manager-unstable.nixosModules.home-manager
+      inputs.home-manager-steamdeck.nixosModules.home-manager
 
       # Secrets management
       inputs.sops-nix.nixosModules.sops
@@ -70,7 +79,7 @@
       {
         home-manager = {
           users.deck.imports = homeImports."deck@steamdeck";
-          extraSpecialArgs = specialArgs;
+          extraSpecialArgs = deckSpecialArgs;
           backupFileExtension = ".hm-backup";
           sharedModules = [
             inputs.sops-nix.homeManagerModules.sops

@@ -4,7 +4,36 @@ Noctalia 5.0.1 replaces Waybar, Walker/Elephant, Mako, swaylock/hyprlock,
 swayidle/hypridle, swaybg/hyprpaper, meeting guard, and `theme-switch`.
 Their modules, launcher/locker/wallpaper flake inputs, Walker cache, and
 Waybar-specific passwordless WireGuard polling rules are removed.
-Hyprland remains a compositor for the portable profiles; Framework uses Niri.
+Framework, Phantom and Steam Deck use Niri. The live ISO still uses Hyprland.
+
+## Portable profiles
+
+Phantom inherits the Framework applications, plugins and shared Niri bindings.
+`desktop.niri.portable` omits Framework's output placement and workspace pins,
+letting Niri discover the connected displays. Brightness commands use the focused
+display. The source `home/programs/wayland/niri.kdl` remains unchanged.
+Its tmpfs root and selective encrypted persistence remain in place; Noctalia
+runtime settings, clipboard history and generated themes are ephemeral. See
+`hosts/phantom/README.md` for the dedicated WireGuard peer provisioning requirement.
+
+Steam Deck uses the same shell and bindings with a smaller application selection.
+Obsidian and Mullvad Browser launch shortcuts/autostarts are omitted. Ghostty,
+Firefox, Yazi, Newsboat, screenshots and recording are available. The Deck does
+not import Framework's account integrations or plugins. Noctalia's idle suspend
+is disabled there so the media server stays reachable; locking and screen-off
+remain enabled. Desktop login still locks immediately, so ensure the `deck`
+account has a usable password before switching from Gaming Mode.
+
+Jovian's “Switch to Desktop” now selects `niri`. In Noctalia's launcher, choose
+“Return to Gaming Mode” to invoke Jovian's `steamosctl switch-to-game-mode`.
+Steam Deck now uses Nyx's vendored Jovian, with nixpkgs and Home Manager following
+Nyx's pins independently of Framework's unstable packages. The current gaming
+stack selects `7.2.4-valve1`; its Valve kernel patches remain enabled. Update
+the `nyx` input deliberately to advance the gaming stack together. Nyx's cache
+supplies the checked kernel and 64-bit graphics outputs; 32-bit Valve graphics
+may still need compiling on the build machine. Validate the session
+round trip, panel orientation, touch input, X11 games and suspend/resume on the
+actual Deck before making it the boot default.
 
 `home/programs/wayland/noctalia.nix` is imported by the shared Wayland profile.
 `noctalia-templates.nix` adds community templates to the Framework-derived
