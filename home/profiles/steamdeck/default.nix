@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./controller-desktop.nix
     ./syncthing.nix
     ../../programs/keepassxc.nix
     ../../programs/games/minecraft
@@ -38,8 +39,17 @@
     size = 24;
     gtk.enable = true;
   };
-  # Desktop inactivity must not suspend the stationary media server.
-  programs.noctalia.settings.idle.behavior.suspend.enabled = lib.mkForce false;
+  # Jovian already logs into the Deck automatically. A desktop lock would
+  # require credentials and input that Steam's desktop keyboard cannot provide
+  # reliably on a session-lock surface. Keep this console password-free.
+  programs.noctalia.settings = {
+    lockscreen.enabled = lib.mkForce false;
+    lockscreen.lock_before_suspend = lib.mkForce false;
+    hooks.started = lib.mkForce [ "noctalia msg wallpaper-next" ];
+    idle.behavior.lock.enabled = lib.mkForce false;
+    # Desktop inactivity must not suspend the stationary media server.
+    idle.behavior.suspend.enabled = lib.mkForce false;
+  };
   # Gaming Mode also starts graphical-session.target. Only start the desktop
   # shell when Niri has imported its socket into the user manager environment.
   systemd.user.services.noctalia.Unit.ConditionEnvironment = "NIRI_SOCKET";

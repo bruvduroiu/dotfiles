@@ -19,6 +19,46 @@ in
       enable = true;
       user = "deck";
       stateDir = "/home/${mainUser}/.local/share/decky"; # Keep scoped to user
+
+      # Decky's unit gets ONLY this list on its PATH (the module sets
+      # `path = cfg.extraPackages`), on top of systemd's tiny default of
+      # coreutils/findutils/grep/sed/systemd. Plugins shell out by bare name,
+      # so anything missing here fails at runtime and nowhere else — the
+      # plugin renders fine and simply reports nothing. TunnelDeck needs:
+      #   networkmanager → nmcli, the whole plugin
+      #   iproute2       → `ip -j route get` for its "priority interface" panel
+      #   iputils        → ping, for its reachability check
+      #   glibc.bin      → getent, to resolve steampowered.com
+      # systemctl is already present via systemd.
+      extraPackages = with pkgs; [
+        networkmanager
+        iproute2
+        iputils
+        glibc.bin
+
+        # TunnelDeck offers an "Enable OpenVPN" switch that runs, as root, a
+        # SteamOS-only script: wget + pacman + mksquashfs, writing a sysext to
+        # /var/lib/extensions and calling /usr/share/libalpm/scripts. None of
+        # that exists here, and none of it is needed — NetworkManager has
+        # WireGuard built in, unlike OpenVPN.
+        #
+        # The plugin decides whether to offer that switch by running
+        # `pacman -Qi networkmanager-openvpn` and catching CalledProcessError
+        # only — so a missing pacman raises FileNotFoundError instead and the
+        # switch renders in an undefined state. Answering the query honestly
+        # ("installed") makes it render checked and disabled, i.e. unpressable.
+        (writeShellScriptBin "pacman" ''
+          # Narrow on purpose: any other pacman invocation should still fail,
+          # so a future plugin cannot mistake this for a working package
+          # manager.
+          if [ "$1" = "-Qi" ] && [ "$2" = "networkmanager-openvpn" ]; then
+            echo "Name            : networkmanager-openvpn"
+            exit 0
+          fi
+          echo "pacman: not available on NixOS (stub)" >&2
+          exit 1
+        '')
+      ];
     };
     devices.steamdeck = {
       enable = true;
@@ -48,6 +88,9 @@ in
   programs.dconf.enable = true;
 
   # System configuration
+  # Steam Input's X11 keyboard/mouse output must reach native Wayland clients.
+  programs.steam.extest.enable = true;
+
   networking.hostName = "steamdeck";
 
   # WireGuard peer identity (see system/network/wireguard.nix).
@@ -62,9 +105,17 @@ in
   # mullvadAddressV4/V6 placeholders. Those are bound to a Mullvad device key
   # the deck does not have, and a placeholder Mullvad address is the failure
   # mode that handshakes happily and then drops every packet.
+  #
+  # wg0 runs on the NetworkManager backend rather than wg-quick. That is
+  # purely so the tunnel exists as an NM *profile*: TunnelDeck (the Gaming
+  # Mode VPN plugin) lists `nmcli connection show` filtered to types
+  # vpn/wireguard, and a wg-quick interface is a kernel device with no
+  # connection behind it — invisible. Same key, same peer, same routes; see
+  # network.wireguard.backend for what changes and what does not.
   network.wireguard = {
     overlayIP = inputs.secrets.vars.hosts.steamdeck.wireguard.overlayIP;
     mullvad.enable = false;
+    backend = "networkmanager";
   };
 
   # sops decryption identity for this host. The deck is headless and never
