@@ -8,11 +8,6 @@
     ./steamdeck
   ];
 
-  "nixos@iso" = [
-    ./iso/base.nix
-    ./iso
-  ];
-
   "bogdan@phantom" = [
     ./phantom
   ];

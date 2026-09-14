@@ -4,7 +4,7 @@ Noctalia 5.0.1 replaces Waybar, Walker/Elephant, Mako, swaylock/hyprlock,
 swayidle/hypridle, swaybg/hyprpaper, meeting guard, and `theme-switch`.
 Their modules, launcher/locker/wallpaper flake inputs, Walker cache, and
 Waybar-specific passwordless WireGuard polling rules are removed.
-Framework, Phantom and Steam Deck use Niri. The live ISO still uses Hyprland.
+Framework, Phantom and Steam Deck use Niri.
 
 ## Portable profiles
 
@@ -26,6 +26,9 @@ account has a usable password before switching from Gaming Mode.
 
 Jovian's “Switch to Desktop” now selects `niri`. In Noctalia's launcher, choose
 “Return to Gaming Mode” to invoke Jovian's `steamosctl switch-to-game-mode`.
+Controller-only use (one app per screen, the L5-held Steam Input layer that
+sends Niri chords, and the Kando wheel) is described in
+`home/profiles/steamdeck/CONTROLLER.md`; none of it reaches the other hosts.
 Steam Deck now uses Nyx's vendored Jovian, with nixpkgs and Home Manager following
 Nyx's pins independently of Framework's unstable packages. The current gaming
 stack selects `7.2.4-valve1`; its Valve kernel patches remain enabled. Update
@@ -215,7 +218,7 @@ Do not point generated output at an immutable Home Manager symlink.
 | yazi | `noctalia` flavor for both modes, including syntax colors. |
 | Claude Code | Generated in personal and work profile theme directories. Select Noctalia with `/theme`; restart once if newly added. |
 | Codex | `tui.theme = "noctalia"`; start a new session to pick up syntax colors. |
-| Discord | Midnight community CSS generated for Vencord/Vesktop. Requires a compatible client/mod and enabling the theme; stock Discord cannot load it. |
+| Discord | Midnight community CSS written to Vesktop's theme directory. The official client cannot load it and is no longer installed. `vesktop.nix` seeds `noctalia.theme.css` into Vencord's `enabledThemes` at activation, and Vencord watches the themes directory, so switches re-inject without a restart. |
 | fcitx5 | Classic UI theme selected on Framework; native D-Bus reload hook. |
 | fzf | Community color options read through `FZF_DEFAULT_OPTS_FILE` on each invocation. Open a fresh login shell after activation. |
 | jjui | `ui.theme = "noctalia"` reading a generated `themes/noctalia.toml`. Stylix's target is off: its static `ui.colors` is jjui's highest-priority layer and masked every other one. A running jjui recolors when the terminal reports the new polarity; otherwise reopen it. |

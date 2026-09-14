@@ -12,6 +12,25 @@ let
   fzfTemplate = pkgs.runCommand "noctalia-fzf-template" { } ''
     sed -n '/^--color=/p' ${source}/fzf/fzf.sh | sed 's/"$//' > "$out"
   '';
+  # Midnight spends its three dimmest text slots on Material's outline roles,
+  # which are specified for dividers (~3:1, ~1.5:1) rather than for text. Under
+  # this dark palette that puts message body at 5.5:1, channel names at 3.0:1
+  # and timestamps at 1.7:1 against the chat background - the last two below
+  # WCAG AA. Shift each slot one rung up the on-surface scale, which does carry
+  # a text contrast guarantee, and let outline_variant fall out of text duty.
+  # This rewrites which role is read, not the color, so live retheming and the
+  # other palettes (light mode included) keep working.
+  discordTemplate = pkgs.runCommand "noctalia-discord-midnight" { } ''
+    cp ${source}/discord/discord-midnight.css "$out"
+    chmod u+w "$out"
+    substituteInPlace "$out" \
+      --replace-fail '--text-3: {{colors.on_surface_variant.default.hex}};' \
+                     '--text-3: {{colors.on_surface.default.hex}};' \
+      --replace-fail '--text-4: {{colors.outline.default.hex}};' \
+                     '--text-4: {{colors.on_surface_variant.default.hex}};' \
+      --replace-fail '--text-5: {{colors.outline_variant.default.hex}};' \
+                     '--text-5: {{colors.outline.default.hex}};'
+  '';
   # Upstream builds beside apply.sh, which is read-only in the Nix store.
   libreofficeSource = pkgs.runCommand "noctalia-libreoffice" { } ''
     cp -r ${source}/libreoffice "$out"
@@ -41,10 +60,11 @@ in
       "${userHome}/.claude-work/themes/noctalia.json"
     ];
     codex = template "codex/codex.tmTheme" "${userHome}/.codex/themes/noctalia.tmTheme";
-    discord = template "discord/discord-midnight.css" [
-      "${cfg}/Vencord/themes/noctalia.theme.css"
-      "${cfg}/vesktop/themes/noctalia.theme.css"
-    ];
+    # Vesktop points Vencord at its own userData dir, so themes live here.
+    discord = {
+      input_path = "${discordTemplate}";
+      output_path = "${cfg}/vesktop/themes/noctalia.theme.css";
+    };
     fcitx5 = (template "fcitx5/theme.conf" "${config.xdg.dataHome}/fcitx5/themes/noctalia/theme.conf") // {
       post_hook = "${pkgs.systemd}/bin/busctl --user call org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Controller1 ReloadAddonConfig s classicui";
     };

@@ -9,6 +9,7 @@
 
     # programs
     ../../programs
+    ../../programs/vesktop.nix
     ../../programs/keepassxc.nix
     ../../programs/wayland
     ../../programs/wayland/noctalia-templates.nix

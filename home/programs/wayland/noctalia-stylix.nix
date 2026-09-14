@@ -19,6 +19,14 @@
     yazi.enable = false;
     opencode.enable = false;
     obsidian.enable = false;
+    # Wrote ~/.config/Vencord/themes/stylix.theme.css for Vencord-injected-into-
+    # Discord, a client this config no longer installs. Vesktop reads
+    # ~/.config/vesktop/themes instead, so the file was simply dead.
+    vencord.enable = false;
+    # Pre-asserts `vencord.settings.enabledThemes = [ "stylix.css" ]`, which
+    # would both mask Noctalia's live theme and freeze Vencord's writable
+    # settings.json as a store symlink. vesktop.nix seeds the theme instead.
+    vesktop.enable = false;
     zathura.enable = false;
   };
 }

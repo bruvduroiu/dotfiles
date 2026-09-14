@@ -3,7 +3,6 @@
 #
 # Inheritance structure:
 #   base → desktop → laptop
-#                  → iso
 #                  → phantom (ephemeral USB with impermanence)
 #   base → steamdeck (uses Jovian-NixOS for desktop)
 
@@ -56,16 +55,6 @@ let
     ./services/fprintd.nix
   ];
 
-  # Live ISO - portable system with Hyprland environment
-  # Extends desktop with network auth and YubiKey support
-  # Note: boot.nix excluded - ISO uses its own boot configuration
-  iso = desktop ++ [
-    ./network/tailscale.nix      # Base Tailscale service
-    ./network/tailscale-iso.nix  # Auto-auth with sops-encrypted key
-
-    ./services/yubikey.nix  # For sops decryption with age-plugin-yubikey
-  ];
-
   # Phantom USB - ephemeral system with impermanence
   # Extends desktop with LUKS boot, impermanence, and paranoid security
   # Root is tmpfs - only /persist survives reboot
@@ -98,5 +87,5 @@ let
   ];
 
 in {
-  inherit laptop steamdeck iso phantom;
+  inherit laptop steamdeck phantom;
 }

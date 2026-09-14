@@ -9,7 +9,6 @@ in
 {
   home.packages = with pkgs; [
     pkgs-unstable.telegram-desktop
-    discord-ptb
     signal-desktop
     element-desktop
   ];

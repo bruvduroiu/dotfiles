@@ -7,7 +7,7 @@
     homeImports = import "${self}/home/profiles";
     mod = "${self}/system";
 
-    inherit (import mod) laptop steamdeck iso phantom;
+    inherit (import mod) laptop steamdeck phantom;
 
     specialArgs = { inherit inputs self;};
     # Shared modules may select unstable applications. Scope those selections
@@ -86,37 +86,6 @@
           ];
         };
       }
-      ];
-    };
-
-    # Live ISO - portable NixOS with Framework13-like environment
-    live-iso = nixosSystem {
-      inherit specialArgs;
-      modules = iso ++ [
-        ./iso
-
-        "${mod}/programs/hyprland"
-
-        # Home Manager (stable, follows nixpkgs)
-        inputs.home-manager.nixosModules.home-manager
-
-        # Secrets management (for Yubikey-based sops decryption)
-        inputs.sops-nix.nixosModules.sops
-
-        # Private NixOS config (from the private flake)
-        inputs.secrets.nixosModules.default
-
-        {
-          home-manager = {
-            users.nixos.imports = homeImports."nixos@iso";
-            extraSpecialArgs = specialArgs;
-            backupFileExtension = ".hm-backup";
-            sharedModules = [
-              inputs.sops-nix.homeManagerModules.sops
-              inputs.nix4nvchad.homeManagerModules.default
-            ];
-          };
-        }
       ];
     };
 

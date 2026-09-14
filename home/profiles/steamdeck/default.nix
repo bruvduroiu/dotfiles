@@ -3,10 +3,13 @@
 {
   imports = [
     ./controller-desktop.nix
+    ./xwayland-satellite-pin.nix
     ./syncthing.nix
+    ../../programs/vesktop.nix
     ../../programs/keepassxc.nix
     ../../programs/games/minecraft
     ../../programs/games/openrct2
+    ../../programs/games/heroic
     # Configured Claude Code (settings/agents/MCP/plugins under ~/.claude). Required
     # by the openrct2 coding-agent fork, whose in-game terminal launches `claude`.
     ../../terminal/programs/claude

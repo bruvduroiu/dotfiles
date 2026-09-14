@@ -399,6 +399,7 @@ window-rule {
 // comms → named workspaces, hidden from screencasts
 window-rule {
     match app-id=r#"(?i)^discord"#
+    match app-id=r#"(?i)^vesktop"#
     match app-id=r#"^org\.telegram\.desktop$"#
     match app-id=r#"(?i)^signal"#
     open-on-workspace "chat"
