@@ -396,6 +396,12 @@ window-rule {
     }
 }
 
+// Chromium windows open without taking focus.
+window-rule {
+    match app-id=r#"(?i)^(chromium|chromium-browser|org\.chromium\.Chromium)$"#
+    open-focused false
+}
+
 // comms → named workspaces, hidden from screencasts
 window-rule {
     match app-id=r#"(?i)^discord"#

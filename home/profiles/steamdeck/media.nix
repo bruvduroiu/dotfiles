@@ -62,6 +62,7 @@ in
 {
   home.packages = [
     pkgs.kodi
+    pkgs.grayjay
   ];
 
   # Read-only declarative config (Kodi only reads these)
