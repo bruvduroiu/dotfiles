@@ -66,6 +66,9 @@ in
         if test -f ${config.sops.secrets.abliteration_api_key.path}
           set -gx ABLITERATION_API_KEY (cat ${config.sops.secrets.abliteration_api_key.path})
         end
+        if test -f ${config.sops.secrets.immich_api_key.path}
+          set -gx IMMICH_API_KEY (cat ${config.sops.secrets.immich_api_key.path})
+        end
       '';
       interactiveShellInit = ''
         set -gx fzf_fd_opts "${fd_opts}"

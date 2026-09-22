@@ -59,6 +59,11 @@
     sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
   };
 
+  # Immich API key (exported as IMMICH_API_KEY in fish)
+  sops.secrets.immich_api_key = {
+    sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+  };
+
   # Alpha Vantage key (used by portfolio-update-prices)
   sops.secrets.alphavantage_api_key = {
     sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
