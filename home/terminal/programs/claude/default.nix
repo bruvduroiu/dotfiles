@@ -134,6 +134,10 @@ in
         type = "http";
         url = "https://mcp.notion.com/mcp";
       };
+      metacog = {
+        type = "http";
+        url = "http://10.0.20.197:8788/mcp";
+      };
     };
 
     # Settings
