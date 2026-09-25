@@ -48,6 +48,36 @@ let
     '';
   };
 
+  # Waiting for the Storage Box to resolve before touching the network.
+  #
+  # The laptop sleeps through 02:00, so Persistent= fires the missed run at
+  # the very second of resume — before Wi-Fi has re-associated (~4s later on
+  # 2026-09-29). `after = network-online.target` cannot help: that target is
+  # reached once at boot and stays active across suspend, so it gates nothing
+  # on wake. Every catch-up run between 09-24 and 09-29 died on "Could not
+  # resolve hostname" for exactly this reason.
+  #
+  # Resolving the actual host is the most direct readiness signal there is.
+  # On timeout it exits non-zero on purpose, so the failure notification
+  # names the network rather than a restic stack of sftp errors.
+  waitOnline = pkgs.writeShellApplication {
+    name = "restic-wait-online";
+    runtimeInputs = [ pkgs.getent pkgs.coreutils ];
+    text = ''
+      timeout=180
+      until getent hosts ${storageBoxHost} >/dev/null; do
+        if (( SECONDS >= timeout )); then
+          echo "restic: ${storageBoxHost} still unresolvable after ''${timeout}s, network not up" >&2
+          exit 1
+        fi
+        sleep 5
+      done
+      if (( SECONDS > 0 )); then
+        echo "restic: network up after ''${SECONDS}s"
+      fi
+    '';
+  };
+
   # Syncthing folder ids covering the backup paths above (Pictures is not
   # synced). See home/services/syncthing.nix.
   pausedFolders = [ "docs" "passwords" ];
@@ -273,6 +303,11 @@ in {
     # through sudo. Every call is `|| true`: a writer that cannot be stilled
     # should degrade the snapshot's consistency, never cancel the backup.
     backupPrepareCommand = ''
+      # Resume-from-suspend catch-up runs start before Wi-Fi is back. Not
+      # `|| true`: with no network there is nothing useful left to do, and
+      # failing here happens before hister and syncthing are disturbed.
+      ${lib.getExe waitOnline}
+
       # Clear any lock left behind by a run that lost its transport. First,
       # before the quiesce, so a hanging unlock does not hold hister down with
       # it. `|| true` because a network failure here fails the backup a moment
@@ -351,6 +386,9 @@ in {
     script = ''
       export RESTIC_REPOSITORY="${repository}"
       export RESTIC_PASSWORD_FILE="${config.sops.secrets.restic_password.path}"
+
+      # Same resume race as the backup; hit on 2026-09-28.
+      ${lib.getExe waitOnline}
 
       # This unit is the one that leaked the lock on 2026-09-05, and nothing
       # downstream of a failed check ever cleans up after it. Same reasoning as
