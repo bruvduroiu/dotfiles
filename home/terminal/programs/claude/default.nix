@@ -7,6 +7,10 @@
 
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
+  codingMcps = import ../coding-mcps {
+    inherit lib pkgs;
+    cacheHome = config.xdg.cacheHome;
+  };
 
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a
   # writeShellApplication (deps pinned, shellchecked at build time) and exports
@@ -95,50 +99,8 @@ in
     # skillsDir was renamed to `skills` in 26.05 (accepts a dir path or attrset).
     skills = codingAgents.skills;
 
-    # MCP servers configuration — Nix store paths resolved at build time
-    mcpServers = {
-      # nixpkgs names this binary `playwright-mcp` (see meta.mainProgram), not
-      # `mcp-server-playwright` — the npm-era name. Pointing at the latter is
-      # why this server previously failed: the path simply does not exist, so
-      # every launch died with ENOENT before the MCP handshake. getExe reads
-      # mainProgram, so an upstream rename cannot silently break it again.
-      playwright = {
-        type = "stdio";
-        command = lib.getExe pkgs.playwright-mcp;
-        args = [
-          # Playwright normally downloads its own browser builds; on NixOS
-          # those are neither present nor runnable. Hand it the store chromium
-          # instead of letting it hunt for a ~/.cache/ms-playwright build.
-          "--executable-path"
-          "${pkgs.ungoogled-chromium}/bin/chromium"
-          # Snapshots and screenshots otherwise land in `./.playwright-mcp/`
-          # relative to the session cwd — i.e. dropped into whichever repo is
-          # open. Keep that scratch output in the cache dir instead.
-          "--output-dir"
-          "${config.xdg.cacheHome}/playwright-mcp"
-        ];
-      };
-      datadog = {
-        type = "http";
-        url = "https://mcp.datadoghq.eu/api/unstable/mcp-server/mcp?toolsets=all";
-      };
-      deepwiki = {
-        type = "http";
-        url = "https://mcp.deepwiki.com/mcp";
-      };
-      linear = {
-        type = "http";
-        url = "https://mcp.linear.app/mcp";
-      };
-      notion = {
-        type = "http";
-        url = "https://mcp.notion.com/mcp";
-      };
-      metacog = {
-        type = "http";
-        url = "http://10.0.20.197:8788/mcp";
-      };
-    };
+    # Shared with Codex; Nix store paths are resolved at build time.
+    mcpServers = codingMcps.claudeServers;
 
     # Settings
     settings = {
@@ -203,6 +165,7 @@ in
         ask = [
           "Bash(git push:*)"
           "Bash(git commit:*)"
+          "Bash(git rm:*)"
           # Stack surgery, authorised only while a /jj-stack* skill is
           # running and only on `trunk()..@ & mine()` — see the exception in
           # CLAUDE.md. Each one still prompts so the human sees every rewrite.

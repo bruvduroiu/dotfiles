@@ -7,6 +7,10 @@
 
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
+  codingMcps = import ../coding-mcps {
+    inherit lib pkgs;
+    cacheHome = config.xdg.cacheHome;
+  };
   codexConfigDir = "${config.home.homeDirectory}/.codex";
   codexSettings = {
     forced_login_method = "chatgpt";
@@ -29,6 +33,8 @@ let
     web_search = "live";
     check_for_update_on_startup = false;
     shell_environment_policy.ignore_default_excludes = false;
+
+    mcp_servers = codingMcps.codexServers;
 
     agents = {
       enabled = true;
@@ -105,9 +111,6 @@ in
     # than one shared one.
     context = codingAgents.context;
     skills = codingAgents.skills;
-
-    # No MCP servers. Claude Code and OpenCode carry the remote integrations;
-    # Codex stays a local coding agent and avoids separate OAuth sessions.
   };
 
   # Home Manager owns the stable link while Codex writes through it to the
