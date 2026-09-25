@@ -35,7 +35,6 @@
       directories = [
         ".gnupg"
         ".ssh"
-        ".local/share/keyrings"
       ];
       files = [
         ".bash_history"

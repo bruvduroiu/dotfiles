@@ -80,9 +80,15 @@ let
 in {
   # Niri config is a hand-written KDL file shipped by home-manager, see
   # home/programs/wayland/niri.{nix,kdl}. The nixpkgs module owns the
-  # session, portals (gnome + gtk), gnome-keyring and systemd units; this
-  # module adds only env and helper scripts — no niri config.
+  # session, portals (gnome + gtk) and systemd units; this module adds only
+  # env and helper scripts — no niri config.
   programs.niri.enable = true;
+
+  # The nixpkgs niri module turns gnome-keyring on by default. Nothing here
+  # uses it (SSH goes through gpg-agent), and greetd autologin never hands it
+  # a password, so every login ended in an "unlock your keyring" prompt.
+  # Its PAM hooks, Secret portal and gcr-ssh-agent all follow this switch.
+  services.gnome.gnome-keyring.enable = false;
 
   environment = {
     pathsToLink = [ "/share/icons" ];
