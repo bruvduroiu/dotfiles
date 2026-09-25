@@ -15,7 +15,7 @@
 }
 @font-face {
   font-family: "JetBrains Mono";
-  src: url("@fontdir@/JetBrainsMono-Variable.woff2") format("woff2");
+  src: url("@fontdir@/JetBrainsMono-Variable.ttf") format("truetype");
   font-weight: 100 800;
   font-style: normal;
   font-display: swap;

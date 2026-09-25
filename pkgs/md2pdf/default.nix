@@ -34,8 +34,8 @@ let
     hash = "sha256-KCWNBiEhaUhBaoWdMkh6tq0cnv+g0IeVaY5wvjyRdjA=";
   };
   # JetBrains Mono for code + ASCII diagrams: full-cell box-drawing glyphs so
-  # ├─┐│→ line up. Variable [wght] file, taken straight from nixpkgs (no pinning).
-  jbMonoVariable = "${jetbrains-mono}/share/fonts/WOFF2/JetBrainsMono[wght].woff2";
+  # ├─┐│→ line up. Variable TrueType [wght] file, taken straight from nixpkgs (no pinning).
+  jbMonoVariable = "${jetbrains-mono}/share/fonts/truetype/JetBrainsMono[wght].ttf";
   # Noto Sans Math for MathML: a *sans* font with a real OpenType MATH table.
   # Without it chromium pulls math italics from a serif fallback, which clashes
   # with the Geist body (mismatched p/b/t glyphs in formulas). Chosen over Fira
@@ -62,7 +62,7 @@ stdenv.mkDerivation {
     cp themes/*.css $out/share/md2pdf/themes/
     cp ${mermaidJs} $out/share/md2pdf/mermaid.min.js
     cp ${geistSans} $out/share/md2pdf/fonts/Geist-Variable.woff2
-    cp "${jbMonoVariable}" $out/share/md2pdf/fonts/JetBrainsMono-Variable.woff2
+    cp "${jbMonoVariable}" $out/share/md2pdf/fonts/JetBrainsMono-Variable.ttf
     cp "${notoSansMath}" $out/share/md2pdf/fonts/NotoSansMath-Regular.otf
 
     # Point each theme's @font-face at the bundled fonts by absolute path.
