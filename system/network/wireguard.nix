@@ -75,6 +75,18 @@ let
   # Networks reachable through the home hub via wg0
   hubNetworks = pvars.hub.networks;
 
+  # The hub's resolver (the router's dnsmasq), reached through wg0 — optional
+  # in the private flake. It is bound to the wg0 LINK for the private
+  # subdomain alone, as a routing-only domain, so every other name keeps
+  # resolving exactly as before (Quad9 / Mullvad). `local.buduroiu.com` is
+  # NXDOMAIN publicly: it exists only in the router's dnsmasq (homelab repo,
+  # modules/local-ingress.nix), so away from home the tunnel is the only path
+  # to an answer. resolved prefers the longest matching routing domain, so
+  # `~local.buduroiu.com` here beats the dispatcher's `~buduroiu.com` on the
+  # uplinks and Mullvad's `~.`.
+  hubDNS = pvars.hub.dns or null;
+  hubDNSDomains = [ "~local.buduroiu.com" ];
+
   # ── Mullvad config ──────────────────────────────────────────────────────────
   # OPTIONAL, AND BETTER LEFT UNSET. A relay's endpoint and public key are
   # Mullvad's to change: keys rotate while the IP stays put, so a pinned pair
@@ -261,6 +273,12 @@ in {
           ${lib.concatMapStringsSep "\n"
             (net: "${ip} route replace ${net} dev wg0 metric 4000")
             hubNetworks}
+        '' + lib.optionalString (hubDNS != null) ''
+          ${resolvectl} dns wg0 ${hubDNS}
+          ${resolvectl} domain wg0 ${lib.concatStringsSep " " hubDNSDomains}
+        '';
+        preDown = lib.optionalString (hubDNS != null) ''
+          ${resolvectl} revert wg0 2>/dev/null || true
         '';
         peers = [
           {
@@ -426,6 +444,11 @@ in {
             # The overlay must not gate NetworkManager-wait-online: the hub is
             # unreachable until the physical uplink is up.
             may-fail = true;
+          } // lib.optionalAttrs (hubDNS != null) {
+            # Same split DNS as the wg-quick postUp: NM hands both to resolved
+            # as this link's server and routing-only domain.
+            dns = "${hubDNS};";
+            dns-search = lib.concatMapStrings (d: "${d};") hubDNSDomains;
           };
           # v4-only overlay. Also removes the one setting TunnelDeck offers to
           # change, which is what would clone this profile into /etc.
