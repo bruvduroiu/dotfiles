@@ -8,6 +8,13 @@
     inputs.secrets.nixosModules.default
   ];
 
+  # dotool (the typing driver behind push-to-talk dictation,
+  # home/programs/wayland/voxtype.nix) writes to /dev/uinput, which
+  # hardware.uinput.enable (system/hardware) leaves group-owned by `uinput`.
+  # Lists merge with system/core/users.nix. Takes effect at the next login,
+  # not at switch: group membership is read when the session starts.
+  users.users.bogdan.extraGroups = [ "uinput" ];
+
   # --- Stylix theming ---
   stylix = {
     enable = true;

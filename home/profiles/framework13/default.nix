@@ -16,6 +16,7 @@
     ../../programs/wayland/noctalia-plugins.nix
     ../../programs/wayland/noctalia-calendar.nix
     ../../programs/wayland/niri.nix
+    ../../programs/wayland/voxtype.nix
     ../../programs/gtk.nix
     ../../programs/yt-dlp.nix
     ../../programs/gpg.nix
@@ -39,6 +40,12 @@
     enable = true;
     obsidian.enable = true;
   };
+
+  # Push-to-talk dictation: hold F19 (a Voyager layer key) or toggle with
+  # Mod+V on the internal keyboard. Transcribed by the mbp's Qwen3-ASR server.
+  sops.secrets.asr_api_key.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+  services.dictation.apiKeyFile = config.sops.secrets.asr_api_key.path;
+  services.dictation.enable = true;
 
   # SOPS secret for OpenRouter API key (used by nvim 99 plugin)
   sops.secrets.openrouter_api_key = {

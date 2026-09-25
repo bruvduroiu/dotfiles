@@ -1169,11 +1169,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1788881743,
-        "narHash": "sha256-2V9GZGvPfrNzxFozhI9dcqV+c3QdA8YZrvAAzqEB+dI=",
+        "lastModified": 1790185690,
+        "narHash": "sha256-xJ+X4hBtOcAFGBOe5nAMyMUeF9foJBmIOu3NjBqBycU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d6524aaca2ff07876657ae2b323f24be4874944b",
+        "rev": "4975466d324710c576dc11ad614684e6bd8cad8e",
         "type": "github"
       },
       "original": {
@@ -1262,11 +1262,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1788921488,
-        "narHash": "sha256-8+xWRxEkD6l217cIUdRxfeUGS9lQX0hVtUuNVsBaDzk=",
+        "lastModified": 1790218706,
+        "narHash": "sha256-6e4Na3z008XpdVyOXgfasXIn1aN+z8AXFG+jXdQSyuI=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "6aefcda9401be8acc2b74244fb3b37520ea1f0a8",
+        "rev": "c508844df6c28fa6dabc1b6af70f3ccbd65c5201",
         "type": "github"
       },
       "original": {
@@ -1669,11 +1669,11 @@
     },
     "secrets": {
       "locked": {
-        "lastModified": 1790097191,
-        "narHash": "sha256-1h87ggDlhr73/e86qY4UK5oZLS/KT7gbI6Nn1HKKtw4=",
+        "lastModified": 1791439031,
+        "narHash": "sha256-aooYSE1uPNeM3i59m0HbkJ24lF1Hqp9i9Nf6ejYLMFc=",
         "ref": "refs/heads/main",
-        "rev": "c87f90d45cdcd2d524ed3d83d9fcc359b89a739c",
-        "revCount": 24,
+        "rev": "db69971ada141eac3dc5008c8c8a226f9f537f01",
+        "revCount": 25,
         "type": "git",
         "url": "ssh://forgejo@git.oolongtechnologies.io/bogdan/secrets.git"
       },
