@@ -35,29 +35,39 @@ let
     crawler = {
       backend = "http";
     };
-    # Octen-Embedding-0.6B, a Qwen3-Embedding-0.6B fine-tune, served on the LAN.
+    # EmbeddingGemma 2 (llama.cpp on the LAN; the server ignores `model` and
+    # serves whatever it loaded). One 768-dim space for text, code, images,
+    # video and audio — but hister only ever sends text, so only that half is
+    # used here. Changing model/dimensions needs a fresh vectors.sqlite3: the
+    # vec0 table keeps its FLOAT[n] width and hister never re-creates it.
     semantic_search = {
       enable = true;
       embedding_endpoint = "http://192.168.1.193:11434/v1/embeddings";
-      embedding_model = "octen-embedding-0.6b";
+      embedding_model = "embeddinggemma-2";
       embedding_timeout = 300;
-      # 0.6B variant: 1024-dim vectors (the 4B/8B are 2560/4096).
-      dimensions = 1024;
-      # Chunk size, not model capacity: the model accepts 32k, but a chunk that
+      # Native width. MRL 512/256/128 would need client-side truncation and
+      # re-normalisation, which hister doesn't do, and llama.cpp ignores the
+      # OpenAI `dimensions` field.
+      dimensions = 768;
+      # Chunk size, not model capacity: the model accepts 8k, but a chunk that
       # large collapses a whole paper into a single vector. hister counts
-      # approximate word-tokens (a word or punctuation mark each, so ~1.3x fewer
-      # than Qwen3's BPE) and keeps 5% headroom, putting this near ~1250 real
-      # tokens per chunk.
+      # approximate word-tokens and keeps 5% headroom; Gemma's 262k vocab
+      # splits words less than Qwen's BPE did, so this is roughly ~1100 real
+      # tokens.
       max_context_length = 1024;
       chunk_overlap = 128;
       max_embedding_batch_size = 8;
       max_embedding_concurrency = 2;
-      # Qwen3-Embedding is instruction-tuned on the query side only. Documents
-      # are embedded bare, apart from the "- " prefix Octen recommends to dodge
-      # the upstream Qwen3 unprefixed-document bug.
-      query_prefix = "Instruct: Given a search query, retrieve relevant passages that answer the query\nQuery: ";
-      document_prefix = "- ";
-      similarity_threshold = 0.5;
+      # Model-card "SearchQuery" template. Its document side is
+      # "title: {title} | text: {content}", but hister already writes
+      # "title: …\nlanguage: …\ncontent:\n…" on every chunk, which is close
+      # enough, so no document prefix is added.
+      query_prefix = "task: search result | query: ";
+      document_prefix = "";
+      # Gemma scores sit higher than Qwen3's: measured with hister-shaped
+      # inputs, related query/chunk pairs land around 0.73–0.77 and unrelated
+      # ones around 0.45–0.55, so the old 0.5 would let in nearly everything.
+      similarity_threshold = 0.62;
       result_limit = 10;
       semantic_weight = 0.4;
     };

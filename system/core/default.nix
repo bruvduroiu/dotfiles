@@ -6,7 +6,7 @@
     ./sops.nix
   ];
 
-  environment.variables.EDITOR = "nvim";
+  environment.variables.EDITOR = "hx";
 
   documentation.dev.enable = true;
 
