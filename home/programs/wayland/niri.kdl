@@ -312,12 +312,16 @@ binds {
     Mod+Alt+BracketLeft    hotkey-overlay-title="Send workspace to monitor left" { move-workspace-to-monitor-left; }
     Mod+Alt+BracketRight   hotkey-overlay-title="Send workspace to monitor right" { move-workspace-to-monitor-right; }
 
-    // theme toggle
+    // theme: toggle pins dark/light (leaves the sunrise/sunset schedule);
+    // Shift returns to it
     Mod+F5 { spawn "noctalia" "msg" "theme-mode-toggle"; }
+    Mod+Shift+F5 hotkey-overlay-title="Theme follows schedule" { spawn "noctalia" "msg" "theme-mode-set" "auto"; }
 
-    // screenshot (grim + satty pipeline, unchanged)
-    Print { spawn "screenshot" "full"; }
-    Shift+Print { spawn "screenshot" "area"; }
+    // screenshot (noctalia; saves to ~/Pictures/Screenshots + clipboard)
+    Print hotkey-overlay-title="Screenshot monitor" { spawn "noctalia" "msg" "screenshot-fullscreen"; }
+    Shift+Print hotkey-overlay-title="Screenshot region" { spawn "noctalia" "msg" "screenshot-region"; }
+    Ctrl+Print hotkey-overlay-title="Freeze + annotate" { spawn "noctalia" "msg" "screenshot-annotate"; }
+    Ctrl+Shift+Print hotkey-overlay-title="Draw on live screen" { spawn "noctalia" "msg" "annotate"; }
 
     // screen recording
     Mod+Print { spawn "wf-recorder-toggle"; }

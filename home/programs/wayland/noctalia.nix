@@ -28,11 +28,7 @@ in
 
   programs.noctalia = {
     enable = true;
-    # 5.0.1 supports fixed output lists only. Resolve our "focused" selector
-    # through its native compositor backend, without an external polling daemon.
-    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [ ./noctalia-focused-notifications.patch ];
-    });
+    package = inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
     systemd.enable = true;
     # The upstream module runs `noctalia config validate` at build time.
     checkConfig = true;
@@ -49,12 +45,20 @@ in
         clipboard_enabled = true;
         # Preserve Niri's native keyboard navigation in overview.
         niri_overview_type_to_launch_enabled = false;
+        # Same folder and name as niri's own screenshot-path; ".png" is appended.
+        screenshot = {
+          directory = "${config.home.homeDirectory}/Pictures/Screenshots";
+          filename_pattern = "%Y-%m-%d_%H-%M-%S";
+        };
       };
 
       theme = {
         source = "builtin";
         builtin = "Rosé Pine";
-        mode = "dark";
+        # Follows the [location] sunrise/sunset. Mod+F5 persists a fixed
+        # dark/light to state settings.toml, which outranks this; Mod+Shift+F5
+        # (`theme-mode-set auto`) hands control back to the schedule.
+        mode = "auto";
         templates = {
           enable_builtin_templates = true;
           builtin_ids = [ "gtk3" "gtk4" "ghostty" "niri" ];
@@ -123,7 +127,9 @@ in
       audio.enable_sounds = false;
       notification = {
         enable_daemon = true;
-        monitors = [ "focused" ];
+        # Each toast lands on the output focused when it arrives; `monitors`
+        # is ignored while this is on.
+        follow_focused_output = true;
       };
       lockscreen = {
         enabled = true;
