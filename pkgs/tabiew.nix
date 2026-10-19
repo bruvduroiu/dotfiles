@@ -1,21 +1,43 @@
 {
   lib,
-  fetchFromGitHub,
-  rustPlatform,
+  stdenvNoCC,
+  fetchurl,
   installShellFiles,
 }:
-rustPlatform.buildRustPackage rec {
-  pname = "tabiew";
-  version = "0.12.0";
+let
+  version = "0.15.1";
+  baseUrl = "https://github.com/shshemi/tabiew/releases/download/v${version}";
 
-  src = fetchFromGitHub {
-    owner = "shshemi";
-    repo = "tabiew";
-    tag = "v${version}";
-    hash = "sha256-ilZOXV9P3i2Gzcop9PRCHznorEdGMje097d9my0JVeU=";
+  # Upstream's static musl builds; no ELF patching needed on NixOS.
+  binaries = {
+    x86_64-linux = {
+      target = "x86_64-unknown-linux-musl";
+      hash = "sha256-QE7Nn2jCnYnAIFrPQNa2OX/VzA0ZMj5RJEx4tPZRpZM=";
+    };
+    aarch64-linux = {
+      target = "aarch64-unknown-linux-musl";
+      hash = "sha256-pXB2IsjMJgcbkfuikm7ChsbEMw5wKBbqG95sHDZALxM=";
+    };
+  };
+  binary =
+    binaries.${stdenvNoCC.hostPlatform.system}
+      or (throw "tabiew: unsupported system ${stdenvNoCC.hostPlatform.system}");
+
+  extras = fetchurl {
+    url = "${baseUrl}/tabiew-manual-and-completions.tar.gz";
+    hash = "sha256-tChSAZRQ9jOdnRtVd0XJlKg3NTBdLhYDYPfCYEQetls=";
+  };
+in
+stdenvNoCC.mkDerivation {
+  pname = "tabiew";
+  inherit version;
+
+  src = fetchurl {
+    url = "${baseUrl}/tw-${binary.target}";
+    inherit (binary) hash;
   };
 
-  cargoHash = "sha256-TYOsE0v2m0lTTK/+S82URDk4+ywu2nzzTQAi9pdBu2U=";
+  dontUnpack = true;
 
   nativeBuildInputs = [ installShellFiles ];
 
@@ -24,16 +46,20 @@ rustPlatform.buildRustPackage rec {
     "man"
   ];
 
-  postInstall = ''
-    installManPage target/manual/tabiew.1
+  installPhase = ''
+    runHook preInstall
 
+    install -Dm755 $src $out/bin/tw
+
+    tar xzf ${extras}
+    installManPage manual/tabiew.1
     installShellCompletion \
-      --bash target/completion/tw.bash \
-      --zsh target/completion/_tw \
-      --fish target/completion/tw.fish
-  '';
+      --bash completion/tw.bash \
+      --zsh completion/_tw \
+      --fish completion/tw.fish
 
-  doCheck = false; # there are no tests
+    runHook postInstall
+  '';
 
   meta = {
     description = "Lightweight, terminal-based application to view and query delimiter separated value formatted documents, such as CSV and TSV files";
@@ -41,7 +67,7 @@ rustPlatform.buildRustPackage rec {
     changelog = "https://github.com/shshemi/tabiew/releases/tag/v${version}";
     license = lib.licenses.mit;
     mainProgram = "tw";
-    maintainers = with lib.maintainers; [ anas ];
-    platforms = with lib.platforms; unix ++ windows;
+    sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
+    platforms = builtins.attrNames binaries;
   };
 }

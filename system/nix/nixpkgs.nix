@@ -55,10 +55,7 @@
             config.allowUnfree = true;
           }).obsidian;
         opencode = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.opencode;
-        sheets = prev.callPackage "${self}/pkgs/sheets.nix" {
-          srcHash = "sha256-xDu+jbWH7ubXC6ImvkRVgPI0OHAaUQ60sELDJN8hY1M=";
-          vendorHash = "sha256-X7bfALH9mM15HP6SM60CFIG1rm4Ma6LEh2p7z5LNW64=";
-        };
+        sheets = prev.callPackage "${self}/pkgs/sheets.nix" { };
         sqlit-tui = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.sqlit-tui;
         google-cloud-sdk = prev.google-cloud-sdk.overrideAttrs (oldAttrs: rec {
           version = "563.0.0";

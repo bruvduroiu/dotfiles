@@ -11,13 +11,14 @@
 }:
 
 let
-  version = "0.18.0";
+  version = "0.20.0";
+  hash = "sha256-8FKieCq7T87wIawCjVoto2kX1PU2sV1LFQtz2nydzBM=";
 
   src = fetchFromGitHub {
     owner = "asciimoo";
     repo = "hister";
     rev = "v${version}";
-    hash = "sha256-yX/MGhGyQxE5cSe1Q4T9EEBwRS5mxUBtpkn/RnGN4lU=";
+    inherit hash;
   };
 
   # server/static/static.go embeds `all:app/*`, which webui/build.sh generates
@@ -27,7 +28,7 @@ let
     inherit version src;
 
     npmWorkspace = "webui/app";
-    npmDepsHash = "sha256-WlN/84qmKSd98xGF/XTbwTt0WFqJgogmy9Kmyjq1DuY=";
+    npmDepsHash = "sha256-ho0iMiA0GPI4h8ylRMT/oFXUIO9K893osAnBe4/FV70=";
 
     preBuild = ''
       patchShebangs webui
@@ -46,7 +47,7 @@ buildGoModule {
   inherit version src;
 
   # Upstream nix/package.nix publishes this hash; it assumes proxyVendor.
-  vendorHash = "sha256-UR384CLSa44MqPVzzgzGZC/ROdG2iWtJ5L8AX/tfg0k=";
+  vendorHash = "sha256-piPns+kq6ZCM4Bpe7nzdjHjkZKe1VV6UY9IIMshNGpo=";
   proxyVendor = true;
 
   nativeBuildInputs = [
@@ -77,8 +78,9 @@ buildGoModule {
     wrapProgram $out/bin/hister \
       --prefix PATH : ${lib.makeBinPath [ yt-dlp ]}
 
+    # hister ≥0.20 creates its data dir on every invocation; $HOME is unwritable here
     installShellCompletion --cmd hister \
-      --fish <($out/bin/hister completion fish)
+      --fish <(HISTER_DATA_DIR=$TMPDIR/hister $out/bin/hister completion fish)
   '';
 
   passthru = {
