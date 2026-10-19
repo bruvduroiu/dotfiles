@@ -15,9 +15,9 @@
           colors = import "${self}/lib/colors" prev.lib;
         };
         claude-code = prev.callPackage "${self}/pkgs/claude.nix" {
-          version = "2.1.280";
+          version = "2.1.303";
           hashes = {
-            "x86_64-linux" = "sha256-HghQPb3zwssNcG0y80CCdziNHHbvEIZz6P5CwbMikls=";
+            "x86_64-linux" = "sha256-N1mI9Fd1ZSQjRpXPLY9krOmcX2hoLkfqJIYqhDwZFFA=";
             "aarch64-linux" = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
           };
         };
