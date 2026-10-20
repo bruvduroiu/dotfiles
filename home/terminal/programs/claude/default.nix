@@ -6,11 +6,14 @@
 }:
 
 let
-  codingAgents = import ../coding-agents { inherit lib pkgs; };
+  codingAgents = import ../coding-agents {
+    inherit lib pkgs;
+    histerEnabled = config.systemd.user.services ? hister;
+  };
   codingMcps = import ../coding-mcps {
     inherit lib pkgs;
     cacheHome = config.xdg.cacheHome;
-    homeDirectory = config.home.homeDirectory;
+    histerEnabled = config.systemd.user.services ? hister;
   };
 
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a

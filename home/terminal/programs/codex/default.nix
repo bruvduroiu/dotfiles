@@ -10,7 +10,7 @@ let
   codingMcps = import ../coding-mcps {
     inherit lib pkgs;
     cacheHome = config.xdg.cacheHome;
-    homeDirectory = config.home.homeDirectory;
+    histerEnabled = config.systemd.user.services ? hister;
   };
   codexConfigDir = "${config.home.homeDirectory}/.codex";
   codexSettings = {
@@ -46,7 +46,8 @@ let
       notifications = true;
       notification_method = "auto";
       notification_condition = "unfocused";
-    } // lib.optionalAttrs ((config.programs.noctalia.settings.theme.templates.user or { }) ? codex) {
+    }
+    // lib.optionalAttrs ((config.programs.noctalia.settings.theme.templates.user or { }) ? codex) {
       theme = "noctalia";
     };
 

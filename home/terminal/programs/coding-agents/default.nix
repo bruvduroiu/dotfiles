@@ -1,4 +1,8 @@
-{ lib, pkgs }:
+{
+  lib,
+  pkgs,
+  histerEnabled ? false,
+}:
 
 let
   agentDir = ./agents;
@@ -60,7 +64,25 @@ in
 {
   context = ./AGENTS.md;
   skills = ./skills;
-  claudeAgents = agentDir;
+  # Claude's explicit tool lists also restrict MCP access. Grant only Hister's
+  # read tools on hosts that run it; retain the original definitions elsewhere.
+  claudeAgents =
+    if !histerEnabled then
+      agentDir
+    else
+      pkgs.linkFarm "claude-agents-with-hister" (
+        map (name: {
+          name = "${name}.md";
+          path = pkgs.writeText "${name}.md" (
+            lib.replaceStrings
+              [ "tools: ${fieldFor name "tools"}" ]
+              [
+                "tools: ${fieldFor name "tools"}, mcp__hister__search, mcp__hister__get_preview, mcp__hister__get_history"
+              ]
+              (builtins.readFile (sourceFor name))
+          );
+        }) agentNames
+      );
   opencodeAgents = lib.genAttrs agentNames opencodeAgent;
   codexAgents = lib.genAttrs agentNames codexAgent;
 }

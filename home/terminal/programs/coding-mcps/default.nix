@@ -2,7 +2,7 @@
   lib,
   pkgs,
   cacheHome,
-  homeDirectory,
+  histerEnabled ? false,
 }:
 
 let
@@ -21,14 +21,6 @@ let
         "--output-dir"
         "${cacheHome}/playwright-mcp"
       ];
-    };
-    # 12 Axes political quiz, played by the model. Stdlib-only Python that
-    # reads its catalogs from the checkout, so it runs from the working tree
-    # rather than the store: it simply fails to start if the repo is absent.
-    "12axes" = {
-      type = "stdio";
-      command = lib.getExe pkgs.python3;
-      args = [ "${homeDirectory}/development/12axes/mcp/twelve_axes_server.py" ];
     };
     datadog = {
       type = "http";
@@ -49,6 +41,12 @@ let
     metacog = {
       type = "http";
       url = "http://10.0.20.197:8788/mcp";
+    };
+  }
+  // lib.optionalAttrs histerEnabled {
+    hister = {
+      type = "http";
+      url = "http://127.0.0.1:4433/mcp";
     };
   };
 in

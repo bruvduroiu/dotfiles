@@ -9,8 +9,7 @@
       "WebFetch(domain:code.claude.com)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:docs.gtk.org)",
-      "Bash(nmcli -f GENERAL.DEVICE,GENERAL.STATE,GENERAL.CONNECTION device show wlp192s0)",
-      "mcp__plugin_claude-code-home-manager_12axes__answer"
+      "Bash(nmcli -f GENERAL.DEVICE,GENERAL.STATE,GENERAL.CONNECTION device show wlp192s0)"
     ],
     "deny": [
       "Read(./secrets/**)"
