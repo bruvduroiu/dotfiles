@@ -10,6 +10,7 @@ let
   codingMcps = import ../coding-mcps {
     inherit lib pkgs;
     cacheHome = config.xdg.cacheHome;
+    homeDirectory = config.home.homeDirectory;
   };
   codexConfigDir = "${config.home.homeDirectory}/.codex";
   codexSettings = {

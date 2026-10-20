@@ -10,6 +10,7 @@ let
   codingMcps = import ../coding-mcps {
     inherit lib pkgs;
     cacheHome = config.xdg.cacheHome;
+    homeDirectory = config.home.homeDirectory;
   };
 
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a

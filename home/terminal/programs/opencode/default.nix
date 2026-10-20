@@ -8,6 +8,11 @@
 
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
+  codingMcps = import ../coding-mcps {
+    inherit lib pkgs;
+    cacheHome = config.xdg.cacheHome;
+    homeDirectory = config.home.homeDirectory;
+  };
   lspDeps = import ./lsp-deps.nix { inherit pkgs; };
   secretsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
 in
@@ -93,30 +98,10 @@ in
           };
         };
       };
-      # Remote MCP servers — mirrored from the claude-code config so opencode
-      # sees the same tools. opencode's schema is `type = "remote"` + `url`
-      # (vs. claude's `type = "http"`); `enabled` is required per server.
-      mcp = {
-        datadog = {
-          type = "remote";
-          url = "https://mcp.datadoghq.eu/api/unstable/mcp-server/mcp?toolsets=all";
-          enabled = true;
-        };
-        deepwiki = {
-          type = "remote";
-          url = "https://mcp.deepwiki.com/mcp";
-          enabled = true;
-        };
-        linear = {
-          type = "remote";
-          url = "https://mcp.linear.app/mcp";
-          enabled = true;
-        };
-        notion = {
-          type = "remote";
-          url = "https://mcp.notion.com/mcp";
-          enabled = true;
-        };
+      # Shared with Claude Code and Codex via ../coding-mcps, translated to
+      # opencode's local/remote schema there. Figma stays opencode-only: its
+      # OAuth client credentials come from sops.
+      mcp = codingMcps.opencodeServers // {
         figma = {
           type = "remote";
           url = "https://mcp.figma.com/mcp";
