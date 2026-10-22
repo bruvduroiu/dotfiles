@@ -23,6 +23,7 @@
     ./tabiew.nix
     ./xdg.nix
     ./yazi
+    ./zellij
   ];
 
   home.packages = with pkgs; [

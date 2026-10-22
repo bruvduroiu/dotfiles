@@ -1,0 +1,34 @@
+// Per-project workbench: Helix beside a coding-agent picker, jjui on its
+// own tab. Launched by `zj` (attach-or-create) with the project root as cwd;
+// every pane inherits that cwd, so nothing here hardcodes a path.
+//
+// Command panes go through `direnv exec .` so the project's .envrc (LSPs,
+// toolchains) reaches hx and the agent even though zellij execs them
+// directly instead of via an interactive fish. With no .envrc, direnv exec
+// is a no-op. A blocked .envrc fails the pane: `direnv allow` in a shell
+// pane, then Enter in the failed pane re-runs it.
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="compact-bar"
+        }
+    }
+
+    tab name="main" focus=true {
+        pane split_direction="vertical" {
+            pane name="hx" size="60%" command="direnv" {
+                args "exec" "." "hx"
+            }
+            pane name="agent" command="direnv" {
+                args "exec" "." "agent"
+            }
+        }
+    }
+
+    tab name="vcs" {
+        pane name="jjui" command="direnv" {
+            args "exec" "." "jjui"
+        }
+    }
+}

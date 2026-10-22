@@ -1,0 +1,222 @@
+// Zellij: Alt-direct keybinds shaped like niri's Mod binds (one modifier
+// down), an ANSI-16 theme that follows ghostty's light/dark switch, and
+// per-project sessions entered through `zj`. Hand-written KDL, appended to
+// config.kdl by default.nix (`extraConfig`).
+//
+// Alt letters deliberately left unbound because Helix or fish own them:
+//   Helix 25.07   a b c d e i n o p s u x . , ; : - _ ( ) `   A-C A-I A-J A-K
+//   fish          o v e   (Alt+O edit-output, Alt+V / Alt+E edit command line)
+// Alt+Shift+<letter> is written "Alt Shift x"; zellij treats "Alt X" the same.
+
+keybinds clear-defaults=true {
+    // Everything lives on Alt and works from every mode except locked, so
+    // there is no prefix and no mode to remember for the daily keys.
+    shared_except "locked" {
+        // focus — niri Mod+H/J/K/L. Left/Right continue into the
+        // neighbouring tab at the screen edge, like niri's wrap-around.
+        bind "Alt h" { MoveFocusOrTab "Left"; }
+        bind "Alt l" { MoveFocusOrTab "Right"; }
+        bind "Alt j" { MoveFocus "Down"; }
+        bind "Alt k" { MoveFocus "Up"; }
+
+        // panes — niri Mod+Return / Mod+Q
+        bind "Alt Enter" { NewPane; }
+        bind "Alt Shift Enter" { NewPane "Down"; }
+        bind "Alt q" { CloseFocus; }
+        bind "Alt Shift p" { SwitchToMode "RenamePane"; PaneNameInput 0; }
+
+        // tabs — niri Mod+1..9, Mod+[ / Mod+], Mod+Escape (previous)
+        bind "Alt t" { NewTab; }
+        bind "Alt Shift q" { CloseTab; }
+        bind "Alt Shift t" { SwitchToMode "RenameTab"; TabNameInput 0; }
+        bind "Alt 1" { GoToTab 1; }
+        bind "Alt 2" { GoToTab 2; }
+        bind "Alt 3" { GoToTab 3; }
+        bind "Alt 4" { GoToTab 4; }
+        bind "Alt 5" { GoToTab 5; }
+        bind "Alt 6" { GoToTab 6; }
+        bind "Alt 7" { GoToTab 7; }
+        bind "Alt 8" { GoToTab 8; }
+        bind "Alt 9" { GoToTab 9; }
+        bind "Alt [" { GoToPreviousTab; }
+        bind "Alt ]" { GoToNextTab; }
+        // Both spellings: legacy input sends the shifted char, the kitty
+        // protocol sends the base key plus Shift.
+        bind "Alt {" "Alt Shift [" { MoveTab "Left"; }
+        bind "Alt }" "Alt Shift ]" { MoveTab "Right"; }
+        bind "Alt Esc" { ToggleTab; }
+
+        // floating / fullscreen — niri Mod+F, Mod+Shift+F, Mod+G
+        bind "Alt f" { ToggleFloatingPanes; }
+        bind "Alt Shift f" { ToggleFocusFullscreen; }
+        bind "Alt g" { TogglePaneEmbedOrFloating; }
+
+        // overlays: yazi as a file picker for the Helix pane (its `edit`
+        // opener is zj-edit), the session manager, one more agent pane.
+        bind "Alt y" {
+            Run "yazi" {
+                floating true
+                name "yazi"
+                close_on_exit true
+                x "5%"
+                y "5%"
+                width "90%"
+                height "90%"
+            }
+        }
+        bind "Alt z" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+        }
+        bind "Alt Shift a" {
+            Run "direnv" "exec" "." "agent" {
+                name "agent"
+            }
+        }
+
+        // modes for the rarer, repeated operations — niri Mod+R (resize),
+        // Mod+Shift+hjkl (move). Esc or Enter returns to normal.
+        bind "Alt r" { SwitchToMode "Resize"; }
+        bind "Alt m" { SwitchToMode "Move"; }
+        bind "Alt Shift r" { NextSwapLayout; }
+
+        // scrollback
+        bind "Alt w" "Alt PageUp" { SwitchToMode "Scroll"; }
+        bind "Alt /" { SwitchToMode "EnterSearch"; SearchInput 0; }
+        bind "Alt Shift e" { EditScrollback; }
+
+        // session
+        bind "Alt Shift d" { Detach; }
+        bind "Alt Shift g" { SwitchToMode "Locked"; }
+    }
+
+    locked {
+        bind "Alt Shift g" { SwitchToMode "Normal"; }
+    }
+
+    resize {
+        bind "h" "Left" { Resize "Increase Left"; }
+        bind "j" "Down" { Resize "Increase Down"; }
+        bind "k" "Up" { Resize "Increase Up"; }
+        bind "l" "Right" { Resize "Increase Right"; }
+        bind "H" { Resize "Decrease Left"; }
+        bind "J" { Resize "Decrease Down"; }
+        bind "K" { Resize "Decrease Up"; }
+        bind "L" { Resize "Decrease Right"; }
+        bind "=" "+" { Resize "Increase"; }
+        bind "-" { Resize "Decrease"; }
+    }
+
+    move {
+        bind "n" "Tab" { MovePane; }
+        bind "p" { MovePaneBackwards; }
+        bind "h" "Left" { MovePane "Left"; }
+        bind "j" "Down" { MovePane "Down"; }
+        bind "k" "Up" { MovePane "Up"; }
+        bind "l" "Right" { MovePane "Right"; }
+    }
+
+    scroll {
+        bind "q" "Ctrl c" { ScrollToBottom; SwitchToMode "Normal"; }
+        bind "e" { EditScrollback; SwitchToMode "Normal"; }
+        bind "/" "s" { SwitchToMode "EnterSearch"; SearchInput 0; }
+        bind "j" "Down" { ScrollDown; }
+        bind "k" "Up" { ScrollUp; }
+        bind "Ctrl f" "PageDown" "l" { PageScrollDown; }
+        bind "Ctrl b" "PageUp" "h" { PageScrollUp; }
+        bind "d" { HalfPageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+        bind "[" { ScrollToPreviousPrompt; }
+        bind "]" { ScrollToNextPrompt; }
+        bind "m" { SelectCommandAtScrollPosition; }
+        bind "c" { CopyLastCommandOutput; SwitchToMode "Normal"; }
+    }
+
+    search {
+        bind "q" "Ctrl c" { ScrollToBottom; SwitchToMode "Normal"; }
+        bind "j" "Down" { ScrollDown; }
+        bind "k" "Up" { ScrollUp; }
+        bind "Ctrl f" "PageDown" "l" { PageScrollDown; }
+        bind "Ctrl b" "PageUp" "h" { PageScrollUp; }
+        bind "d" { HalfPageScrollDown; }
+        bind "u" { HalfPageScrollUp; }
+        bind "n" { Search "down"; }
+        bind "p" { Search "up"; }
+        bind "c" { SearchToggleOption "CaseSensitivity"; }
+        bind "w" { SearchToggleOption "Wrap"; }
+        bind "o" { SearchToggleOption "WholeWord"; }
+    }
+
+    entersearch {
+        bind "Ctrl c" "Esc" { SwitchToMode "Scroll"; }
+        bind "Enter" { SwitchToMode "Search"; }
+    }
+
+    renametab {
+        bind "Ctrl c" "Esc" { UndoRenameTab; SwitchToMode "Normal"; }
+    }
+
+    renamepane {
+        bind "Ctrl c" "Esc" { UndoRenamePane; SwitchToMode "Normal"; }
+    }
+
+    // Any mode with a prompt-less key table drops back to normal on Esc/Enter.
+    shared_except "normal" "locked" "entersearch" "renametab" "renamepane" {
+        bind "Esc" "Enter" { SwitchToMode "Normal"; }
+    }
+}
+
+// ----- appearance ---------------------------------------------------------
+// ANSI-16 only: every colour is a palette index, so the palette ghostty
+// applies on Mod+F5 (Rose Pine / Rose Pine Dawn) is the theme. No hex, no
+// restart, no theme_dark/theme_light pair to keep in sync.
+themes {
+    ansi {
+        fg 7
+        bg 0
+        black 0
+        red 1
+        green 2
+        yellow 3
+        blue 4
+        magenta 5
+        cyan 6
+        white 7
+        orange 3
+    }
+}
+theme "ansi"
+
+ui {
+    pane_frames {
+        rounded_corners true
+        hide_session_name true
+    }
+}
+pane_frames true
+show_startup_tips false
+show_release_notes false
+
+// ----- behaviour ----------------------------------------------------------
+default_mode "normal"
+default_layout "shell"
+mouse_mode true
+copy_command "wl-copy"
+copy_clipboard "system"
+copy_on_select true
+scrollback_editor "hx"
+scroll_buffer_size 20000
+
+// Resurrection: sessions (tabs, panes, cwds, commands) persist across
+// reboots as "press Enter to run" panes; the last 5000 lines of each pane's
+// scrollback come back with them.
+session_serialization true
+serialize_pane_viewport true
+scrollback_lines_to_serialize 5000
+
+// Desktop notifications emitted inside a pane (OSC 9/99/777) reach the host
+// as a plain BEL: ghostty marks the window urgent, niri shows it, Mod+D
+// jumps there. Same quiet path as claude-code's terminal_bell channel.
+host_notification_protocol "bell"

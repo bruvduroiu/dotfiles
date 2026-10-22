@@ -1,0 +1,16 @@
+// Agent-only session: one full-screen coding-agent picker pane. For a repo
+// you are not editing by hand right now (review, long autonomous run).
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="compact-bar"
+        }
+    }
+
+    tab name="agent" focus=true {
+        pane name="agent" command="direnv" {
+            args "exec" "." "agent"
+        }
+    }
+}

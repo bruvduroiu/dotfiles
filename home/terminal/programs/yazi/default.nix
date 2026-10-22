@@ -87,6 +87,16 @@
       # `set -- %s` re-anchors it as `$1` so paths with spaces survive the
       # trip into the SQL string literal.
       opener = {
+        # Inside a zellij session (the Alt+y overlay), zj-edit sends
+        # `:open <file>` to the Helix pane instead of starting a second hx;
+        # outside one it is plain hx. See ../zellij/zj-edit.sh.
+        edit = [
+          {
+            run = ''zj-edit %s'';
+            block = true;
+            desc = "Open in Helix";
+          }
+        ];
         duckdb = [
           {
             run = ''set -- %s; duckdb -cmd "CREATE TABLE tbl AS FROM '$1';"'';
@@ -148,6 +158,13 @@
       {
         on = ["<C-n>"];
         run = ''shell '${lib.getExe pkgs.ripdrag} "$@" -x 2>/dev/null &' --confirm'';
+      }
+      # Workbench for the hovered directory (or the hovered file's directory)
+      # in a new ghostty window: attach if a session exists, else create one.
+      {
+        on = "W";
+        run = ''shell 'ghostty +new-window -e zj "$0"' --orphan'';
+        desc = "Open zellij workbench here";
       }
       # duckdb
       {
