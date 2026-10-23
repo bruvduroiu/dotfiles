@@ -54,9 +54,12 @@
       disable-ccid = true;
       # Use PC/SC for card access
       pcsc-driver = "${pkgs.pcsclite.lib}/lib/libpcsclite.so";
-      # Open the card in shared PC/SC mode so age-plugin-yubikey and ssh-agent
-      # can use the YubiKey while scdaemon holds it (sops decrypt during deploys)
-      pcsc-shared = true;
+      # NOT pcsc-shared: shared mode re-selects the OpenPGP applet before every
+      # command, which clears the card's verified-PIN state — so "PIN once"
+      # became a PIN prompt per signature and per SSH auth. Exclusive mode
+      # keeps the card unlocked for the scdaemon session; sops (PIV via
+      # age-plugin-yubikey) gets the card by killing scdaemon first — see
+      # home/services/gpg.nix and system/core/sops.nix.
     };
   };
   home.packages = [ pkgs.gnupg ];

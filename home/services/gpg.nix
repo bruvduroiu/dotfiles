@@ -18,5 +18,11 @@
       "F25F34CF85F685E5C1B0DE428B8A7228EBDB03E5" # YubiKey 1 (NEO) auth key - 0x6D916A825C88D51F
     ];
   };
+
+  # scdaemon holds the card exclusively (no pcsc-shared, see programs/gpg.nix),
+  # which locks age-plugin-yubikey out. Release it before HM sops decrypts;
+  # gpg-agent respawns scdaemon on next use (one PIN prompt after).
+  systemd.user.services.sops-nix.Service.ExecStartPre =
+    "-${pkgs.gnupg}/bin/gpgconf --kill scdaemon";
 }
 
