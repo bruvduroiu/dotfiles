@@ -70,6 +70,16 @@ in
     enableFishIntegration = false;
   };
 
+  # fish completions. zj.fish autoloads from ~/.config/fish/completions. The
+  # zellij additions (session + layout names) go through conf.d: fish loads a
+  # single <cmd>.fish per command, first on $fish_complete_path wins, so a
+  # completions/zellij.fish here would shadow the package's clap-generated one
+  # in vendor_completions.d instead of extending it.
+  xdg.configFile = {
+    "fish/completions/zj.fish".source = ./zj.fish;
+    "fish/conf.d/zellij-completions.fish".source = ./zellij-completions.fish;
+  };
+
   # Noctalia launcher: "Workbench" opens the zj picker in a new ghostty window.
   xdg.desktopEntries.zj = {
     name = "Workbench";
