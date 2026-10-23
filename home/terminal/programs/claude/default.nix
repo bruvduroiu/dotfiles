@@ -167,31 +167,26 @@ in
           "Read(~/.config/nvim/**)"
         ];
         ask = [
-          "Bash(git push:*)"
-          "Bash(git commit:*)"
-          "Bash(git rm:*)"
-          # Stack surgery, authorised only while a /jj-stack* skill is
-          # running and only on `trunk()..@ & mine()` — see the exception in
-          # CLAUDE.md. Each one still prompts so the human sees every rewrite.
-          # abandon/undo/op restore are deliberately absent: human-only.
-          "Bash(jj split:*)"
-          "Bash(jj restore:*)"
-          "Bash(jj rebase:*)"
-          "Bash(jj absorb:*)"
-          "Bash(jj squash:*)"
-          "Bash(jj bookmark set:*)"
-          "Bash(jj bookmark delete:*)"
-          "Bash(jj git fetch:*)"
-          "Bash(jj git push:*)"
-          # Forge CLIs: PR creation, comments, base retargeting.
-          "Bash(gh pr:*)"
-          "Bash(glab mr:*)"
-          "Bash(fj pr:*)"
-          "Bash(rm -rf:*)"
-          "Bash(cargo publish:*)"
-          "Bash(npm publish:*)"
-          "WebFetch(domain:*)"
-          "Bash(curl:*)"
+          # "Bash(git push:*)"
+          # "Bash(git commit:*)"
+          # "Bash(git rm:*)"
+          # "Bash(jj split:*)"
+          # "Bash(jj restore:*)"
+          # "Bash(jj rebase:*)"
+          # "Bash(jj absorb:*)"
+          # "Bash(jj squash:*)"
+          # "Bash(jj bookmark set:*)"
+          # "Bash(jj bookmark delete:*)"
+          # "Bash(jj git fetch:*)"
+          # "Bash(jj git push:*)"
+          # "Bash(gh pr:*)"
+          # "Bash(glab mr:*)"
+          # "Bash(fj pr:*)"
+          # "Bash(rm -rf:*)"
+          # "Bash(cargo publish:*)"
+          # "Bash(npm publish:*)"
+          # "WebFetch(domain:*)"
+          # "Bash(curl:*)"
         ];
         # Read(...) rules cover the Read tool only — `cat`/`echo $TOKEN` slip
         # past them entirely. The secret-read-guard hook (hooks.nix) is what
@@ -200,12 +195,8 @@ in
           "Read(./.env)"
           "Read(./.env.*)"
           "Read(./secrets/**)"
-          # sops-nix decrypts to /run/secrets at activation: plaintext on a
-          # tmpfs, and the single highest-value thing on the box to leak.
           "Read(/run/secrets/**)"
           "Read(/run/secrets.d/**)"
-          # Private flake (inputs.secrets): sops files AND vars — keeps
-          # network topology/identifiers out of AI conversation context
           "Read(~/development/secrets/**)"
           "Read(~/.aws/**)"
           "Read(~/.ssh/**)"
@@ -214,9 +205,8 @@ in
           "Read(~/.netrc)"
           "Read(~/.npmrc)"
           "Read(~/.docker/config.json)"
-          "Bash(wget:*)"
         ];
-        defaultMode = "default";
+        defaultMode = "auto";
       };
       env = {
         SHELL = "fish";
