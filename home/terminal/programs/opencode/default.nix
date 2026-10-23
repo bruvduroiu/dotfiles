@@ -122,7 +122,7 @@ in
       # guaranteed to survive the provider's model filter. gpt-5.6-sol is
       # admitted by the same filter and has a 1M context, but ships as beta —
       # switch with `/models` in the TUI before committing it here.
-      model = "openai/gpt-5.5";
+      model = "openai/gpt-6-astra";
       permission = {
         "*" = "allow";
         # Private flake (inputs.secrets): sops files AND vars — keeps
@@ -138,41 +138,41 @@ in
         };
         "bash" = {
           "*" = "allow";
-          "touch *" = "ask";
-          "mkdir *" = "ask";
-          "rm *" = "ask";
-          "cp *" = "ask";
-          "mv *" = "ask";
-          "dd *" = "ask";
-          "sudo *" = "ask";
-          "chmod *" = "ask";
-          "chown *" = "ask";
-          "curl *" = "ask";
-          "wget *" = "ask";
-          "npm install *" = "ask";
-          "pip install *" = "ask";
-          "git push" = "ask";
-          "git reset --hard *" = "ask";
-          "git clean *" = "ask";
-          "reboot" = "ask";
-          "shutdown" = "ask";
-          "kill *" = "ask";
-          "killall *" = "ask";
-          "docker *" = "ask";
-          "mkfs *" = "ask";
-          "fdisk *" = "ask";
-          "parted *" = "ask";
-          "format *" = "ask";
-          "git branch -d *" = "ask";
-          "git branch -D *" = "ask";
-          "git rebase *" = "ask";
-          "npm run publish" = "ask";
-          "ssh *" = "ask";
-          "scp *" = "ask";
-          "nix *" = "ask";
-          "nixos-rebuild *" = "ask";
+          # "touch *" = "ask";
+          # "mkdir *" = "ask";
+          # "rm *" = "ask";
+          # "cp *" = "ask";
+          # "mv *" = "ask";
+          # "dd *" = "ask";
+          # "sudo *" = "ask";
+          # "chmod *" = "ask";
+          # "chown *" = "ask";
+          # "curl *" = "ask";
+          # "wget *" = "ask";
+          # "npm install *" = "ask";
+          # "pip install *" = "ask";
+          # "git push" = "ask";
+          # "git reset --hard *" = "ask";
+          # "git clean *" = "ask";
+          # "reboot" = "ask";
+          # "shutdown" = "ask";
+          # "kill *" = "ask";
+          # "killall *" = "ask";
+          # "docker *" = "ask";
+          # "mkfs *" = "ask";
+          # "fdisk *" = "ask";
+          # "parted *" = "ask";
+          # "format *" = "ask";
+          # "git branch -d *" = "ask";
+          # "git branch -D *" = "ask";
+          # "git rebase *" = "ask";
+          # "npm run publish" = "ask";
+          # "ssh *" = "ask";
+          # "scp *" = "ask";
+          # "nix *" = "ask";
+          # "nixos-rebuild *" = "ask";
         };
-        "doom_loop" = "ask";
+        # "doom_loop" = "ask";
         "external_directory" = {
           "/tmp/**" = "allow";
           "~/development/**" = "allow";
