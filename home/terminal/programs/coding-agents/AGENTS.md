@@ -168,6 +168,39 @@ copy with another agent.
   Build on a described, finished revision instead.
 - `jj workspace forget`, like all history surgery, stays human-only.
 
+## SSH: one ControlMaster per host
+
+The SSH key lives on a YubiKey (`cardno:32_450_811`): **every new SSH
+connection needs a physical touch**. Never run a series of plain `ssh`/`scp`
+commands against the same host — open one master per host and route
+everything through it, so the human touches once per host per session.
+
+```bash
+S=/tmp/claude-$(id -u)/<host>.sock          # short name, e.g. p1.sock
+mkdir -p -m 0700 "${S%/*}"
+# Reuse a live master; only open one (= one touch) if the check fails.
+ssh -S "$S" -O check root@<host> 2>/dev/null \
+  || ssh -M -S "$S" -o ControlPersist=4h -fN root@<host>
+ssh -S "$S" root@<host> '<cmd>'             # no touch
+```
+
+- **Jump hosts** (e.g. a microVM behind its host): tunnel the inner master
+  through the outer one instead of a fresh `-J` connection —
+  `-o "ProxyCommand=ssh -S /tmp/claude-$(id -u)/outer.sock root@outer -W %h:%p"`.
+  That costs one touch for the inner host, none for the hop.
+- **Socket path must be short**: Unix sockets cap at 108 bytes, so a session
+  scratchpad path fails with `unix_listener: path ... too long`. The
+  `/tmp/claude-<uid>/` directory is shared on purpose: any agent session can
+  reuse a master another one opened.
+- **Say so before a touch.** Tell the human "touch the YubiKey" in the same
+  message as the command that opens a master, and batch the work so masters
+  are opened up front, not discovered one at a time.
+- `sign_and_send_pubkey: ... agent refused operation` is a missed or timed-out
+  touch, not a broken key: retry the master once, after telling the human.
+- Tools that open their own connections (`clan machines update`,
+  `nixos-rebuild --target-host`, `nix copy`) bypass these sockets; expect a
+  touch from each of them and let the human run them unless asked.
+
 ## Development practices
 
 - When Hister MCP is available, use `search` to discover related code, notes,
