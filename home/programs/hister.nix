@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ config, pkgs, ... }:
 
 let
   conf = config.xdg.configHome;
@@ -13,59 +8,6 @@ let
   # files open read-write. Created by StateDirectory= on the unit below.
   stateDir = "${config.xdg.stateHome}/hister";
   yamlFormat = pkgs.formats.yaml { };
-  documentRoots = {
-    Papers = "${home}/Documents/Papers";
-    Personal = "${home}/Documents/Personal";
-    Work = "${home}/Documents/Work";
-  };
-  convertedDir = "${stateDir}/docling/converted";
-  excludes = [
-    "node_modules"
-    "vendor"
-    "dist"
-    "build"
-    "target"
-    "result"
-    "result-*"
-    "secrets"
-    "*secret*"
-    "*credential*"
-    "*.lock"
-  ];
-  watched = path: label: filetypes: {
-    inherit
-      path
-      label
-      filetypes
-      excludes
-      ;
-    include_hidden = false;
-    delete_on_remove = true;
-  };
-  python = pkgs.python3.withPackages (ps: [
-    ps.requests
-    ps.docling-core
-  ]);
-  conversionConfig = pkgs.writeText "hister-docling.json" (
-    builtins.toJSON {
-      state_dir = "${stateDir}/docling";
-      docling_url = "http://192.168.1.193:8080";
-      documents = lib.mapAttrs (_: path: { inherit path; }) documentRoots;
-      extensions = [
-        ".pdf"
-        ".docx"
-        ".pptx"
-        ".xlsx"
-        ".png"
-        ".jpg"
-        ".jpeg"
-        ".tiff"
-      ];
-      max_file_bytes = 100 * 1024 * 1024;
-      conversion_timeout = 900;
-      max_conversions = 10;
-    }
-  );
 
   settings = {
     app = {
@@ -84,52 +26,11 @@ let
     indexer = {
       detect_languages = true;
       keep_stopwords = false;
-      max_file_size_mb = 10;
-      directories =
-        lib.mapAttrsToList (
-          label: path:
-          watched path label [
-            "md"
-            "txt"
-          ]
-        ) documentRoots
-        ++ lib.mapAttrsToList (label: _: watched "${convertedDir}/${label}" label [ "md" ]) documentRoots
-        ++ [
-          (
-            (watched "${home}/Documents/Keep" "Keep" [
-              "md"
-              "txt"
-            ])
-            // {
-              excludes = excludes ++ [
-                "9 - Templates"
-                "9 - Scripts"
-                "9 - Attachments"
-              ];
-            }
-          )
-          (watched "${home}/development" "Code" [
-            "md"
-            "txt"
-            "nix"
-            "py"
-            "go"
-            "rs"
-            "ts"
-            "tsx"
-            "js"
-            "jsx"
-            "lua"
-            "kdl"
-            "sh"
-            "bash"
-            "fish"
-            "c"
-            "h"
-            "cpp"
-            "hpp"
-          ])
-        ];
+      directories = [
+        { path = "${home}/Documents/Papers"; label = "Papers"; filetypes = [ "pdf" ]; }
+        { path = "${home}/Documents/Personal"; label = "Personal"; filetypes = [ "pdf" "md" ]; }
+        { path = "${home}/Documents/Work"; label = "Work"; filetypes = [ "pdf" "md" ]; }
+      ];
     };
     crawler = {
       backend = "http";
@@ -158,10 +59,9 @@ let
       max_embedding_batch_size = 8;
       max_embedding_concurrency = 2;
       # Model-card "SearchQuery" template. Its document side is
-      # "title: {title} | text: {content}". Hister constructs its own
-      # "title: …\nlanguage: …\ncontent:\n…" wrapper; a static prefix cannot
-      # replace that template. Keep the general search task for this mixed
-      # corpus. CodeRetrieval per query needs upstream support.
+      # "title: {title} | text: {content}", but hister already writes
+      # "title: …\nlanguage: …\ncontent:\n…" on every chunk, which is close
+      # enough, so no document prefix is added.
       query_prefix = "task: search result | query: ";
       document_prefix = "";
       # Gemma scores sit higher than Qwen3's: measured with hister-shaped
@@ -191,57 +91,22 @@ in
 
   xdg.configFile."hister/config.yml".source = yamlFormat.generate "hister-config.yml" settings;
 
-  # A removable query preset, not an access restriction or server-wide filter.
-  # v0.20's semantic hits do not reliably obey label filters.
-  xdg.desktopEntries.hister-search = {
-    name = "Hister Search";
-    comment = "Search documents and browsing history";
-    exec = ''${pkgs.xdg-utils}/bin/xdg-open "http://127.0.0.1:4433/?q=-label:Code"'';
-    icon = "system-search";
-    terminal = false;
-    categories = [ "Utility" ];
-  };
-
   systemd.user.services.hister = {
     Unit = {
       Description = "Hister - Web history listener";
       After = [ "default.target" ];
     };
     Service = {
-      ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${
-        lib.concatMapStringsSep " " (label: "${convertedDir}/${label}") (builtins.attrNames documentRoots)
-      }";
       ExecStart = "${pkgs.hister}/bin/hister listen";
       # Declaratively creates ${stateDir} (systemd >= 250 honours this for user
       # units, resolving it under $XDG_STATE_HOME) so the databases have a home
       # without an activation script.
       StateDirectory = "hister";
-      UMask = "0077";
       Restart = "on-failure";
       RestartSec = 5;
     };
     Install = {
       WantedBy = [ "default.target" ];
     };
-  };
-
-  systemd.user.services.hister-docling = {
-    Unit.Description = "Convert documents and OCR for Hister";
-    Service = {
-      Type = "oneshot";
-      ExecStart = "${python}/bin/python ${./hister/ingest.py} ${conversionConfig}";
-      StateDirectory = "hister";
-      UMask = "0077";
-      TimeoutStartSec = "3h";
-    };
-  };
-  systemd.user.timers.hister-docling = {
-    Unit.Description = "Refresh Hister document conversions";
-    Timer = {
-      OnBootSec = "2min";
-      OnUnitInactiveSec = "5min";
-      Unit = "hister-docling.service";
-    };
-    Install.WantedBy = [ "timers.target" ];
   };
 }

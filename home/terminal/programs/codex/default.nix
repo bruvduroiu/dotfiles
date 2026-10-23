@@ -10,7 +10,6 @@ let
   codingMcps = import ../coding-mcps {
     inherit lib pkgs;
     cacheHome = config.xdg.cacheHome;
-    histerEnabled = config.systemd.user.services ? hister;
   };
   codexConfigDir = "${config.home.homeDirectory}/.codex";
   codexSettings = {

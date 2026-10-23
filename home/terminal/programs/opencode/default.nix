@@ -11,7 +11,6 @@ let
   codingMcps = import ../coding-mcps {
     inherit lib pkgs;
     cacheHome = config.xdg.cacheHome;
-    histerEnabled = config.systemd.user.services ? hister;
   };
   lspDeps = import ./lsp-deps.nix { inherit pkgs; };
   secretsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";

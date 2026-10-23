@@ -41,10 +41,6 @@
     obsidian.enable = true;
   };
 
-  desktop.niri.extraBinds = ''
-    Mod+Alt+Space hotkey-overlay-title="Search documents and history" { spawn "xdg-open" "http://127.0.0.1:4433/?q=-label:Code"; }
-  '';
-
   # Push-to-talk dictation: hold F19 (a Voyager layer key) or toggle with
   # Mod+V on the internal keyboard. Transcribed by the mbp's Qwen3-ASR server.
   sops.secrets.asr_api_key.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";

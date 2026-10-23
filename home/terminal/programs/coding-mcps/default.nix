@@ -2,7 +2,6 @@
   lib,
   pkgs,
   cacheHome,
-  histerEnabled ? false,
 }:
 
 let
@@ -41,12 +40,6 @@ let
     metacog = {
       type = "http";
       url = "http://10.0.20.197:8788/mcp";
-    };
-  }
-  // lib.optionalAttrs histerEnabled {
-    hister = {
-      type = "http";
-      url = "http://127.0.0.1:4433/mcp";
     };
   };
 in
