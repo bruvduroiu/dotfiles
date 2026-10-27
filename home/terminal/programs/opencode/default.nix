@@ -13,6 +13,9 @@ let
     cacheHome = config.xdg.cacheHome;
   };
   lspDeps = import ./lsp-deps.nix { inherit pkgs; };
+  scheduler = pkgs.callPackage ../../../../pkgs/opencode-scheduler {
+    inherit (config.home) profileDirectory;
+  };
   secretsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
 in
 {
@@ -46,6 +49,9 @@ in
     skills = codingAgents.skills;
 
     settings = {
+      # Pin the plugin, not its jobs: chat tools manage mutable job JSON and
+      # systemd user timers under ~/.config without Home Manager activation.
+      plugin = [ "file://${scheduler}" ];
       # `openai` here is the ChatGPT Plus/Pro (Codex) subscription, not an API
       # key. opencode 1.18 has that OAuth flow built in — it talks to
       # https://chatgpt.com/backend-api/codex/responses and reports the models
@@ -179,6 +185,10 @@ in
       };
     };
   };
+
+  # Generated timers use the stable profile path, so Nix GC and package
+  # upgrades do not strand jobs with references to old Perl store paths.
+  home.packages = [ pkgs.perl ];
 
   # FFF refuses to index the home directory used by the web project picker,
   # causing valid paths under ~/development to return no search results.

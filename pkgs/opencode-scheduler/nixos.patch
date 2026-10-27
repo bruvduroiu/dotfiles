@@ -1,0 +1,204 @@
+--- a/upstream.js
++++ b/upstream.js
+@@ -1,3 +1,5 @@
++import { AsyncLocalStorage } from 'node:async_hooks';
++export const schedulerDirectory = new AsyncLocalStorage();
+ // @bun
+ var __defProp = Object.defineProperty;
+ var __export = (target, all) => {
+@@ -12407,9 +12409,9 @@
+   return join(scopeLogsDir(scopeId), `${slug}.log`);
+ }
+ function currentScopeId() {
+-  return deriveScopeId(process.cwd());
+-}
+-var SUPERVISOR_SCRIPT = `#!/usr/bin/perl
++  return deriveScopeId((schedulerDirectory.getStore() || process.cwd()));
++}
++var SUPERVISOR_SCRIPT = `#!@perl@
+ use strict;
+ use warnings;
+ use JSON::PP;
+@@ -12812,7 +12814,7 @@
+ function loadPackageInfo() {
+   const fallback = { name: "opencode-scheduler", version: "unknown" };
+   try {
+-    const packagePath = join(dirname(fileURLToPath(import.meta.url)), "..", "package.json");
++    const packagePath = join(dirname(fileURLToPath(import.meta.url)), "package.json");
+     const raw = readFileSync(packagePath, "utf-8");
+     const parsed = JSON.parse(raw);
+     return {
+@@ -12824,42 +12826,10 @@
+   }
+ }
+ function findOpencode() {
+-  const override = process.env.OPENCODE_SCHEDULER_OPENCODE_PATH?.trim();
+-  if (override)
+-    return override;
+-  try {
+-    const resolved = execSync("command -v opencode", {
+-      env: { ...process.env, PATH: getEnhancedPath() + ":" + (process.env.PATH ?? "") },
+-      stdio: ["ignore", "pipe", "ignore"]
+-    }).toString().trim();
+-    if (resolved) {
+-      if (resolved.includes("/"))
+-        return resolved;
+-      return "opencode";
+-    }
+-  } catch {}
+-  const paths = [
+-    "/opt/homebrew/bin/opencode",
+-    "/usr/local/bin/opencode",
+-    join(homedir(), ".opencode", "bin", "opencode")
+-  ];
+-  for (const p of paths) {
+-    if (existsSync(p)) {
+-      return p;
+-    }
+-  }
+-  return "opencode";
++  return "@opencode@";
+ }
+ function getEnhancedPath() {
+-  const paths = [
+-    "/opt/homebrew/bin",
+-    "/usr/local/bin",
+-    "/usr/bin",
+-    "/bin",
+-    "/usr/sbin",
+-    "/sbin"
+-  ];
+-  return paths.join(":");
++  return "@runtimePath@";
+ }
+ function splitCronExpression(cron) {
+   const parts = cron.trim().split(/\s+/);
+@@ -12953,7 +12923,7 @@
+   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+ }
+ function escapeSystemdArg(value) {
+-  return value.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
++  return value.replace(/%/g, "%%").replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
+ }
+ function renderLaunchdCalendar(calendar) {
+   return Object.entries(calendar).map(([key, value]) => `    <key>${key}</key>
+@@ -12983,7 +12953,7 @@
+         for (const domValue of domValues) {
+           for (const monthValue of months) {
+             for (const dowValue of dowValues) {
+-              calendars.push(`${dowValue} *-${monthValue}-${domValue} ${hourValue}:${minuteValue}:00`);
++              calendars.push(`${dowValue === "*" ? "" : dowValue + " "}*-${monthValue}-${domValue} ${hourValue}:${minuteValue}:00`);
+             }
+           }
+         }
+@@ -13139,7 +13109,7 @@
+ `)}
+   </array>`;
+   const programArgumentsXml = [
+-    `    <string>${escapePlistString("/usr/bin/perl")}</string>`,
++    `    <string>${escapePlistString("@perl@")}</string>`,
+     `    <string>${escapePlistString(SUPERVISOR_PATH)}</string>`,
+     `    <string>${escapePlistString(jobPath)}</string>`
+   ].join(`
+@@ -13226,17 +13196,17 @@
+   const jobPath = jobFilePath(scopeId, job.slug);
+   const workdir = job.workdir || homedir();
+   const enhancedPath = getEnhancedPath();
+-  const execStart = ["/usr/bin/perl", SUPERVISOR_PATH, jobPath].map((arg) => `"${escapeSystemdArg(arg)}"`).join(" ");
++  const execStart = ["@perl@", SUPERVISOR_PATH, jobPath].map((arg) => `"${escapeSystemdArg(arg)}"`).join(" ");
+   return `[Unit]
+-Description=OpenCode Job: ${job.name}
++Description=OpenCode Job: ${escapeSystemdArg(job.name)}
+ 
+ [Service]
+ Type=oneshot
+-WorkingDirectory=${workdir}
++WorkingDirectory=${escapeSystemdArg(workdir)}
+ Environment="PATH=${enhancedPath}"
+ ExecStart=${execStart}
+-StandardOutput=append:${logFilePath}
+-StandardError=append:${logFilePath}
++StandardOutput=append:${escapeSystemdArg(logFilePath)}
++StandardError=append:${escapeSystemdArg(logFilePath)}
+ 
+ [Install]
+ WantedBy=default.target
+@@ -13247,7 +13217,7 @@
+   const calendarLines = calendars.map((calendar) => `OnCalendar=${calendar}`).join(`
+ `);
+   return `[Unit]
+-Description=Timer for OpenCode Job: ${job.name}
++Description=Timer for OpenCode Job: ${escapeSystemdArg(job.name)}
+ 
+ [Timer]
+ ${calendarLines}
+@@ -13434,7 +13404,7 @@
+   const escapedJobPath = shellEscapeDoubleQuoted(jobPath);
+   const escapedLogPath = shellEscapeDoubleQuoted(logFilePath);
+   const escapedPath = shellEscapeDoubleQuoted(getEnhancedPath());
+-  return `${job.schedule} PATH="${escapedPath}" /usr/bin/perl "${escapedSupervisor}" "${escapedJobPath}" >> "${escapedLogPath}" 2>&1`;
++  return `${job.schedule} PATH="${escapedPath}" @perl@ "${escapedSupervisor}" "${escapedJobPath}" >> "${escapedLogPath}" 2>&1`;
+ }
+ function installCronJob(job) {
+   if (!isCronAvailable()) {
+@@ -14045,9 +14015,14 @@
+   const command = findOpencode();
+   const run = normalizeRunSpec(getJobRun(job));
+   validateRunSpec(run);
++  if (run.command || run.port !== undefined || run.share) {
++    throw new Error("OpenCode v2 scheduled jobs support prompts, not v1 command/port/share options.");
++  }
++  if (run.variant && !run.model) throw new Error("Specify a model when selecting a variant.");
+   const args = ["run"];
++  if (!run.attachUrl) args.push("--standalone");
+   if (run.attachUrl) {
+-    args.push("--attach", run.attachUrl);
++    args.push("--server", run.attachUrl);
+   }
+   if (run.port !== undefined) {
+     args.push("--port", String(run.port));
+@@ -14059,10 +14034,7 @@
+     args.push("--agent", run.agent);
+   }
+   if (run.model) {
+-    args.push("--model", run.model);
+-  }
+-  if (run.variant) {
+-    args.push("--variant", run.variant);
++    args.push("--model", run.variant ? `${run.model}#${run.variant}` : run.model);
+   }
+   if (run.runFormat) {
+     args.push("--format", run.runFormat);
+@@ -14386,7 +14358,7 @@
+         async execute(args) {
+           const format = normalizeFormat(args.format);
+           const slug = args.source ? `${args.source}-${slugify(args.name)}` : slugify(args.name);
+-          const workdir = normalizeWorkdirPath(args.workdir || process.cwd());
++          const workdir = normalizeWorkdirPath(args.workdir || (schedulerDirectory.getStore() || process.cwd()));
+           const scopeId = deriveScopeId(workdir);
+           if (loadScopedJob(scopeId, slug)) {
+             return errorResult(format, `Job "${slug}" already exists in this workspace scope (${scopeId}). Delete it first or use a different name.`);
+@@ -14502,7 +14474,7 @@
+         },
+         async execute(args) {
+           const format = normalizeFormat(args.format);
+-          const scopeId = args.allScopes ? undefined : deriveScopeId(normalizeWorkdirPath(args.scopeRoot || process.cwd()));
++          const scopeId = args.allScopes ? undefined : deriveScopeId(normalizeWorkdirPath(args.scopeRoot || (schedulerDirectory.getStore() || process.cwd())));
+           let jobs = args.allScopes ? loadAllJobsAcrossScopes() : loadAllScopedJobs(scopeId);
+           if (args.includeLegacy) {
+             jobs = [...jobs, ...loadAllLegacyJobs()];
+@@ -14610,7 +14582,7 @@
+             const label = requested ? `"${requested}"` : "that name";
+             return errorResult(format, `No built-in skill found for ${label}. Available: ${available || "(none)"}`);
+           }
+-          const directory = args.directory ?? process.cwd();
++          const directory = args.directory ?? (schedulerDirectory.getStore() || process.cwd());
+           const overwrite = args.overwrite === true;
+           try {
+             const installed = installBuiltinSkill(skill, directory, overwrite);
+@@ -14971,3 +14943,5 @@
+   src_default as default,
+   SchedulerPlugin
+ };
++
++export { object, toJSONSchema, cronToSystemdCalendars };
