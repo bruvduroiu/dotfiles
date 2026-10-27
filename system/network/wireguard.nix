@@ -382,6 +382,18 @@ in {
       };
     };
 
+    # ── Boot ordering against YubiKey-backed sops ────────────────────────────
+    # The initrd cannot decrypt (no pcscd — see system/core/sops.nix), so at
+    # boot the keys only appear once sops-install-secrets-yubikey succeeds.
+    # Without this, wg-quick starts first, `wg set … private-key` fails inside
+    # postUp, and the unit still reports active: routes installed, no
+    # identity, every packet to the hub silently dropped. Registering as a
+    # consumer orders each tunnel after the decrypt, skips it while its key
+    # is missing, and starts it once a late decrypt succeeds.
+    yubikeySops.consumers = lib.mapAttrs'
+      (name: iface: lib.nameValuePair "wg-quick-${name}" iface.privateKeyFile)
+      config.networking.wg-quick.interfaces;
+
     # ── wg0 as a NetworkManager profile (backend = "networkmanager") ─────────
     # Same tunnel as the wg-quick wg0 above, expressed as an NM keyfile so it
     # appears in `nmcli connection show` — see the `backend` option's docs.

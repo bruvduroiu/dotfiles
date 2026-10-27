@@ -18,4 +18,9 @@
     owner = "transmission";
     group = "users";
   };
+
+  # The prestart merges the credentials into settings.json once, at start;
+  # wait for the late YubiKey decrypt (system/core/sops.nix).
+  yubikeySops.consumers.transmission =
+    config.sops.secrets."transmission/credentials".path;
 }

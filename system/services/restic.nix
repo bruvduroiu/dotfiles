@@ -353,10 +353,14 @@ in {
     };
   };
 
-  # Ensure restic service waits for sops secrets
+  # Ensure restic service waits for sops secrets. The system-level decrypt is
+  # sops-install-secrets-yubikey (system/core/sops.nix); `sops-nix.service`
+  # is the Home Manager *user* unit and never existed here, so the ordering
+  # this used to declare was inert. Plain after/wants rather than a
+  # yubikeySops consumer: the timer owns when this runs.
   systemd.services.restic-backups-hetzner = {
-    after = [ "sops-nix.service" "network-online.target" ];
-    wants = [ "sops-nix.service" "network-online.target" ];
+    after = [ "sops-install-secrets-yubikey.service" "network-online.target" ];
+    wants = [ "sops-install-secrets-yubikey.service" "network-online.target" ];
     onFailure = [ "notify-failure@%n.service" ];
 
     # Allow the restic user to access bogdan's home directory
@@ -372,8 +376,8 @@ in {
     # backup — the job that actually protects data — gets the lock first. This
     # only orders a shared transaction; the overlapping-timer case is covered
     # by --retry-lock on both units.
-    after = [ "sops-nix.service" "network-online.target" "restic-backups-hetzner.service" ];
-    wants = [ "network-online.target" ];
+    after = [ "sops-install-secrets-yubikey.service" "network-online.target" "restic-backups-hetzner.service" ];
+    wants = [ "sops-install-secrets-yubikey.service" "network-online.target" ];
     onFailure = [ "notify-failure@%n.service" ];
 
     serviceConfig = {
