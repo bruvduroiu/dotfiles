@@ -36,6 +36,7 @@
         tailsnitch = prev.callPackage "${self}/pkgs/tailsnitch.nix" { };
         tabiew = prev.callPackage "${self}/pkgs/tabiew.nix" { };
         lazy-zellij = prev.callPackage "${self}/pkgs/lazy-zellij.nix" { };
+        skepsis = prev.callPackage "${self}/pkgs/skepsis.nix" { };
         uber-receipts = prev.callPackage "${self}/pkgs/uber-receipts" { };
         portfolio-tracker = prev.callPackage "${self}/pkgs/portfolio-tracker" { };
         hister = prev.callPackage "${self}/pkgs/hister.nix" { };

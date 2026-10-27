@@ -19,6 +19,7 @@
     ./jj.nix
     ./k9s.nix
     ./opencode
+    ./skepsis.nix
     ./stui.nix
     ./tabiew.nix
     ./xdg.nix
