@@ -45,6 +45,9 @@ let
       notifications = true;
       notification_method = "auto";
       notification_condition = "unfocused";
+      # Inline, like --no-alt-screen: output stays in the terminal's
+      # scrollback, so zellij's scroll mode (Alt w) works in agent panes.
+      alternate_screen = "never";
     }
     // lib.optionalAttrs ((config.programs.noctalia.settings.theme.templates.user or { }) ? codex) {
       theme = "noctalia";

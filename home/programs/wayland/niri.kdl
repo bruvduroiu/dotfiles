@@ -252,7 +252,7 @@ binds {
     // +new-window goes through D-Bus to the resident systemd-managed
     // instance (~20ms) instead of cold-starting GTK per window (~300ms).
     Mod+Return { spawn "ghostty" "+new-window"; }
-    Mod+Shift+Return hotkey-overlay-title="Zellij workbench picker" { spawn "ghostty" "+new-window" "-e" "zj"; }
+    Mod+Shift+Return hotkey-overlay-title="Zellij session picker" { spawn "ghostty" "+new-window" "-e" "lzj"; }
     Mod+Y { spawn "ghostty" "+new-window" "-e" "yazi"; }
     Mod+Space hotkey-overlay-title="Noctalia launcher" { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
     Mod+Ctrl+Q allow-when-locked=true allow-inhibiting=false { spawn "noctalia" "msg" "session" "lock"; }

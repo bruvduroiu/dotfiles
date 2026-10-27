@@ -218,6 +218,11 @@ in
       # (SUPER+D jumps to it). Default "auto" would send desktop notifications
       # in ghostty instead; the bell/urgency path is quieter and survives DND.
       preferredNotifChannel = "terminal_bell";
+
+      # Inline renderer, pinned: unset, a server-side rollout flag picks the
+      # fullscreen one (alternate screen + its own virtual scroll), which
+      # leaves zellij's scroll mode (Alt w) nothing to scroll in agent panes.
+      tui = "default";
     };
   };
 }

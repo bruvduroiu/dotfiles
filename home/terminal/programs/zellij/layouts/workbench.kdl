@@ -1,6 +1,8 @@
-// Per-project workbench: Helix beside a coding-agent picker, jjui on its
-// own tab. Launched by `zj` (attach-or-create) with the project root as cwd;
-// every pane inherits that cwd, so nothing here hardcodes a path.
+// Per-project workbench, one full-screen tab each: the coding-agent picker
+// (main), Helix (hx), jjui (vcs). Alt+1/2/3 jump between them. The
+// `default_layout`, so every new session (`lzj NAME`, `zj NAME`, yazi `W`)
+// gets it; start one from the project root, since every pane inherits the
+// cwd and nothing here hardcodes a path.
 //
 // Command panes go through `direnv exec .` so the project's .envrc (LSPs,
 // toolchains) reaches hx and the agent even though zellij execs them
@@ -16,13 +18,14 @@ layout {
     }
 
     tab name="main" focus=true {
-        pane split_direction="vertical" {
-            pane name="hx" size="60%" command="direnv" {
-                args "exec" "." "hx"
-            }
-            pane name="agent" command="direnv" {
-                args "exec" "." "agent"
-            }
+        pane name="agent" command="direnv" {
+            args "exec" "." "agent"
+        }
+    }
+
+    tab name="hx" {
+        pane name="hx" command="direnv" {
+            args "exec" "." "hx"
         }
     }
 

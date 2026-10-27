@@ -163,7 +163,9 @@
       # in a new ghostty window: attach if a session exists, else create one.
       {
         on = "W";
-        run = ''shell 'ghostty +new-window -e zj "$0"' --orphan'';
+        # %h, not $0: yazi 26 passes no positional args to `shell`. Empty
+        # under an empty directory, so fall back to yazi's cwd.
+        run = ''shell 'd=%h; [ -n "$d" ] || d=$PWD; [ -d "$d" ] || d=$(dirname "$d"); ghostty +new-window --working-directory="$d" -e lzj "$(basename "$d")"' --orphan'';
         desc = "Open zellij workbench here";
       }
       # duckdb

@@ -1,5 +1,4 @@
-// Bare session: one shell under the compact bar. The `default_layout`, so a
-// plain `zellij` looks like this too.
+// Bare session: one shell under the compact bar (`lzj NAME -l shell`).
 layout {
     default_tab_template {
         children

@@ -35,6 +35,7 @@
         gh-actions-language-server = prev.callPackage "${self}/pkgs/gh-actions-language-server.nix" { };
         tailsnitch = prev.callPackage "${self}/pkgs/tailsnitch.nix" { };
         tabiew = prev.callPackage "${self}/pkgs/tabiew.nix" { };
+        lazy-zellij = prev.callPackage "${self}/pkgs/lazy-zellij.nix" { };
         uber-receipts = prev.callPackage "${self}/pkgs/uber-receipts" { };
         portfolio-tracker = prev.callPackage "${self}/pkgs/portfolio-tracker" { };
         hister = prev.callPackage "${self}/pkgs/hister.nix" { };

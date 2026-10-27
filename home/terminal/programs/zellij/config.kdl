@@ -1,11 +1,13 @@
 // Zellij: Alt-direct keybinds shaped like niri's Mod binds (one modifier
 // down), an ANSI-16 theme that follows ghostty's light/dark switch, and
-// per-project sessions entered through `zj`. Hand-written KDL, appended to
-// config.kdl by default.nix (`extraConfig`).
+// per-project sessions entered through lazy-zellij (`lzj`, `zj`).
+// Hand-written KDL, appended to config.kdl by default.nix (`extraConfig`).
 //
-// Alt letters deliberately left unbound because Helix or fish own them:
-//   Helix 25.07   a b c d e i n o p s u x . , ; : - _ ( ) `   A-C A-I A-J A-K
-//   fish          o v e   (Alt+O edit-output, Alt+V / Alt+E edit command line)
+// Alt keys deliberately left unbound because Helix or fish own them:
+//   Helix 25.07   a b c d e i n o p s u x . , ; : - _ ( ) ` | ! *   A-C A-I A-J A-K A-U
+//   fish          c C p s   (interactive, helix keymap; it also binds l and f,
+//                            which zellij takes first)
+// Check a new key against both before binding it: see the README.
 // Alt+Shift+<letter> is written "Alt Shift x"; zellij treats "Alt X" the same.
 
 keybinds clear-defaults=true {
@@ -201,7 +203,7 @@ show_release_notes false
 
 // ----- behaviour ----------------------------------------------------------
 default_mode "normal"
-default_layout "shell"
+default_layout "workbench"
 mouse_mode true
 copy_command "wl-copy"
 copy_clipboard "system"
