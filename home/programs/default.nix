@@ -7,6 +7,7 @@
     ./office
     ./hister.nix
     ./development.nix
+    ./openwork.nix
     ./media
     ./media/audacious
     ./media/fotema.nix
