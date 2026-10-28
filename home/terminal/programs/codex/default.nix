@@ -7,10 +7,7 @@
 
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
-  codingMcps = import ../coding-mcps {
-    inherit lib pkgs;
-    cacheHome = config.xdg.cacheHome;
-  };
+  codingMcps = import ../coding-mcps { inherit config lib pkgs; };
   codexConfigDir = "${config.home.homeDirectory}/.codex";
   codexSettings = {
     forced_login_method = "chatgpt";
@@ -34,7 +31,7 @@ let
     check_for_update_on_startup = false;
     shell_environment_policy.ignore_default_excludes = false;
 
-    mcp_servers = codingMcps.codexServers;
+    mcp_servers = codingMcps.codexServers "codex";
 
     agents = {
       enabled = true;

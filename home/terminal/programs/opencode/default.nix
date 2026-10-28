@@ -8,10 +8,7 @@
 
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
-  codingMcps = import ../coding-mcps {
-    inherit lib pkgs;
-    cacheHome = config.xdg.cacheHome;
-  };
+  codingMcps = import ../coding-mcps { inherit config lib pkgs; };
   lspDeps = import ./lsp-deps.nix { inherit pkgs; };
   scheduler = pkgs.callPackage ../../../../pkgs/opencode-scheduler {
     inherit (config.home) profileDirectory;
@@ -19,6 +16,7 @@ let
   secretsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
 in
 {
+  # Figma's OAuth client for opencode (used by the figma entry in ../coding-mcps).
   sops.secrets = {
     figma_oauth_client_id.sopsFile = secretsFile;
     figma_oauth_client_secret.sopsFile = secretsFile;
@@ -26,7 +24,6 @@ in
 
   programs.opencode = {
     enable = true;
-    enableMcpIntegration = true;
 
     web.enable = true;
 
@@ -103,20 +100,9 @@ in
           };
         };
       };
-      # Shared with Claude Code and Codex via ../coding-mcps, translated to
-      # opencode's local/remote schema there. Figma stays opencode-only: its
-      # OAuth client credentials come from sops.
-      mcp = codingMcps.opencodeServers // {
-        figma = {
-          type = "remote";
-          url = "https://mcp.figma.com/mcp";
-          enabled = true;
-          oauth = {
-            clientId = "{file:${config.sops.secrets.figma_oauth_client_id.path}}";
-            clientSecret = "{file:${config.sops.secrets.figma_oauth_client_secret.path}}";
-          };
-        };
-      };
+      # Selected per agent in ../coding-mcps, translated to opencode's
+      # local/remote schema there.
+      mcp = codingMcps.opencodeServers "opencode";
 
       autoshare = false;
       # The package is upgraded through nixpkgs, not by mutating the store.

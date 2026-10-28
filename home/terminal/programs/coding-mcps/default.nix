@@ -1,12 +1,14 @@
 {
+  config,
   lib,
   pkgs,
-  cacheHome,
 }:
 
 let
-  # Shared server definitions. Credentials remain in each client's own store;
-  # authenticate remote servers in Codex with `codex mcp login <name>`.
+  # Every MCP server, declared once. A server can carry per-agent extras under
+  # a `claude`, `codex` or `opencode` key; they are merged in only for that
+  # agent's schema. Credentials stay in each client's own store; remote
+  # servers are signed into per client, e.g. `codex mcp login <name>`.
   servers = {
     playwright = {
       type = "stdio";
@@ -18,7 +20,7 @@ let
         "${pkgs.ungoogled-chromium}/bin/chromium"
         # Keep screenshots and snapshots out of the session's repository.
         "--output-dir"
-        "${cacheHome}/playwright-mcp"
+        "${config.xdg.cacheHome}/playwright-mcp"
       ];
     };
     datadog = {
@@ -41,27 +43,90 @@ let
       type = "http";
       url = "http://10.0.20.197:8788/mcp";
     };
+    figma = {
+      type = "http";
+      url = "https://mcp.figma.com/mcp";
+      # opencode needs its own OAuth client, from sops (declared in
+      # ../opencode). Claude Code gets Figma from its official plugin instead.
+      opencode.oauth = {
+        clientId = "{file:${config.sops.secrets.figma_oauth_client_id.path}}";
+        clientSecret = "{file:${config.sops.secrets.figma_oauth_client_secret.path}}";
+      };
+    };
   };
+
+  # Which servers each agent gets, and with what changes. Values are
+  # overrides merged into the server, e.g. `hey.args = [ "mcp" "--read-only" ]`;
+  # `{ }` takes it as declared. `use` turns a list of names into that form.
+  use = names: lib.genAttrs names (_: { });
+  common = [
+    "playwright"
+    "datadog"
+    "deepwiki"
+    "linear"
+    "notion"
+    "metacog"
+  ];
+  selections = {
+    claude = use common;
+    codex = use common;
+    opencode = use (common ++ [ "figma" ]);
+  };
+
+  agentKeys = [
+    "claude"
+    "codex"
+    "opencode"
+  ];
+
+  # The selected servers for one agent, with its extras and overrides applied.
+  resolve =
+    family: agent:
+    lib.mapAttrs (
+      name: override:
+      let
+        server =
+          servers.${name}
+            or (throw "coding-mcps: ${agent} selects unknown server `${name}`");
+      in
+      lib.recursiveUpdate (lib.recursiveUpdate (removeAttrs server agentKeys) (server.${family} or { }))
+        override
+    ) (selections.${agent} or (throw "coding-mcps: no selection for agent `${agent}`"));
 in
 {
-  claudeServers = servers;
+  inherit servers selections;
+
+  claudeServers = agent: resolve "claude" agent;
+
   # Codex infers the transport from command/url rather than a type field.
-  codexServers = lib.mapAttrs (_: server: builtins.removeAttrs server [ "type" ]) servers;
+  codexServers =
+    agent: lib.mapAttrs (_: server: removeAttrs server [ "type" ]) (resolve "codex" agent);
+
   # opencode spells the transports local/remote, takes the command and its
   # arguments as one list, and requires `enabled` on every server.
-  opencodeServers = lib.mapAttrs (
-    _: server:
-    if server.type == "stdio" then
-      {
-        type = "local";
-        command = [ server.command ] ++ server.args;
-        enabled = true;
-      }
-    else
-      {
-        type = "remote";
-        inherit (server) url;
-        enabled = true;
-      }
-  ) servers;
+  opencodeServers =
+    agent:
+    lib.mapAttrs (
+      _: server:
+      let
+        rest = removeAttrs server [
+          "type"
+          "command"
+          "args"
+        ];
+      in
+      if server.type == "stdio" then
+        rest
+        // {
+          type = "local";
+          command = [ server.command ] ++ server.args or [ ];
+          enabled = true;
+        }
+      else
+        rest
+        // {
+          type = "remote";
+          enabled = true;
+        }
+    ) (resolve "opencode" agent);
 }

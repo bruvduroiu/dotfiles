@@ -7,10 +7,7 @@
 
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
-  codingMcps = import ../coding-mcps {
-    inherit lib pkgs;
-    cacheHome = config.xdg.cacheHome;
-  };
+  codingMcps = import ../coding-mcps { inherit config lib pkgs; };
 
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a
   # writeShellApplication (deps pinned, shellchecked at build time) and exports
@@ -99,8 +96,9 @@ in
     # skillsDir was renamed to `skills` in 26.05 (accepts a dir path or attrset).
     skills = codingAgents.skills;
 
-    # Shared with Codex; Nix store paths are resolved at build time.
-    mcpServers = codingMcps.claudeServers;
+    # Selected per agent in ../coding-mcps; Nix store paths are resolved at
+    # build time.
+    mcpServers = codingMcps.claudeServers "claude";
 
     # Settings
     settings = {
