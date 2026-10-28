@@ -58,6 +58,7 @@
           }).obsidian;
         opencode = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.opencode;
         sheets = prev.callPackage "${self}/pkgs/sheets.nix" { };
+        hey-cli = prev.callPackage "${self}/pkgs/hey-cli.nix" { };
         sqlit-tui = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.sqlit-tui;
         google-cloud-sdk = prev.google-cloud-sdk.overrideAttrs (oldAttrs: rec {
           version = "563.0.0";
