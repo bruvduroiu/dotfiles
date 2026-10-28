@@ -54,6 +54,12 @@ let
         clientSecret = "{file:${config.sops.secrets.figma_oauth_client_secret.path}}";
       };
     };
+    hey = {
+      type = "stdio";
+      # Saves drafts, never sends: a draft goes out from HEY or `hey draft send`.
+      command = lib.getExe pkgs.hey-cli;
+      args = [ "mcp" ];
+    };
   };
 
   # Which servers each agent gets, and with what changes. Values are
@@ -76,6 +82,9 @@ let
     ]);
     codex = use common;
     opencode = use (common ++ [ "figma" ]);
+    # Layered over opencode's: OpenWork reads the same opencode.json, then
+    # these through OPENCODE_CONFIG_CONTENT (home/programs/openwork.nix).
+    openwork = use [ "hey" ];
   };
 
   agentKeys = [
