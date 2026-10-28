@@ -8,6 +8,10 @@
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
   codingMcps = import ../coding-mcps { inherit config lib pkgs; };
+  # By path, not an overlay attribute: the steamdeck's Home Manager builds
+  # its own pkgs without this repo's overlays.
+  egm = pkgs.callPackage ../../../../pkgs/egm.nix { };
+
   # The work account's MCPs beyond the shared ones (selected in ../coding-mcps).
   # Both accounts run the same wrapper, whose generated plugin dir carries the
   # `claude` selection, so the work wrapper adds the difference with
@@ -113,6 +117,13 @@ in
     # at the built store paths instead — see hooks.nix.
     # skillsDir was renamed to `skills` in 26.05 (accepts a dir path or attrset).
     skills = codingAgents.skills;
+
+    # Pinned plugins, loaded with --plugin-dir by the wrapper both accounts
+    # run. EGM: /egm-brainstorm, /egm-draft, /egm-review, …
+    # HM 26.11 (the deck) wants an attrset for stable plugin dir names and
+    # warns on a list; 26.05 (framework13) only takes a list.
+    plugins =
+      if lib.versionAtLeast config.home.version.release "26.11" then { inherit egm; } else [ egm ];
 
     # The personal account's selection (../coding-mcps); claude-work adds its
     # own on top. Nix store paths are resolved at build time.

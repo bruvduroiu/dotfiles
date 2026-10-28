@@ -8,6 +8,7 @@
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
   codingMcps = import ../coding-mcps { inherit config lib pkgs; };
+  egm = pkgs.callPackage ../../../../pkgs/egm.nix { };
   codexConfigDir = "${config.home.homeDirectory}/.codex";
   codexSettings = {
     forced_login_method = "chatgpt";
@@ -42,6 +43,15 @@ let
     shell_environment_policy.ignore_default_excludes = false;
 
     mcp_servers = codingMcps.codexServers "codex";
+
+    # EGM as a Codex plugin: a local marketplace at the pinned store path,
+    # with the installed copy provided by codexPluginCache below, so nothing
+    # is installed with `codex plugin add`.
+    marketplaces.egm = {
+      source_type = "local";
+      source = "${egm}";
+    };
+    plugins."egm@egm".enabled = true;
 
     agents = {
       enabled = true;
@@ -128,6 +138,20 @@ in
   # mutable backing file. This remains rollback-safe because config.toml itself
   # is still a Home Manager-managed symlink.
   home.file.".codex/config.toml".source = config.lib.file.mkOutOfStoreSymlink codexConfigBacking;
+
+  # Codex looks for an installed plugin at plugins/cache/<marketplace>/<plugin>/
+  # <version>, and its skill loader skips symlinked SKILL.md files: a
+  # Home Manager link (even recursive) shows as "installed, enabled" but
+  # exposes no skills. So copy the pinned tree, and only when it changes.
+  home.activation.codexPluginCache = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    egmCache="${codexConfigDir}/plugins/cache/egm"
+    if [ "$(cat "$egmCache/.hm-source" 2>/dev/null)" != "${egm}" ]; then
+      run rm -rf "$egmCache"
+      run mkdir -p "$egmCache/egm"
+      run cp -r --no-preserve=mode ${egm} "$egmCache/egm/${egm.version}"
+      run sh -c 'printf "%s\n" "$1" > "$2"' -- "${egm}" "$egmCache/.hm-source"
+    fi
+  '';
 
   # On declarative changes, retain runtime-only top-level tables such as
   # [projects] and [notice], then replace managed keys with the new values.
