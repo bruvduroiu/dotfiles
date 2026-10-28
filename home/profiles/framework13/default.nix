@@ -1,6 +1,72 @@
-{ config, inputs, ... }:
-
 {
+  config,
+  inputs,
+  lib,
+  pkgs,
+  ...
+}:
+
+let
+  # API keys a command may ask for by env var name. They used to be exported
+  # into every fish shell, so every child process (each coding agent
+  # included) inherited all of them; now a key reaches only the command run
+  # under `withkey`. The values stay in sops (docs/secrets.md).
+  apiKeyFiles = {
+    ABLITERATION_API_KEY = config.sops.secrets.abliteration_api_key.path;
+    ALPHAVANTAGE_API_KEY = config.sops.secrets.alphavantage_api_key.path;
+    DEEPSEEK_API_KEY = config.sops.secrets.deepseek_api_key.path;
+    IMMICH_API_KEY = config.sops.secrets.immich_api_key.path;
+    OPENROUTER_API_KEY = config.sops.secrets.openrouter_api_key.path;
+  };
+
+  withkey = pkgs.writeShellApplication {
+    name = "withkey";
+    text = ''
+      # withkey VAR [VAR...] -- COMMAND [ARGS...]
+      declare -A files=(
+        ${lib.concatStringsSep "\n    " (
+          lib.mapAttrsToList (name: path: "[${name}]=${lib.escapeShellArg path}") apiKeyFiles
+        )}
+      )
+
+      usage() {
+        echo "usage: withkey VAR [VAR...] -- COMMAND [ARGS...]" >&2
+        echo "known: ''${!files[*]}" >&2
+        exit 2
+      }
+
+      vars=()
+      while (($#)); do
+        if [[ $1 == -- ]]; then
+          shift
+          break
+        fi
+        vars+=("$1")
+        shift
+      done
+      ((''${#vars[@]} && $#)) || usage
+
+      for var in "''${vars[@]}"; do
+        file=''${files[$var]:-}
+        [[ -n $file ]] || { echo "withkey: unknown key $var" >&2; usage; }
+        [[ -r $file ]] || { echo "withkey: $var: $file is not readable (sops not activated?)" >&2; exit 1; }
+        export "$var=$(<"$file")"
+      done
+      exec "$@"
+    '';
+  };
+in
+{
+  home.packages = [
+    withkey
+    # mods reads DEEPSEEK_API_KEY for its deepseek provider (~/.config/mods/mods.yml).
+    (lib.hiPrio (
+      pkgs.writeShellScriptBin "mods" ''
+        exec ${lib.getExe withkey} DEEPSEEK_API_KEY -- ${lib.getExe pkgs.mods} "$@"
+      ''
+    ))
+  ];
+
   imports = [
 
     # editors
@@ -53,7 +119,7 @@
     Wants = [ "sops-nix.service" ];
   };
 
-  # SOPS secret for OpenRouter API key (used by nvim 99 plugin)
+  # OpenRouter key (opencode `openrouter` provider; `withkey` for ad-hoc use)
   sops.secrets.openrouter_api_key = {
     sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
   };
@@ -72,7 +138,7 @@
     sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
   };
 
-  # Immich API key (exported as IMMICH_API_KEY in fish)
+  # Immich API key (`withkey IMMICH_API_KEY -- …`)
   sops.secrets.immich_api_key = {
     sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
   };
@@ -90,10 +156,11 @@
     sopsFile = "${inputs.secrets}/secrets/common/datadog.yaml";
   };
 
-  # dd-log reads *_FILE variants so key material stays on disk (sops
-  # runtime paths), not in every process environment.
+  # dd-log and portfolio-update-prices read *_FILE variants so key material
+  # stays on disk (sops runtime paths), not in every process environment.
   home.sessionVariables = {
     DD_API_KEY_FILE = config.sops.secrets.dd_api_key.path;
     DD_APP_KEY_FILE = config.sops.secrets.dd_app_key.path;
+    ALPHAVANTAGE_API_KEY_FILE = config.sops.secrets.alphavantage_api_key.path;
   };
 }

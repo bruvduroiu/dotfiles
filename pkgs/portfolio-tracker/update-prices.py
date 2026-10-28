@@ -2,8 +2,10 @@
 """Refresh Cur Price (col E) in portfolio-tracker.ods from Alpha Vantage.
 
 Usage:
-  export ALPHAVANTAGE_API_KEY=xxxx   # provided by sops via fish shellInit
   portfolio-update-prices            # updates ~/Documents/Finance/portfolio-tracker.ods
+
+  The key is read from the file named by ALPHAVANTAGE_API_KEY_FILE (the sops
+  path, set by the framework13 home profile), or from ALPHAVANTAGE_API_KEY.
 
 Flags:
   --file PATH   ODS to update (default ~/Documents/Finance/portfolio-tracker.ods)
@@ -63,8 +65,15 @@ def main():
     args = ap.parse_args()
 
     apikey = os.environ.get("ALPHAVANTAGE_API_KEY")
+    keyfile = os.environ.get("ALPHAVANTAGE_API_KEY_FILE")
+    if not apikey and keyfile and not args.dry:
+        try:
+            with open(keyfile) as f:
+                apikey = f.read().strip()
+        except OSError as e:
+            sys.exit(f"ERROR: cannot read ALPHAVANTAGE_API_KEY_FILE: {e.strerror}")
     if not args.dry and not apikey:
-        sys.exit("ERROR: set ALPHAVANTAGE_API_KEY in the environment (never hardcode it).")
+        sys.exit("ERROR: set ALPHAVANTAGE_API_KEY_FILE or ALPHAVANTAGE_API_KEY (never hardcode it).")
 
     doc = load(args.file)
     table = doc.getElementsByType(Table)[0]        # first sheet = Portfolio

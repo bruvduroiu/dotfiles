@@ -53,23 +53,8 @@ in
           src = fish-helix;
         }
       ];
-      shellInit = ''
-        if test -f ${config.sops.secrets.openrouter_api_key.path}
-          set -gx OPENROUTER_API_KEY (cat ${config.sops.secrets.openrouter_api_key.path})
-        end
-        if test -f ${config.sops.secrets.deepseek_api_key.path}
-          set -gx DEEPSEEK_API_KEY (cat ${config.sops.secrets.deepseek_api_key.path})
-        end
-        if test -f ${config.sops.secrets.alphavantage_api_key.path}
-          set -gx ALPHAVANTAGE_API_KEY (cat ${config.sops.secrets.alphavantage_api_key.path})
-        end
-        if test -f ${config.sops.secrets.abliteration_api_key.path}
-          set -gx ABLITERATION_API_KEY (cat ${config.sops.secrets.abliteration_api_key.path})
-        end
-        if test -f ${config.sops.secrets.immich_api_key.path}
-          set -gx IMMICH_API_KEY (cat ${config.sops.secrets.immich_api_key.path})
-        end
-      '';
+      # No API keys exported here: commands get them through `withkey` or a
+      # *_FILE variable (home/profiles/framework13, docs/secrets.md).
       interactiveShellInit = ''
         set -gx fzf_fd_opts "${fd_opts}"
         set -gx fzf_preview_dir_cmd "${pkgs.eza}/bin/eza ${eza_opts}"
