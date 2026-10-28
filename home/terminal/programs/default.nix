@@ -16,6 +16,7 @@
     ./fzf.nix
     ./gdu.nix
     ./git.nix
+    ./hey.nix
     ./jj.nix
     ./k9s.nix
     ./opencode
