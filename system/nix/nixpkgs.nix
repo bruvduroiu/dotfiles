@@ -57,6 +57,15 @@
             config.allowUnfree = true;
           }).obsidian;
         opencode = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.opencode;
+        # Unstable's v18 unvendors ffmpeg/curl-impersonate/libsodium/sqlite and
+        # drops FUTO.Updater.Client; the wrapper bubblewraps the whole app.
+        grayjay = prev.callPackage "${self}/pkgs/grayjay-sandboxed.nix" {
+          grayjay =
+            (import inputs.nixpkgs-unstable.outPath {
+              system = prev.stdenv.hostPlatform.system;
+              config.allowUnfree = true;
+            }).grayjay;
+        };
         sheets = prev.callPackage "${self}/pkgs/sheets.nix" { };
         hey-cli = prev.callPackage "${self}/pkgs/hey-cli.nix" { };
         sqlit-tui = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.sqlit-tui;
