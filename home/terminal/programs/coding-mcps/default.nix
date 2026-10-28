@@ -7,9 +7,9 @@
 let
   # Every MCP server, declared once. A server can carry per-agent extras under
   # a `claude`, `codex` or `opencode` key; they are merged in only for that
-  # agent's schema. Credentials stay in each client's own store; remote
-  # servers are signed into per client, e.g. `claude-work` → /mcp,
-  # `codex mcp login <name>`.
+  # agent's schema. Credentials stay in each client's own store (now the
+  # KeePassXC keyring for Codex); remote servers are signed into per client,
+  # e.g. `claude-work` → /mcp, `codex mcp login <name>`.
   servers = {
     playwright = {
       type = "stdio";

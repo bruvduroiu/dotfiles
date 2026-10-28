@@ -12,6 +12,16 @@ let
   codexSettings = {
     forced_login_method = "chatgpt";
 
+    # Both logins rotate their refresh tokens, so they go to the KeePassXC
+    # Secret Service rather than plaintext files under ~/.codex
+    # (docs/secrets.md). Pinned: the MCP store's default, "auto", switches
+    # silently whenever a keyring appears on the bus. Codex reads these in its
+    # own process, outside the command sandbox that hides the keyring from
+    # tools. With the database locked, Codex can't authenticate until you
+    # unlock.
+    cli_auth_credentials_store = "keyring";
+    mcp_oauth_credentials_store = "keyring";
+
     model_reasoning_effort = "medium";
     model_reasoning_summary = "auto";
     model_verbosity = "medium";
@@ -90,7 +100,7 @@ in
     package = pkgs.codex;
 
     # Auth is a one-time interactive step that cannot be declared in Nix (it
-    # mints a refresh token into $CODEX_HOME/auth.json):
+    # mints a refresh token into the keyring, see cli_auth_credentials_store):
     #   codex login          # browser OAuth against the ChatGPT account
     #   codex login status   # verify
     # `forced_login_method` is the guard rail that keeps it that way: with it
