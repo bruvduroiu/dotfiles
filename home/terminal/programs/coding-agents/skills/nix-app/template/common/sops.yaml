@@ -1,0 +1,6 @@
+# Recipient = the YubiKey's age-plugin-yubikey identity. Never a fresh
+# `age-keygen` key, never `age-plugin-yubikey --generate`.
+# Get the recipient (public, no touch): age-plugin-yubikey --list
+creation_rules:
+  - path_regex: secrets\.env\.yaml$
+    age: age1yubikey1REPLACE_ME

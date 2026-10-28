@@ -1,0 +1,15 @@
+# Dev shell from the flake (nix-direnv caches it; re-evaluates on watched changes).
+use flake
+watch_file shell.nix default.nix nix/*.nix
+
+# Secrets: decrypted on every load (YubiKey touch), exported into the shell.
+# Agents launched from this shell inherit them; nothing is written to disk.
+if [[ -f secrets.env.yaml ]]; then
+  watch_file secrets.env.yaml .sops.yaml
+  if secrets=$(sops decrypt --output-type dotenv secrets.env.yaml); then
+    eval "$("$direnv" dotenv bash /dev/stdin <<<"$secrets")"
+  else
+    log_error "sops decrypt failed: secrets NOT loaded (YubiKey plugged in and touched?)"
+  fi
+  unset secrets
+fi

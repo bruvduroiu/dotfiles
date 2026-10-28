@@ -17,7 +17,7 @@ Work down this list; stop at the first one that applies.
 
 | Situation | Command |
 |---|---|
-| Repo has `.envrc` | `direnv exec . <cmd>` |
+| Repo has `.envrc` | `<cmd>` directly: you inherited the direnv env (see below) |
 | Repo has `flake.nix` with a devShell | `nix develop -c <cmd>` |
 | Repo has `shell.nix`, no flake | `nix-shell --run '<cmd>'` |
 | Repo has `devenv.nix` | `devenv shell -- <cmd>` |
@@ -26,10 +26,14 @@ Work down this list; stop at the first one that applies.
 
 Notes:
 
-- **direnv must be explicit.** The direnv shell hook only runs in the user's
-  interactive fish shell. Commands issued through the Bash tool do *not* pick up
-  `.envrc`; `direnv exec . <cmd>` (or `direnv allow` first, if it has never been
-  approved) is required.
+- **direnv is already loaded.** Agent sessions are started from inside the
+  project directory, in the user's direnv-loaded shell, so the dev shell's
+  tools, recipes and decrypted sops secrets are inherited. Don't wrap commands
+  in `direnv exec .`: it re-decrypts secrets and costs a YubiKey touch per
+  command. Exception: after editing `shell.nix`/`flake.nix` your env is stale,
+  so verify with `nix develop -c <cmd>` and ask the human to reload. Never run
+  `direnv allow` yourself. If tools are missing although `.envrc` exists, the
+  session wasn't started in that shell: say so.
 - **Don't assume `nix develop` gives language tooling.** A flake's default
   devShell can be for anything. Run `nix flake show` or read `shell.nix` before
   relying on it. (Example: this dotfiles repo's default devShell is Android/Boox
@@ -74,6 +78,17 @@ In order of preference:
 2. `nix run nixpkgs#steam-run -- ./thebinary` (FHS sandbox, no config change).
 3. `programs.nix-ld` is enabled on this host; a library it lacks gets added to
    `system/programs/nix-ld.nix` (requires a rebuild — ask first).
+
+### Packaging projects in Nix
+
+New projects (and existing ones, when asked) follow the house layout in the
+`nix-app` skill: flake-parts `flake.nix` (inputs/outputs only), `default.nix`
+(package), `shell.nix` (dev shell + recipes instead of make/just), direnv
+`.envrc` sourcing sops secrets, `nix/module.nix` + `nix/image.nix` for deploy.
+Load the skill before writing any of these files.
+
+Secrets use sops with the **YubiKey** recipient (age-plugin-yubikey). Never
+create a new age identity (`age-keygen`, `age-plugin-yubikey --generate`).
 
 ### Writing temporary scripts
 
