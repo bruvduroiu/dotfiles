@@ -8,6 +8,16 @@
 let
   codingAgents = import ../coding-agents { inherit lib pkgs; };
   codingMcps = import ../coding-mcps { inherit config lib pkgs; };
+  # The work account's MCPs beyond the shared ones (selected in ../coding-mcps).
+  # Both accounts run the same wrapper, whose generated plugin dir carries the
+  # `claude` selection, so the work wrapper adds the difference with
+  # --mcp-config. That flag only adds servers, hence the assertion below.
+  personalMcps = codingMcps.claudeServers "claude";
+  workMcps = codingMcps.claudeServers "claude-work";
+  workOnlyMcps = removeAttrs workMcps (builtins.attrNames personalMcps);
+  workMcpConfig = pkgs.writeText "claude-work-mcp.json" (
+    builtins.toJSON { mcpServers = workOnlyMcps; }
+  );
 
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a
   # writeShellApplication (deps pinned, shellchecked at build time) and exports
@@ -36,10 +46,18 @@ let
   claude-work = pkgs.writeShellScriptBin "claude-work" ''
     set -eu
     export CLAUDE_CONFIG_DIR="$HOME/${workConfigDir}"
-    exec ${config.programs.claude-code.finalPackage}/bin/claude "$@"
+    exec ${config.programs.claude-code.finalPackage}/bin/claude \
+      --mcp-config ${workMcpConfig} "$@"
   '';
 in
 {
+  assertions = [
+    {
+      assertion = lib.all (name: workMcps ? ${name}) (builtins.attrNames personalMcps);
+      message = "coding-mcps: the claude-work selection must include every `claude` server; the work wrapper can only add servers.";
+    }
+  ];
+
   home.packages = [ claude-work ] ++ builtins.attrValues claudeScripts.packages;
 
   # `programs.claude-code` materialises exactly one configDir, so a session
@@ -96,9 +114,9 @@ in
     # skillsDir was renamed to `skills` in 26.05 (accepts a dir path or attrset).
     skills = codingAgents.skills;
 
-    # Selected per agent in ../coding-mcps; Nix store paths are resolved at
-    # build time.
-    mcpServers = codingMcps.claudeServers "claude";
+    # The personal account's selection (../coding-mcps); claude-work adds its
+    # own on top. Nix store paths are resolved at build time.
+    mcpServers = personalMcps;
 
     # Settings
     settings = {

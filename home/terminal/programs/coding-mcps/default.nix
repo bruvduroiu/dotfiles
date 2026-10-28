@@ -8,7 +8,8 @@ let
   # Every MCP server, declared once. A server can carry per-agent extras under
   # a `claude`, `codex` or `opencode` key; they are merged in only for that
   # agent's schema. Credentials stay in each client's own store; remote
-  # servers are signed into per client, e.g. `codex mcp login <name>`.
+  # servers are signed into per client, e.g. `claude-work` → /mcp,
+  # `codex mcp login <name>`.
   servers = {
     playwright = {
       type = "stdio";
@@ -61,14 +62,18 @@ let
   use = names: lib.genAttrs names (_: { });
   common = [
     "playwright"
-    "datadog"
     "deepwiki"
     "linear"
-    "notion"
     "metacog"
   ];
   selections = {
     claude = use common;
+    # Must include everything `claude` has: the work wrapper can only add
+    # servers on top of the shared ones (see ../claude).
+    claude-work = use (common ++ [
+      "datadog"
+      "notion"
+    ]);
     codex = use common;
     opencode = use (common ++ [ "figma" ]);
   };
