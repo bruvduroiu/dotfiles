@@ -9,6 +9,9 @@ scripts/
 # and home/terminal/programs/claude/scripts.nix builds them into PATH binaries.
 # An ignored file is invisible to jj *and* to the git-backed flake.
 !home/terminal/programs/coding-agents/skills/*/scripts/
-docs/
+# docs/ stays local, except the secrets policy that module comments point to.
+# `docs/*`, not `docs/`: git can't re-include a file under an excluded directory.
+/docs/*
+!/docs/secrets.md
 /niri/
 result

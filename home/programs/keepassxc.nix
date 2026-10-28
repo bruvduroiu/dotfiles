@@ -52,6 +52,26 @@
       Browser = {
         Enabled = true;
       };
+
+      # Serve org.freedesktop.secrets (gnome-keyring is off, see
+      # system/programs/niri). This is for credentials an app rewrites at
+      # runtime, like hey's rotating OAuth token, which sops can't hold:
+      # sops stays the store for static and boot-time secrets (docs/secrets.md).
+      # Clients only see the groups exposed under Database Settings → Secret
+      # Service Integration; that choice lives in the .kdbx, not here.
+      FdoSecrets = {
+        Enabled = true;
+        # No per-read prompt. KeePassXC 2.7 remembers "Allow All & Future"
+        # only for the requesting process (an in-memory DBusClient), and every
+        # hey/codex/podman run is a new process, so it asked on every command.
+        # The boundary is what you expose instead: only a dedicated group of
+        # app tokens, never the database root (docs/secrets.md). A process
+        # running as you could run the approved tools anyway.
+        ConfirmAccessItem = false;
+        ConfirmDeleteItem = true;
+        # A locked database asks to unlock instead of looking empty.
+        UnlockBeforeSearch = true;
+      };
     };
   };
 }
