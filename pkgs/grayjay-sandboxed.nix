@@ -42,7 +42,10 @@ let
     # bwrap resolves a symlinked bind source, but not symlinks *inside* a bound
     # dir (/etc/ssl/certs/* -> /etc/static/...), so /etc/static (store) too.
     args+=(--ro-bind-try /etc/static /etc/static)
-    for p in fonts ssl pki resolv.conf hosts nsswitch.conf localtime zoneinfo \
+    # CEF can't find libpulse (not on its LD_LIBRARY_PATH or RUNPATH), so
+    # Chromium uses ALSA; /etc/alsa/conf.d routes ALSA's default PCM to the
+    # pipewire-0 socket. Without it ALSA looks for /dev/snd and plays nothing.
+    for p in alsa fonts ssl pki resolv.conf hosts nsswitch.conf localtime zoneinfo \
              machine-id passwd group; do
       args+=(--ro-bind-try "/etc/$p" "/etc/$p")
     done
