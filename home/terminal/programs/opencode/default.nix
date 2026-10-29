@@ -67,7 +67,45 @@ in
         "openrouter"
         "zai-coding-plan"
         "abliteration"
+        "mistral-vibe"
       ];
+      providers.mistral-vibe = {
+        name = "Mistral Vibe";
+        env = [ "MISTRAL_API_KEY" ];
+        package = "@opencode/ai/providers/openai-compatible/responses";
+        # Prefix caching is automatic; do not send OpenAI's cache-key field.
+        compatibility.supportsPromptCacheKey = false;
+        settings.baseURL = "https://api.mistral.ai/v1";
+        body = {
+          store = false;
+          parallel_tool_calls = true;
+          # The Responses runtime defaults to OpenAI encrypted reasoning;
+          # Mistral does not need that extension for stateless requests.
+          include = [ ];
+        };
+        models = {
+          zai-glm-5-3 = {
+            name = "GLM 5.3 (Vibe)";
+            capabilities.tools = true;
+            limit = {
+              context = 1000000;
+              output = 32768;
+            };
+            body.reasoning.effort = "low";
+          };
+          zai-glm-5-3-flash = {
+            name = "GLM 5.3 Flash (Vibe)";
+            capabilities.tools = true;
+            limit.output = 32768;
+            body.reasoning.effort = "low";
+          };
+          deepseek-v4-1-flash-1017 = {
+            name = "DeepSeek V4.1 Flash 1017 (Vibe)";
+            capabilities.tools = true;
+            limit.output = 32768;
+          };
+        };
+      };
       provider = {
         deepseek = {
           options = {
