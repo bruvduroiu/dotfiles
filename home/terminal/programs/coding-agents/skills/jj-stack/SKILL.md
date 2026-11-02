@@ -93,19 +93,28 @@ lines), `chore` (deps, lockfiles, generated code), `behaviour`, `test`, `docs`.
 2. **Seam by concern, not by file.** A file may be touched by several
    revisions. Splitting by file is the lazy split and the one reviewers
    complain about.
-3. **Every revision stands alone.** It builds, its tests pass, its message
-   says *why*. If two revisions cannot be described without naming each
-   other, they are one revision. If you cannot say what one does in a line,
-   it is two.
+3. **Every revision stands alone — atomic and bisectable.** It builds, its
+   tests pass, its message says *why*, and reverting it alone leaves a working
+   tree. If two revisions cannot be described without naming each other, they
+   are one revision. If you cannot say what one does in a line, it is two.
+   The full contract is in the `jj-atomic` skill; step 4 enforces it.
 4. **Tests travel with the behaviour they test**, or come just before it when
-   they pin behaviour that already existed.
-5. **Generated and vendored churn gets its own `chore` revision** so it cannot
-   hide a behaviour change. Pure moves are free (renames cost 0 lines).
-6. **No `misc`, `cleanup`, or `address review` revisions.** Those are absorb
+   they pin behaviour that already existed. A test that *fails* until a later
+   revision never lands on its own: bisect would blame the test.
+5. **Change interfaces in three moves, not one** (expand → migrate →
+   contract): add the new API alongside the old, move callers over, delete
+   the old. Each step is green; a "rename the signature" step whose callers
+   arrive two revisions later is not.
+6. **Generated, vendored and formatter churn gets its own `chore` revision**
+   so it cannot hide a behaviour change, and its message names the command
+   that reproduces it (`nix fmt`, `go generate ./...`). Pure moves are free
+   (renames cost 0 lines).
+7. **No `misc`, `cleanup`, or `address review` revisions.** Those are absorb
    material, not stack members.
-7. **Reviewable order beats chronological order.** The stack is a narrative
-   for the reader, not a log of how the code was written.
-8. **Independent work is not a stack.** If two concerns share no lines,
+8. **Reviewable order beats chronological order** — as long as every prefix
+   of the stack still builds. The stack is a narrative for the reader, not a
+   log of how the code was written.
+9. **Independent work is not a stack.** If two concerns share no lines,
    propose two stacks (or siblings via `jj split -p`), not one chain.
 
 Size: the default limit is 400 changed lines. It is a reviewability
@@ -144,28 +153,31 @@ existing revisions. Neither opens an editor.
 ### 4. Verify
 
 ```bash
-jj-stack-check --against "$BLOB_COMMIT"          # or: bash ~/.claude/skills/jj-stack/scripts/stack-check.sh
+jj-stack-check --against "$BLOB_COMMIT" -x '<build + test command>'
+#   or: bash ~/.claude/skills/jj-stack/scripts/stack-check.sh …
 jj log -r 'conflicts()'                          # must be empty
 ```
 
 The check fails on: a revision over the limit, an empty revision, a missing
-description, a conflict, a revision you did not author, or tip tree ≠ blob
-tree. A surviving remainder still titled like the blob means the plan missed
-something: either describe it as a real step or fold it down with
-`jj squash --from <remainder> --into <step> -u <paths>`.
+description, a conflict, a revision you did not author, tip tree ≠ blob
+tree, and with `-x`, a revision where the command fails (`BROKEN`) or exits
+125 (`UNTESTABLE`, bisect's "skip"). A surviving remainder still titled like
+the blob means the plan missed something: either describe it as a real step
+or fold it down with `jj squash --from <remainder> --into <step> -u <paths>`.
 
-Optionally prove every revision builds, in a throwaway workspace so nothing
-you run can snapshot into the stack (`jj new`, never `jj edit`, so build
-output lands in a scratch child):
+**`-x` is the bisectability proof, not an option.** Pick the command the
+project's CI would run (`nix flake check`, `go test ./...`, `cargo test`),
+the one that decides whether `jj bisect run` could later judge a revision.
+Each revision's tree is exported read-only from the git store into a temp
+dir: no workspace, no checkout, `@` never moves, nothing snapshots. The
+export holds tracked files only, so a step that builds only thanks to an
+ignored or untracked file is caught. `-x` is an ask-permission command; say
+what it will run. Skip it only when the human says so, and say it was skipped.
 
-```bash
-jj workspace add --name stack-build -r 'trunk()' ../$(basename "$PWD").stack-build
-for c in $(jj log -r 'trunk()..@ ~ (@ & empty())' --reversed --no-graph -T 'commit_id ++ "\n"'); do
-  jj -R ../$(basename "$PWD").stack-build new "$c" >/dev/null &&
-  (cd ../$(basename "$PWD").stack-build && <build or test command>) || echo "BROKEN at $c"
-done
-# cleanup is the human's: jj workspace forget stack-build; jj abandon the scratch children
-```
+A `BROKEN` revision usually means a seam in the wrong place: a caller moved
+before its callee, a test before its fix, an import before the module.
+Move the hunk with `jj squash --from <later> --into <broken> -u <paths>`
+(or reorder), never by adding a "fix build" revision on top.
 
 ### 5. Hand off
 
@@ -203,4 +215,5 @@ the check output, and any remainder. Then suggest `/jj-stack-push <topic>`.
 | reorder | `jj rebase -r <rev> -A <other>` / `-B <other>` |
 | remainder onto top | `jj rebase -r <blob> -o @ --skip-emptied` |
 | prove nothing changed | `jj-stack-check --against <blob commit id>` |
+| prove every revision builds | `jj-stack-check -x '<build + test>'` |
 | what did absorb/split do | `jj op show -p` |

@@ -9,6 +9,12 @@
 #   EMPTY      changes nothing (a leftover from a split/rebase)
 #   CONFLICT   carries unresolved conflict markers
 #   NOT-MINE   authored by someone else (you are about to rewrite their work)
+# With -x CMD, also run CMD against each revision's tree, bottom-up — the
+# bisectability gate. Each tree is exported read-only from the git store
+# into a throwaway directory (no workspace, no checkout, @ is never moved):
+#   BROKEN     CMD exited non-zero
+#   UNTESTABLE CMD exited 125 (git/jj bisect's "skip"): a revision bisect
+#              cannot judge is as bad as a broken one
 # With --against COMMIT, also verify the *tree invariant*: the tip of the
 # stack must be byte-for-byte the tree of COMMIT (the blob you carved up).
 # Splitting must never change what the code does — only how it is read.
@@ -28,14 +34,17 @@ set -euo pipefail
 revset='trunk()..@ ~ (@ & empty())'
 limit=400
 against=''
+exec_cmd=''
 repo_args=()
 
 usage() {
   cat <<'EOF'
-usage: jj-stack-check [-r REVSET] [-l LIMIT] [--against COMMIT] [-R REPO]
+usage: jj-stack-check [-r REVSET] [-l LIMIT] [--against COMMIT] [-x CMD] [-R REPO]
   -r REVSET        stack to check              (default: trunk()..@ ~ (@ & empty()))
   -l LIMIT         max changed lines per rev   (default: 400)
   --against COMMIT verify heads(REVSET) has the same tree as COMMIT
+  -x CMD           run `bash -c CMD` in a clean export of every revision;
+                   non-zero fails it (125 = untestable, also fails)
   -R REPO          repository path (passed to jj)
 EOF
 }
@@ -45,6 +54,7 @@ while [ $# -gt 0 ]; do
     -r) revset=$2; shift 2 ;;
     -l) limit=$2; shift 2 ;;
     --against) against=$2; shift 2 ;;
+    -x | --exec) exec_cmd=$2; shift 2 ;;
     -R) repo_args=(-R "$2"); shift 2 ;;
     -h | --help) usage; exit 0 ;;
     *) echo "jj-stack-check: unknown argument: $1" >&2; usage >&2; exit 2 ;;
@@ -60,7 +70,7 @@ jj() { command jj "${repo_args[@]}" --no-pager --color never "$@"; }
 # Unit separator between fields; the description's first line can hold
 # anything printable, so a tab or pipe would be ambiguous.
 us=$'\x1f'
-tmpl="change_id.short(8) ++ \"$us\" ++ commit_id.short(12) ++ \"$us\" ++ diff.stat().total_added() ++ \"$us\" ++ diff.stat().total_removed() ++ \"$us\" ++ if(empty, \"1\", \"0\") ++ \"$us\" ++ if(conflict, \"1\", \"0\") ++ \"$us\" ++ description.first_line() ++ \"\n\""
+tmpl="change_id.short(8) ++ \"$us\" ++ commit_id ++ \"$us\" ++ diff.stat().total_added() ++ \"$us\" ++ diff.stat().total_removed() ++ \"$us\" ++ if(empty, \"1\", \"0\") ++ \"$us\" ++ if(conflict, \"1\", \"0\") ++ \"$us\" ++ description.first_line() ++ \"\n\""
 
 # --reversed: bottom of the stack first, the order a reviewer reads it in.
 rows=$(jj log -r "$revset" --no-graph --reversed -T "$tmpl")
@@ -73,9 +83,35 @@ if [ -z "$rows" ]; then
   exit 0
 fi
 
+# -x: every revision's tree comes out of the backing git store (the
+# colocated .git, or .jj/repo/store/git) via `git archive`, which only reads.
+# The export is what CI would see: tracked files only, no build leftovers,
+# no ignored files, no .git/.jj. Commands that need VCS metadata (version
+# from `git describe`, a flake that wants `self.rev`) must cope without it.
+if [ -n "$exec_cmd" ]; then
+  git_dir=$(jj git root)
+  scratch=$(mktemp -d "${TMPDIR:-/tmp}/jj-stack-check.XXXXXX")
+  trap 'chmod -R u+w "$scratch" 2>/dev/null; rm -rf "$scratch"' EXIT
+fi
+
+# run_at COMMIT → exit status of exec_cmd against that commit's tree; the
+# log stays in $scratch/<commit>.log so a failure can be shown.
+run_at() {
+  local dir="$scratch/$1" log="$scratch/$1.log"
+  mkdir -p "$dir"
+  if ! git --git-dir="$git_dir" archive --format=tar "$1" | tar -x -C "$dir"; then
+    echo "jj-stack-check: could not export $1 from $git_dir" >"$log"
+    return 1
+  fi
+  # </dev/null: the caller is a `while read` loop over the stack; a CMD that
+  # reads stdin would otherwise eat the remaining rows.
+  (cd "$dir" && JJ_STACK_REV=$1 bash -c "$exec_cmd") </dev/null >"$log" 2>&1
+}
+
 fail=0
 count=0
 total=0
+broken_logs=()
 printf '%-9s %-13s %10s  %-28s %s\n' CHANGE COMMIT LINES FLAGS DESCRIPTION
 while IFS="$us" read -r change commit added removed empty conflict desc; do
   count=$((count + 1))
@@ -87,10 +123,26 @@ while IFS="$us" read -r change commit added removed empty conflict desc; do
   [ "$empty" = 1 ] && flags+=(EMPTY)
   [ "$conflict" = 1 ] && flags+=(CONFLICT)
   grep -qx "$change" <<<"$not_mine" && flags+=(NOT-MINE)
+  if [ -n "$exec_cmd" ]; then
+    status=0
+    run_at "$commit" || status=$?
+    case "$status" in
+      0) ;;
+      125) flags+=(UNTESTABLE) ;;
+      *) flags+=(BROKEN) ;;
+    esac
+    if [ "$status" -ne 0 ]; then broken_logs+=("$commit"); fi
+  fi
   [ ${#flags[@]} -gt 0 ] && fail=1
   printf '%-9s %-13s %+5d/-%-4d  %-28s %s\n' \
-    "$change" "$commit" "$added" "$removed" "${flags[*]:-ok}" "${desc:-(no description)}"
+    "$change" "${commit:0:12}" "$added" "$removed" "${flags[*]:-ok}" "${desc:-(no description)}"
 done <<<"$rows"
+
+# A failing revision's output tail, so the fix does not need a re-run.
+for commit in "${broken_logs[@]}"; do
+  printf '\n--- %s: last 20 lines of "%s" ---\n' "${commit:0:12}" "$exec_cmd"
+  tail -n 20 "$scratch/$commit.log"
+done
 
 printf '\n%d revision(s), %d changed lines total, limit %d per revision\n' \
   "$count" "$total" "$limit"

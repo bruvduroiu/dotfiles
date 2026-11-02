@@ -39,14 +39,21 @@ Systems: `x86_64-linux`, `aarch64-darwin`. nixpkgs: `nixos-unstable`.
 ## Scaffolding
 
 The templates live next to this file in `template/`: `common/` plus one
-language directory (`go/` or `python/`). Store copies are read-only, hence
-`--no-preserve=mode`. Dotfiles are stored without the dot so they stay visible.
+language directory (`go/` or `python/`). Dotfiles are stored without the dot
+so they stay visible.
+
+**Every template file is a symlink into `/nix/store`** (Home Manager links
+each file individually), so the copy must dereference: `-L`. Plain `cp -r`
+copies the *links*, and the project ends up tracking symlinks to store paths
+that vanish on the next garbage collection. `--no-preserve=mode` drops the
+store's read-only bits from the copies.
 
 ```bash
 T=<this skill's directory>/template
-cp -r --no-preserve=mode "$T"/common/. "$T"/<go|python>/. .
+cp -rL --no-preserve=mode "$T"/common/. "$T"/<go|python>/. .
 mv envrc .envrc && mv gitignore .gitignore && mv sops.yaml .sops.yaml
 sed -i 's/myapp/<name>/g' flake.nix default.nix shell.nix nix/*.nix
+find . -path ./.jj -prune -o -path ./.git -prune -o -type l -print   # must print nothing
 ```
 
 Then:
@@ -194,6 +201,7 @@ skopeo, so no docker daemon is needed. Secrets are never baked into the image.
 ## Verify before claiming done
 
 ```bash
+find . -path ./.jj -prune -o -path ./.git -prune -o -type l -print   # no store symlinks
 jj st                                  # snapshot → new files tracked
 nix flake check                        # build + tests + treefmt
 nix build .#image --no-link            # Linux
@@ -216,3 +224,4 @@ nix fmt                                # if treefmt-check failed
 | `docker build` / Dockerfile | Non-reproducible, needs a daemon | `nix build .#image` + `push-image` |
 | `pip install` / editing deps in Nix (Python) | Lock and Nix drift apart | `uv add`; uv2nix reads `uv.lock` |
 | New files, then `nix build` fails "not found" | Flake only sees tracked files | `jj st` first |
+| `cp -r` from the skill's `template/` | Copies HM's store symlinks, not files; the repo tracks dangling-to-be links | `cp -rL`, then `find … -type l` is empty |

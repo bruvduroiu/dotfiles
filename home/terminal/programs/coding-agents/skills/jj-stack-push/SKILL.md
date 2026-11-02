@@ -33,11 +33,15 @@ revisions in `trunk()..@ & mine()`. Nothing else is rewritten here.
 ### 0. Gate
 
 ```bash
-jj-stack-check                    # default revset trunk()..@ ~ (@ & empty()); add -l N if the plan overrode the limit
+jj-stack-check -x '<build + test>'   # default revset trunk()..@ ~ (@ & empty()); add -l N if the plan overrode the limit
 ```
 
+Use the same `-x` command `/jj-stack` used. Every PR in the chain is a
+revision someone may later bisect through or revert alone.
+
 Non-zero exit: stop and send the user back to `/jj-stack`. Do not push a
-stack with `TOO-BIG`, `EMPTY`, `NO-DESC`, `CONFLICT`, or `NOT-MINE` rows.
+stack with `TOO-BIG`, `EMPTY`, `NO-DESC`, `CONFLICT`, `NOT-MINE`, `BROKEN`,
+or `UNTESTABLE` rows.
 
 ### 1. Forge and tool
 

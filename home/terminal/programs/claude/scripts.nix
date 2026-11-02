@@ -26,6 +26,10 @@ let
     pkgs.coreutils
     pkgs.gnugrep
     pkgs.gnused
+    # -x: export each revision's tree (git archive | tar) and run CMD in bash
+    pkgs.git
+    pkgs.gnutar
+    pkgs.bash
   ];
 in
 {

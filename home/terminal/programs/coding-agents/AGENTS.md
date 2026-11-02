@@ -130,6 +130,11 @@ When a repo has a `.jj` directory, it is a Jujutsu repo colocated with git
 - **Never rewrite or land history**: no `jj squash`, `jj abandon`, `jj undo`,
   `jj rebase`, `jj op restore`, or `jj git push`. The human reviews the diff
   and carves `@` into revisions themselves (split/absorb/tug/push).
+- **Cut atomic, bisectable revisions as you go** (`jj-atomic` skill): at
+  each seam (mechanical vs semantic, refactor vs feature, lockfile bump,
+  separate fix), verify that the revision builds and its tests pass, then
+  `jj describe -m …` and `jj new`. That only appends revisions and rewrites
+  none, so it is allowed; carving a mixed revision afterwards is not.
 - **The one exception: the `/jj-stack`, `/jj-stack-push` and `/jj-stack-sync`
   skills.** When the human invokes one, rewriting is authorised for that
   skill's duration, bounded as its SKILL.md says: only revisions in
@@ -141,8 +146,8 @@ When a repo has a `.jj` directory, it is a Jujutsu repo colocated with git
   changed lines, *suggest* `/jj-stack`; never run it unasked.
 - Starting a substantial task on a dirty `@` that isn't yours? Suggest (or,
   if asked, run) `jj new -m "claude: <task>"` first so the session's work is
-  isolated in its own revision. `jj describe` may update that revision's
-  message; leave every other revision's message alone.
+  isolated in its own revision. `jj describe` may update the messages of
+  revisions this session created; leave every other revision's message alone.
 
 ### Parallel agents: one workspace per agent
 

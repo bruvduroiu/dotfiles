@@ -58,7 +58,11 @@ STACK='bookmarks(glob:"<topic>-*")'
    by hand with `jj squash --into <rev> -u <paths>` — or genuinely new work,
    which becomes a new revision on top (`jj describe`, then it gets its own
    bookmark and PR in step 6).
-4. Gate again: `jj-stack-check`.
+4. Gate again, builds included: `jj-stack-check -x '<build + test>'`.
+   Absorb is the classic way to break bisectability: a fix that touches two
+   revisions' lines lands half in each, and only the tip was ever compiled.
+   A `BROKEN` row means a hunk went to the wrong owner; move it with
+   `jj squash --from <rev> --into <owner> -u <paths>`.
 5. Capture the per-PR interdiff **before pushing**:
 
    ```bash
@@ -95,7 +99,8 @@ jj new <conflicted rev>       # child of the conflicted revision
 jj squash                     # into its parent; the parent's description is kept, no editor
 ```
 
-Then gate, capture interdiffs (a pure rebase usually yields empty ones), and
+Then gate (with `-x`: trunk moved, so every revision rebuilds against new
+code), capture interdiffs (a pure rebase usually yields empty ones), and
 push with the topic glob. The push moves every bookmark "sideways"; that is
 the lease-safe update, not a force push.
 

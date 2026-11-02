@@ -190,6 +190,12 @@ in
           "Read(~/.config/nvim/**)"
         ];
         ask = [
+          # jj-stack-check is allowed above as a read-only gate, but `-x CMD`
+          # runs arbitrary shell against every revision. Ask beats allow.
+          "Bash(jj-stack-check * -x *)"
+          "Bash(jj-stack-check * --exec *)"
+          "Bash(jj-stack-check -x *)"
+          "Bash(jj-stack-check --exec *)"
           # "Bash(git push:*)"
           # "Bash(git commit:*)"
           # "Bash(git rm:*)"
