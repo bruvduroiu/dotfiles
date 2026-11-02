@@ -40,10 +40,6 @@ let
       type = "http";
       url = "https://mcp.notion.com/mcp";
     };
-    metacog = {
-      type = "http";
-      url = "http://10.0.20.197:8788/mcp";
-    };
     figma = {
       type = "http";
       url = "https://mcp.figma.com/mcp";
@@ -70,7 +66,6 @@ let
     "playwright"
     "deepwiki"
     "linear"
-    "metacog"
   ];
   selections = {
     claude = use common;
