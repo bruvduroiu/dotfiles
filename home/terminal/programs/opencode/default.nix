@@ -45,6 +45,11 @@ in
 
     skills = codingAgents.skills;
 
+    # TUI-side switch; the server still prompts only where `permission`
+    # below says ask. The desktop app keeps its own toggle
+    # (home/programs/opencode-desktop.nix).
+    tui.session.permissions = "autoaccept";
+
     settings = {
       # Pin the plugin, not its jobs: chat tools manage mutable job JSON and
       # systemd user timers under ~/.config without Home Manager activation.
@@ -68,6 +73,9 @@ in
         "zai-coding-plan"
         "abliteration"
         "mistral-vibe"
+        # Claude Code subscription: drives the local `claude` CLI (its own
+        # login in ~/.claude), found via OPENCODE_CLAUDE_PATH or $PATH.
+        "claude-agent"
       ];
       providers.mistral-vibe = {
         name = "Mistral Vibe";
@@ -218,6 +226,7 @@ in
   # causing valid paths under ~/development to return no search results.
   systemd.user.services.opencode-web.Service.Environment = [
     "OPENCODE_DISABLE_FFF=1"
+    "OPENCODE_CLAUDE_PATH=${config.programs.claude-code.finalPackage}/bin/claude"
   ];
 
   # Tools must be real files, not symlinks into /nix/store: opencode's

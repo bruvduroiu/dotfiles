@@ -56,7 +56,79 @@
             system = prev.stdenv.hostPlatform.system;
             config.allowUnfree = true;
           }).obsidian;
-        opencode = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.opencode;
+        # Floor, not a pin (same scheme as the homelab opencode guest): when
+        # upstream outruns the lock, rebuild unstable's recipe at a newer tag.
+        # Bump version + both hashes (lib.fakeHash, copy "got:"; node_modules
+        # is a FOD over `bun install`). Once the lock reaches the floor the
+        # cached nixpkgs build wins and this can go.
+        opencode =
+          let
+            pinned = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system}.opencode;
+            floor = {
+              version = "2.2.5";
+              srcHash = "sha256-/a1czcXi12KWPXcESqplNdOZcjEs8gWCMO7w4nQYLkw=";
+              nodeModulesHash = "sha256-xfOVcw1+waLVNhFDwzOtzxrUSQEogvn88YomydOlhwc=";
+            };
+          in
+          if prev.lib.versionOlder pinned.version floor.version then
+            pinned.overrideAttrs (
+              finalAttrs: old: {
+                inherit (floor) version;
+                src = old.src.override {
+                  tag = "v${finalAttrs.version}";
+                  hash = floor.srcHash;
+                };
+                # node_modules already follows finalAttrs.src; only its
+                # fixed-output hash is baked into the recipe.
+                node_modules = old.node_modules.overrideAttrs {
+                  outputHash = floor.nodeModulesHash;
+                };
+              }
+            )
+          else
+            pinned;
+        # Inherits version/src/node_modules from `opencode`, so it follows the
+        # floor above and stays in lockstep with the CLI.
+        opencode-desktop =
+          let
+            unstable = inputs.nixpkgs-unstable.legacyPackages.${prev.stdenv.hostPlatform.system};
+            pinned = unstable.opencode-desktop;
+            # The launcher wraps unstable's electron; package against the same one.
+            inherit (unstable) electron_44;
+            desktop = pinned.override { inherit (final) opencode; };
+          in
+          if pinned.version == final.opencode.version then
+            desktop
+          else
+            # ≥2.2 renamed scripts/ → script/ and bundles the CLI from
+            # packages/cli/dist (no OPENCODE_CLI_DIST); `bun run build` now
+            # copies the channel's icons itself. Drop with the floor.
+            desktop.overrideAttrs {
+              buildPhase = ''
+                runHook preBuild
+
+                cd packages/desktop
+
+                cli_package=$(bun -e 'import { getCurrentCli } from "./script/utils.ts"; console.log(getCurrentCli().package.replace("@opencode/", ""))')
+                mkdir -p "../cli/dist/$cli_package/bin"
+                cp ${prev.lib.getExe final.opencode} "../cli/dist/$cli_package/bin/opencode"
+                echo '{"version":"${final.opencode.version}"}' > "../cli/dist/$cli_package/package.json"
+
+                bun run build
+
+                cp -r "${electron_44.dist}" $HOME/.electron-dist
+                chmod -R u+w $HOME/.electron-dist
+
+                npx electron-builder --dir \
+                  --config=electron-builder.config.ts \
+                  --config.electronDist="$HOME/.electron-dist" \
+                  --config.electronVersion=${electron_44.version}
+
+                cd ../..
+
+                runHook postBuild
+              '';
+            };
         # Unstable's v18 unvendors ffmpeg/curl-impersonate/libsodium/sqlite and
         # drops FUTO.Updater.Client.
         grayjay =

@@ -1,9 +1,7 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   codingMcps = import ../terminal/programs/coding-mcps { inherit config lib pkgs; };
-
-  pkgs-unstable = inputs.nixpkgs-unstable.legacyPackages.${pkgs.stdenv.hostPlatform.system};
 
   # MCPs only the desktop app gets (the `opencode-desktop` selection in
   # coding-mcps). opencode merges OPENCODE_CONFIG_CONTENT over
@@ -13,15 +11,28 @@ let
     mcp = codingMcps.opencodeServers "opencode-desktop";
   };
 
+  # Auto-accept is a UI setting persisted in the app's own state DB, not in
+  # opencode.json; this only flips the default a fresh profile starts with.
+  # A profile that already saved a choice keeps it (toggle: Mod+Shift+A).
+  unwrapped = pkgs.opencode-desktop.overrideAttrs (old: {
+    postPatch = old.postPatch + ''
+      substituteInPlace packages/app/src/settings/model.tsx \
+        --replace-fail 'permissions: { autoApprove: false,' 'permissions: { autoApprove: true,'
+    '';
+  });
+
   opencode-desktop = pkgs.symlinkJoin {
-    name = "opencode-desktop-${pkgs-unstable.opencode-desktop.version}";
-    paths = [ pkgs-unstable.opencode-desktop ];
+    name = "opencode-desktop-${unwrapped.version}";
+    paths = [ unwrapped ];
     nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
+    # A launcher-started app may not inherit the shell's PATH; point the
+    # claude-agent provider at Claude Code directly.
     postBuild = ''
       wrapProgram $out/bin/opencode-desktop \
-        --set OPENCODE_CONFIG_CONTENT ${lib.escapeShellArg desktopConfig}
+        --set OPENCODE_CONFIG_CONTENT ${lib.escapeShellArg desktopConfig} \
+        --set OPENCODE_CLAUDE_PATH ${config.programs.claude-code.finalPackage}/bin/claude
     '';
-    inherit (pkgs-unstable.opencode-desktop) meta;
+    inherit (unwrapped) meta;
   };
 in
 {
