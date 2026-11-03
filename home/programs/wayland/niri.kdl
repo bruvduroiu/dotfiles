@@ -280,7 +280,7 @@ binds {
     Mod+Ctrl+Shift+D hotkey-overlay-title="Open latest notification" { spawn "noctalia" "msg" "notification-invoke-latest"; }
     Mod+Ctrl+Shift+BackSpace hotkey-overlay-title="Dismiss notification toasts" { spawn "noctalia" "msg" "notification-clear-active"; }
 
-    Mod+Alt+A hotkey-overlay-title="OpenRouter chat" { spawn "firefox" "--new-tab" "https://openrouter.ai/chat"; }
+    Mod+Alt+A hotkey-overlay-title="OpenCode Desktop" { spawn "opencode-desktop"; }
     Mod+Alt+B hotkey-overlay-title="Browser" { spawn "firefox"; }
     Mod+Alt+W hotkey-overlay-title="Work browser" { spawn "firefox" "-P" "work" "--no-remote"; }
     Mod+Alt+H hotkey-overlay-title="Ghost browser" { spawn "mullvad-browser"; }
