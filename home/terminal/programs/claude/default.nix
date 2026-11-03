@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -55,6 +56,9 @@ let
   '';
 in
 {
+  # Bearer token for the kratos entry in ../coding-mcps (also in ../opencode).
+  sops.secrets.kratos_mcp_token.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+
   assertions = [
     {
       assertion = lib.all (name: workMcps ? ${name}) (builtins.attrNames personalMcps);
