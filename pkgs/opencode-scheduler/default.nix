@@ -30,7 +30,7 @@ stdenvNoCC.mkDerivation {
     cp ${./LICENSE} $out/LICENSE
   '';
   meta = {
-    description = "Local systemd scheduling tools for OpenCode and OpenWork";
+    description = "Local systemd scheduling tools for OpenCode and OpenCode Desktop";
     homepage = "https://github.com/different-ai/opencode-scheduler";
     license = lib.licenses.mit;
     platforms = lib.platforms.linux;

@@ -77,9 +77,9 @@ let
     ]);
     codex = use common;
     opencode = use (common ++ [ "figma" ]);
-    # Layered over opencode's: OpenWork reads the same opencode.json, then
-    # these through OPENCODE_CONFIG_CONTENT (home/programs/openwork.nix).
-    openwork = use [ "hey" ];
+    # Layered over opencode's: the desktop app reads the same opencode.json, then
+    # these through OPENCODE_CONFIG_CONTENT (home/programs/opencode-desktop.nix).
+    opencode-desktop = use [ "hey" ];
   };
 
   agentKeys = [

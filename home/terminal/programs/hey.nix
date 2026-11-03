@@ -4,8 +4,8 @@
   # Completions ship in the package's share/, picked up from the profile.
   home.packages = [ pkgs.hey-cli ];
 
-  # hey is offered to agents through OpenWork's MCP config only
-  # (home/programs/openwork.nix). Bare `hey` runs a setup wizard that would
+  # hey is offered to agents through OpenCode Desktop's MCP config only
+  # (home/programs/opencode-desktop.nix). Bare `hey` runs a setup wizard that would
   # otherwise install a Claude Code plugin and a shared ~/.agents skill.
   home.sessionVariables.HEY_SETUP_AGENT = "none";
 

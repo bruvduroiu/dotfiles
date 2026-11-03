@@ -1,8 +1,7 @@
-# Local scheduling in OpenCode and OpenWork
+# Local scheduling in OpenCode and OpenCode Desktop
 
 Both apps load the same pinned `different-ai/opencode-scheduler` plugin from
 the shared OpenCode configuration. Restart the app after changing the plugin.
-Use the chat tools; OpenWork's Cloud Automations screen is a separate service.
 
 For example, in a workspace chat:
 
@@ -52,7 +51,7 @@ Jobs execute through user systemd timers, so the chat app can be closed. The
 machine must be awake and the user service manager running. Persistent timers
 catch up a missed occurrence when available again; they do not replay every
 missed interval. Results are in job logs and standalone OpenCode sessions;
-OpenWork's v2 engine shares the normal OpenCode database and credentials.
+OpenCode Desktop runs the same engine, database and credentials.
 
 Inspect the timers directly with:
 
