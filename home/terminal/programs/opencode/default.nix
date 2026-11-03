@@ -73,8 +73,9 @@ in
     skills = codingAgents.skills;
 
     # TUI-side switch; the server still prompts only where `permission`
-    # below says ask. The desktop app keeps its own toggle
-    # (home/programs/opencode-desktop.nix).
+    # below says ask. The desktop app keeps its own toggle, along with its
+    # other UI settings (layout, experiments), in its state DB;
+    # home/programs/opencode-desktop.nix seeds them.
     tui.session.permissions = "autoaccept";
 
     settings = {
