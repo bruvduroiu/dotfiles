@@ -14,12 +14,38 @@ let
     inherit (config.home) profileDirectory;
   };
   secretsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+
+  # One-time pairing links for the web UI. `opencode pair` only targets
+  # opencode's own background service, not opencode-web, so ask :4096
+  # directly. Opening a link sets a 30-day session cookie signed with the
+  # password (rotating the sops value revokes every paired browser).
+  webPair = pkgs.writeShellApplication {
+    name = "opencode-web-pair";
+    runtimeInputs = with pkgs; [ coreutils gnused curl jq iproute2 gawk qrencode ];
+    text = ''
+      # Read, never source: the value may hold spaces or shell metacharacters.
+      pw=$(sed -n 's/^OPENCODE_SERVER_PASSWORD=//p' ${config.sops.templates."opencode-web.env".path})
+      # A header on stdin keeps the password out of argv and needs no quoting.
+      code=$(printf 'Authorization: Basic %s\n' "$(printf 'opencode:%s' "$pw" | base64 -w0)" \
+        | curl -fsS -H @- -X POST http://127.0.0.1:4096/api/pair | jq -r .code)
+      echo "Links work once and expire in 5 minutes:"
+      first=""
+      for ip in $(ip -4 -o addr show scope global | awk '{ split($4, a, "/"); print a[1] }'); do
+        echo "  http://$ip:4096/auth/connect/$code"
+        first=''${first:-http://$ip:4096/auth/connect/$code}
+      done
+      if [ -n "$first" ]; then qrencode -t ansiutf8 "$first"; fi
+    '';
+  };
 in
 {
   # Figma's OAuth client for opencode (used by the figma entry in ../coding-mcps).
   sops.secrets = {
     figma_oauth_client_id.sopsFile = secretsFile;
     figma_oauth_client_secret.sopsFile = secretsFile;
+    # opencode 2.x `serve` always requires basic auth (user `opencode`); without
+    # this it mints a random password per start that is never shown.
+    opencode_server_password.sopsFile = secretsFile;
   };
 
   programs.opencode = {
@@ -29,8 +55,9 @@ in
 
     # Bind the web UI to every interface for LAN and WireGuard access.
     # framework13's firewall explicitly opens TCP 4096.
-    # No OPENCODE_SERVER_PASSWORD is set, so anything that can route to this
-    # host gets an unauthenticated agent with the permissions below.
+    # Basic auth (user `opencode`, password from sops via the unit's
+    # EnvironmentFile below) is the only gate in front of an agent with the
+    # permissions below.
     web.extraArgs = [
       "--hostname"
       "0.0.0.0"
@@ -220,7 +247,10 @@ in
 
   # Generated timers use the stable profile path, so Nix GC and package
   # upgrades do not strand jobs with references to old Perl store paths.
-  home.packages = [ pkgs.perl ];
+  home.packages = [
+    pkgs.perl
+    webPair
+  ];
 
   # FFF refuses to index the home directory used by the web project picker,
   # causing valid paths under ~/development to return no search results.
@@ -228,6 +258,19 @@ in
     "OPENCODE_DISABLE_FFF=1"
     "OPENCODE_CLAUDE_PATH=${config.programs.claude-code.finalPackage}/bin/claude"
   ];
+
+  # Rendered outside the store; the unit waits for sops to decrypt it.
+  sops.templates."opencode-web.env" = {
+    mode = "0400";
+    content = "OPENCODE_SERVER_PASSWORD=${config.sops.placeholder.opencode_server_password}\n";
+  };
+  systemd.user.services.opencode-web = {
+    Unit = {
+      After = [ "sops-nix.service" ];
+      Wants = [ "sops-nix.service" ];
+    };
+    Service.EnvironmentFile = config.sops.templates."opencode-web.env".path;
+  };
 
   # Tools must be real files, not symlinks into /nix/store: opencode's
   # embedded Bun resolves `@opencode-ai/plugin` from the importer's
