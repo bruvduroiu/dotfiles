@@ -2,7 +2,6 @@
 name: jj-stack
 description: Carve one oversized jj revision (an agent blob, a day of work) into a stack of reviewable revisions of under ~400 changed lines each, refactors first and behaviour last, then prove the split changed nothing with a tree-invariant check. Run before opening PRs; follow with /jj-stack-push.
 argument-hint: "[BLOB revset, default @ (or @- when @ is empty)] [--limit N]"
-disable-model-invocation: true
 metadata:
   origin: local
 ---
@@ -33,12 +32,13 @@ that each tell one story. jj makes producing that sequence cheap, and makes it
 
 ## Scope of authority
 
-Invoking this skill authorises history surgery **only** on revisions that
-are in the blob's stack and yours: `(<blob>-)::@ & mine()`. Concretely:
+This is the local-grooming authority from the global rules, applied to one
+blob: only revisions in the blob's stack that are yours and unpushed,
+`(<blob>-)::@ & mine() & ~immutable()`. Concretely:
 `jj new`, `jj restore --from`, `jj split`, `jj squash --from/--into`,
 `jj rebase -r <blob>`, `jj describe`. Never: `jj edit`, `jj abandon`,
-`jj undo`, `jj op restore`, any revision that is not `mine()`, any pushed
-revision that another person has commented on. The human keeps the undo:
+`jj undo`, `jj op restore`, any revision that is not `mine()`, anything
+pushed, a revision another workspace's `@` builds on. The human keeps the undo:
 print the operation id first.
 
 ## Procedure

@@ -1,6 +1,6 @@
 ---
 name: jj-atomic
-description: Make every jj revision you produce atomic (one reason to exist), bisectable (builds and passes tests on its own, so `jj bisect run` never has to skip it) and revertable alone. Commit-as-you-go with `jj describe` + `jj new` at each seam, which appends history and never rewrites it. Use whenever you write code in a jj repo that will span more than one logical change, before handing work back, or when hunting a regression with `jj bisect run`.
+description: Make every jj revision you produce atomic (one reason to exist), bisectable (builds and passes tests on its own, so `jj bisect run` never has to skip it) and revertable alone. Commit-as-you-go with `jj describe` + `jj new` at each seam, and groom your own unpushed revisions (split, absorb, squash --into) when a seam was missed. Use whenever you write code in a jj repo that will span more than one logical change, before handing work back, or when hunting a regression with `jj bisect run`.
 metadata:
   origin: local
 ---
@@ -31,11 +31,31 @@ jj describe -m "<type>: <imperative title>" -m "<why>"
 jj new
 ```
 
-Neither command rewrites an existing revision. `jj describe` names your own
-working copy and `jj new` stacks an empty one on top. This is allowed under
-the "never rewrite history" rule. Carving a mixed `@` after the fact
-(`jj split`, `jj squash`) is history surgery and belongs to the human or to
-`/jj-stack`.
+`jj describe` names your own working copy and `jj new` stacks an empty one
+on top. Cutting seams going forward is the cheap path, but not the only one:
+your local, unpushed revisions are yours to groom. When a seam was missed or
+a fix belongs further down, rewrite instead of piling on:
+
+| Situation | Command |
+|---|---|
+| `@` (or `<rev>`) mixes two changes | `jj split -r <rev> <paths>` |
+| Fix in `@` belongs to the revision that last touched those lines | `jj absorb` |
+| Fix belongs to a specific revision | `jj squash --into <owner> <paths>` |
+| Revision in the wrong order | `jj rebase -r <rev> -A <other>` / `-B <other>` |
+| Message is wrong or vague | `jj describe -r <rev> -m …` |
+
+Bounds: only `trunk()..@ & mine() & ~immutable()`, named by revset, never
+`jj edit`. Not another author's revisions, not anything pushed, not a
+revision another workspace's `@` builds on while that agent runs.
+`jj abandon`, `jj undo`, `jj op restore` and `jj git push` stay
+human-only. Before the first rewrite, print the undo point:
+
+```bash
+jj op log --limit 1 --no-graph -T 'id.short() ++ "\n"'   # human's undo: jj op restore <id>
+```
+
+Every rewrite rebases the descendants, so a rewritten stack is unverified
+until `jj-stack-check -x` passes over it again.
 
 ## Where the seams are
 
@@ -65,8 +85,8 @@ What does *not* get its own revision:
   that fails until the next revision makes that revision the one bisect
   blames. (A test that pins *existing* behaviour may go first; it passes.)
 - **Follow-up fixes to your own unpushed revision.** "Fix typo in previous
-  commit" is not history, it is noise. Fix it in `@` and say in your
-  hand-off which revision it belongs to; the human absorbs it.
+  commit" is not history, it is noise. Make the fix, then `jj absorb` or
+  `jj squash --into <owner>` it.
 - **Debug prints, scratch files, `TODO: remove`.** These never land.
 
 ## Verify at each seam, not at the end
@@ -123,8 +143,9 @@ verification you ran on it:
 jj log -r '<first>::@-' -T 'change_id.short() ++ " " ++ description.first_line() ++ "\n"'
 ```
 
-If one revision ended up mixed anyway (you noticed the seam late), say so
-and suggest `/jj-stack` for that revision; don't split it yourself.
+If one revision ended up mixed (you noticed the seam late), split it
+before hand-off; for a large blob follow the `/jj-stack` procedure. Report
+the op id you printed before grooming, so the human can roll it all back.
 
 ## Anti-pattern clinic
 
@@ -134,8 +155,9 @@ and suggest `/jj-stack` for that revision; don't split it yourself.
 | `nix fmt` / formatter run in the same revision as logic | Real change hidden in whitespace; blame and bisect point at the wrong line | Formatter output = its own `chore` revision, title names the command |
 | Failing test first ("TDD commit"), fix next | Bisect lands on the test revision and calls it the culprit | Test and fix in one revision |
 | Change a signature, fix callers next revision | The revision in between does not build, so bisect has to skip it | expand → migrate → contract |
-| `fix: typo from previous commit` | Unrevertable pair; history noise | Fix in `@`, tell the human which revision it absorbs into |
+| `fix: typo from previous commit` | Unrevertable pair; history noise | `jj absorb` / `jj squash --into <owner>` |
 | Lockfile bump inside a feature | A dependency change hidden by a feature; can't revert one without the other | Bump alone, green, first |
 | Only building the tip | Middle revisions untested, so bisectability is unproven | `jj-stack-check -x` over your range |
-| `jj split` / `jj squash` to tidy your own revisions | History surgery outside `/jj-stack` | Cut seams going forward; flag the mixed one |
+| Leaving a mixed revision for the human to split | You know the seams, they would be guessing | `jj split` it yourself, then re-run `jj-stack-check -x` |
+| Grooming a pushed or other-author revision | Rewrites what others already fetched or own | Only `trunk()..@ & mine() & ~immutable()`, unpushed |
 | `jj bisect run` in your working workspace | Moves `@`; work in progress gets parked on an old revision | Dedicated workspace |

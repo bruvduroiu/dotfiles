@@ -127,23 +127,23 @@ When a repo has a `.jj` directory, it is a Jujutsu repo colocated with git
   automatically. There is no staging area and nothing to commit. **Never run
   `git commit`, `git add`, or `git stash`** — a git-side commit in a
   colocated repo diverges from jj's view and has to be reconciled.
-- **Never rewrite or land history**: no `jj squash`, `jj abandon`, `jj undo`,
-  `jj rebase`, `jj op restore`, or `jj git push`. The human reviews the diff
-  and carves `@` into revisions themselves (split/absorb/tug/push).
 - **Cut atomic, bisectable revisions as you go** (`jj-atomic` skill): at
   each seam (mechanical vs semantic, refactor vs feature, lockfile bump,
   separate fix), verify that the revision builds and its tests pass, then
-  `jj describe -m …` and `jj new`. That only appends revisions and rewrites
-  none, so it is allowed; carving a mixed revision afterwards is not.
-- **The one exception: the `/jj-stack`, `/jj-stack-push` and `/jj-stack-sync`
-  skills.** When the human invokes one, rewriting is authorised for that
-  skill's duration, bounded as its SKILL.md says: only revisions in
-  `trunk()..@ & mine()`, only by naming revsets (`split`, `restore --from`,
-  `rebase -r/-b`, `absorb`, `squash --into`, `bookmark set`, `git push -b
-  'glob:…'`), never `jj edit`, never another author's revision, and
-  `abandon`/`undo`/`op restore` stay human-only. Print the `jj op log` id
-  first so the human has a one-command undo. If `@` grows past ~400
-  changed lines, *suggest* `/jj-stack`; never run it unasked.
+  `jj describe -m …` and `jj new`.
+- **Grooming local history is allowed**: `split`, `squash --into`,
+  `restore --from`, `rebase -r/-b`, `absorb` and `describe` on revisions in
+  `trunk()..@ & mine() & ~immutable()`, naming revisions by revset (never
+  `jj edit`). Missed a seam? Split it. A fix for a revision below `@`?
+  Absorb or `squash --into` its owner instead of a "fix previous commit"
+  revision. Print the `jj op log` id first, so the human has a one-command
+  undo, and re-verify every revision you rewrote (`jj-stack-check -x`).
+- **Still not allowed**: rewriting another author's revisions, anything
+  pushed, or a revision another workspace's `@` builds on while that agent
+  is running. `jj abandon`, `jj undo`, `jj op restore` and `jj git push`
+  stay human-only; publishing goes through `/jj-stack-push` and
+  `/jj-stack-sync`, which only the human invokes. If `@` grows past ~400
+  changed lines, carve it yourself following the `/jj-stack` procedure.
 - Starting a substantial task on a dirty `@` that isn't yours? Suggest (or,
   if asked, run) `jj new -m "claude: <task>"` first so the session's work is
   isolated in its own revision. `jj describe` may update the messages of
@@ -186,7 +186,7 @@ copy with another agent.
 - Don't stack on another agent's live `@`: it is amended on every snapshot,
   so the child rebases constantly and its workspace goes stale on repeat.
   Build on a described, finished revision instead.
-- `jj workspace forget`, like all history surgery, stays human-only.
+- `jj workspace forget`, like `abandon`/`undo`/`op restore`, stays human-only.
 
 ## SSH: one ControlMaster per host
 
