@@ -18,6 +18,7 @@
     ./git.nix
     ./hey.nix
     ./jj.nix
+    ./kdb.nix
     ./k9s.nix
     ./opencode
     ./skepsis.nix

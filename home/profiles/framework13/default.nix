@@ -156,11 +156,19 @@ in
     sopsFile = "${inputs.secrets}/secrets/common/datadog.yaml";
   };
 
-  # dd-log and portfolio-update-prices read *_FILE variants so key material
-  # stays on disk (sops runtime paths), not in every process environment.
+  # hetzner-1 Postgres cluster admin (role `cluster_admin`), for `kdb`
+  # (home/terminal/programs/kdb.nix)
+  sops.secrets.hetzner1_pg_admin_password = {
+    sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+  };
+
+  # dd-log, portfolio-update-prices and kdb read *_FILE variants so key
+  # material stays on disk (sops runtime paths), not in every process
+  # environment.
   home.sessionVariables = {
     DD_API_KEY_FILE = config.sops.secrets.dd_api_key.path;
     DD_APP_KEY_FILE = config.sops.secrets.dd_app_key.path;
     ALPHAVANTAGE_API_KEY_FILE = config.sops.secrets.alphavantage_api_key.path;
+    KDB_PASSWORD_FILE = config.sops.secrets.hetzner1_pg_admin_password.path;
   };
 }
