@@ -4,6 +4,7 @@
   imports = [
     ./hardware-configuration.nix
     ./transmission.nix
+    ./attic.nix
     inputs.nixos-hardware.nixosModules.framework-amd-ai-300-series
     inputs.secrets.nixosModules.default
   ];

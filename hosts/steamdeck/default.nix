@@ -7,6 +7,7 @@ in
   imports = [
     ./hardware-configuration.nix
     ./transmission.nix
+    ./attic.nix
     ./kodi.nix
     ../../system/programs/niri
     ../../system/programs/fonts.nix
