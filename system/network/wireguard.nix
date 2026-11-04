@@ -75,8 +75,9 @@ let
   # Networks reachable through the home hub via wg0
   hubNetworks = pvars.hub.networks;
 
-  # The hub's resolver (the router's dnsmasq), reached through wg0 — optional
-  # in the private flake. It is bound to the wg0 LINK for the private
+  # The hub's resolver (the router's dnsmasq at its LAN address, routed
+  # through wg0 via hubNetworks) — the private flake may override it. It is
+  # bound to the wg0 LINK for the private
   # subdomain alone, as a routing-only domain, so every other name keeps
   # resolving exactly as before (Quad9 / Mullvad). `local.buduroiu.com` is
   # NXDOMAIN publicly: it exists only in the router's dnsmasq (homelab repo,
@@ -84,7 +85,7 @@ let
   # to an answer. resolved prefers the longest matching routing domain, so
   # `~local.buduroiu.com` here beats the dispatcher's `~buduroiu.com` on the
   # uplinks and Mullvad's `~.`.
-  hubDNS = pvars.hub.dns or null;
+  hubDNS = pvars.hub.dns or "192.168.1.1";
   hubDNSDomains = [ "~local.buduroiu.com" ];
 
   # ── Mullvad config ──────────────────────────────────────────────────────────
