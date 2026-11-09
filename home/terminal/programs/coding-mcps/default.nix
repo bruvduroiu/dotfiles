@@ -28,10 +28,6 @@ let
       type = "http";
       url = "https://mcp.datadoghq.eu/api/unstable/mcp-server/mcp?toolsets=all";
     };
-    deepwiki = {
-      type = "http";
-      url = "https://mcp.deepwiki.com/mcp";
-    };
     linear = {
       type = "http";
       url = "https://mcp.linear.app/mcp";
@@ -111,7 +107,6 @@ let
   pools = {
     personal = [
       "playwright"
-      "deepwiki"
       "linear"
       "figma"
       "kratos"
@@ -120,7 +115,6 @@ let
     ];
     work = [
       "playwright"
-      "deepwiki"
       "linear"
       "kratos"
       "datadog"

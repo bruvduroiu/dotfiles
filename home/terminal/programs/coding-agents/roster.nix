@@ -18,7 +18,6 @@ in
     work = false;
     mcps = [
       "playwright"
-      "deepwiki"
       "linear"
       "kratos"
       "grafana"
@@ -27,11 +26,11 @@ in
   };
   claude-work = {
     work = true;
+    # Figma comes from its official Claude Code plugin, which both accounts
+    # load (../claude), so it is not listed here.
     mcps = [
       "playwright"
-      "deepwiki"
       "linear"
-      "kratos"
       "datadog"
       "notion"
     ];
@@ -42,7 +41,6 @@ in
     # No kratos: Codex takes a bearer token only from an environment variable.
     mcps = [
       "playwright"
-      "deepwiki"
       "linear"
       "grafana"
     ];
@@ -52,7 +50,6 @@ in
     work = false;
     mcps = [
       "playwright"
-      "deepwiki"
       "linear"
       "figma"
       "kratos"
