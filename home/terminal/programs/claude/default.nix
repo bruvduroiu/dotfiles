@@ -13,7 +13,7 @@ let
   # its own pkgs without this repo's overlays.
   egm = pkgs.callPackage ../../../../pkgs/egm.nix { };
 
-  # The work account's MCPs beyond the shared ones (selected in ../coding-mcps).
+  # The work account's MCPs beyond the shared ones (../coding-agents/roster.nix).
   # Both accounts run the same wrapper, whose generated plugin dir carries the
   # `claude` selection, so the work wrapper adds the difference with
   # --mcp-config. That flag only adds servers, hence the assertion below.
@@ -93,7 +93,7 @@ in
       recursive = true;
     };
     "${workConfigDir}/skills" = {
-      source = codingAgents.skills;
+      source = codingAgents.skillsFor "claude-work";
       recursive = true;
     };
   };
@@ -120,7 +120,7 @@ in
     # (not executable, and not registered anywhere). settings.hooks below points
     # at the built store paths instead — see hooks.nix.
     # skillsDir was renamed to `skills` in 26.05 (accepts a dir path or attrset).
-    skills = codingAgents.skills;
+    skills = codingAgents.skillsFor "claude";
 
     # Pinned plugins, loaded with --plugin-dir by the wrapper both accounts
     # run. EGM: /egm-brainstorm, /egm-draft, /egm-review, …
@@ -129,7 +129,7 @@ in
     plugins =
       if lib.versionAtLeast config.home.version.release "26.11" then { inherit egm; } else [ egm ];
 
-    # The personal account's selection (../coding-mcps); claude-work adds its
+    # The personal account's MCPs (../coding-agents/roster.nix); claude-work adds its
     # own on top. Nix store paths are resolved at build time.
     mcpServers = personalMcps;
 

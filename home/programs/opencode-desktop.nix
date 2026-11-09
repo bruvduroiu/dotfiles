@@ -3,8 +3,8 @@
 let
   codingMcps = import ../terminal/programs/coding-mcps { inherit config lib pkgs; };
 
-  # MCPs only the desktop app gets (the `opencode-desktop` selection in
-  # coding-mcps). opencode merges OPENCODE_CONFIG_CONTENT over
+  # MCPs only the desktop app gets (its entry in coding-agents/roster.nix,
+  # served by coding-mcps). opencode merges OPENCODE_CONFIG_CONTENT over
   # ~/.config/opencode, so terminal opencode, Claude Code and Codex never see
   # these. The desktop passes its environment through to the engine it starts.
   desktopConfig = builtins.toJSON {

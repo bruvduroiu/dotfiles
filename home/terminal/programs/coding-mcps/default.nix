@@ -72,34 +72,27 @@ let
     };
   };
 
-  # Which servers each agent gets, and with what changes. Values are
-  # overrides merged into the server, e.g. `hey.args = [ "mcp" "--read-only" ]`;
-  # `{ }` takes it as declared. `use` turns a list of names into that form.
-  use = names: lib.genAttrs names (_: { });
-  common = [
-    "playwright"
-    "deepwiki"
-    "linear"
-  ];
-  selections = {
-    claude = use (common ++ [ "kratos" ]);
-    # Must include everything `claude` has: the work wrapper can only add
-    # servers on top of the shared ones (see ../claude).
-    claude-work = use (common ++ [
+  # The servers each side may offer its agents. Which agent is on which side,
+  # and what it picks from its pool, is ../coding-agents/roster.nix.
+  pools = {
+    personal = [
+      "playwright"
+      "deepwiki"
+      "linear"
+      "figma"
+      "kratos"
+      "hey"
+    ];
+    work = [
+      "playwright"
+      "deepwiki"
+      "linear"
       "kratos"
       "datadog"
       "notion"
-    ]);
-    # No kratos: Codex takes a bearer token only from an environment variable.
-    codex = use common;
-    opencode = use (common ++ [
-      "figma"
-      "kratos"
-    ]);
-    # Layered over opencode's: the desktop app reads the same opencode.json, then
-    # these through OPENCODE_CONFIG_CONTENT (home/programs/opencode-desktop.nix).
-    opencode-desktop = use [ "hey" ];
+    ];
   };
+  roster = import ../coding-agents/roster.nix { inherit lib; };
 
   agentKeys = [
     "claude"
@@ -107,22 +100,26 @@ let
     "opencode"
   ];
 
-  # The selected servers for one agent, with its extras and overrides applied.
+  # The servers one agent picked, with its family's extras applied.
   resolve =
     family: agent:
-    lib.mapAttrs (
-      name: override:
+    let
+      entry = roster.${agent} or (throw "coding-mcps: `${agent}` is not in the roster");
+      side = if entry.work then "work" else "personal";
+    in
+    lib.genAttrs entry.mcps (
+      name:
       let
-        server =
-          servers.${name}
-            or (throw "coding-mcps: ${agent} selects unknown server `${name}`");
+        server = servers.${name} or (throw "coding-mcps: ${agent} picks unknown server `${name}`");
       in
-      lib.recursiveUpdate (lib.recursiveUpdate (removeAttrs server agentKeys) (server.${family} or { }))
-        override
-    ) (selections.${agent} or (throw "coding-mcps: no selection for agent `${agent}`"));
+      if lib.elem name pools.${side} then
+        lib.recursiveUpdate (removeAttrs server agentKeys) (server.${family} or { })
+      else
+        throw "coding-mcps: ${agent} picks `${name}`, which is not in the ${side} pool"
+    );
 in
 {
-  inherit servers selections;
+  inherit servers pools;
 
   claudeServers = agent: resolve "claude" agent;
 

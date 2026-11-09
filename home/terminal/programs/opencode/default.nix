@@ -72,7 +72,7 @@ in
       code = ./agents/code.md;
     };
 
-    skills = codingAgents.skills;
+    skills = codingAgents.skillsFor "opencode";
 
     # TUI-side switch; the server still prompts only where `permission`
     # below says ask. The desktop app keeps its own toggle, along with its
@@ -176,7 +176,7 @@ in
           };
         };
       };
-      # Selected per agent in ../coding-mcps, translated to opencode's
+      # Picked in ../coding-agents/roster.nix, translated to opencode's
       # local/remote schema there.
       mcp = codingMcps.opencodeServers "opencode";
 

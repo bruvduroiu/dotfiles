@@ -131,7 +131,7 @@ in
     # host cannot work without, and two drifting copies of it would be worse
     # than one shared one.
     context = codingAgents.context;
-    skills = codingAgents.skills;
+    skills = codingAgents.skillsFor "codex";
   };
 
   # Home Manager owns the stable link while Codex writes through it to the

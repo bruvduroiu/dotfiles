@@ -48,6 +48,8 @@ let
     ${bodyFor name}
   '';
 
+  roster = import ./roster.nix { inherit lib; };
+
   toml = pkgs.formats.toml { };
   codexAgent = name: {
     description = fieldFor name "description";
@@ -59,7 +61,19 @@ let
 in
 {
   context = ./AGENTS.md;
-  skills = ./skills;
+  inherit roster;
+  # One agent's skills (./roster.nix): ./skills filtered to its picks. Real
+  # directories, not a linkFarm: Home Manager modules readDir this and take a
+  # symlink entry for a file.
+  skillsFor =
+    agent:
+    builtins.path {
+      name = "${agent}-skills";
+      path = ./skills;
+      filter =
+        path: _:
+        lib.elem (lib.head (lib.splitString "/" (lib.removePrefix "${toString ./skills}/" path))) roster.${agent}.skills;
+    };
   claudeAgents = agentDir;
   opencodeAgents = lib.genAttrs agentNames opencodeAgent;
   codexAgents = lib.genAttrs agentNames codexAgent;
