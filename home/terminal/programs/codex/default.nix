@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   lib,
   pkgs,
   ...
@@ -94,6 +95,10 @@ let
   codexConfigPython = pkgs.python3.withPackages (ps: [ ps.tomli-w ]);
 in
 {
+  # Grafana Viewer token for the grafana entry in ../coding-mcps (also in
+  # ../claude, ../opencode).
+  sops.secrets.grafana_mcp_token.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+
   # OpenAI Codex CLI, driven by the ChatGPT Plus/Pro subscription rather than a
   # platform API key. This is the same subscription opencode's `openai` provider
   # uses (see ./opencode/default.nix), but the two keep separate credentials —

@@ -21,6 +21,7 @@ in
       "deepwiki"
       "linear"
       "kratos"
+      "grafana"
     ];
     skills = allSkills;
   };
@@ -43,6 +44,7 @@ in
       "playwright"
       "deepwiki"
       "linear"
+      "grafana"
     ];
     skills = allSkills;
   };
@@ -54,6 +56,7 @@ in
       "linear"
       "figma"
       "kratos"
+      "grafana"
     ];
     skills = allSkills;
   };

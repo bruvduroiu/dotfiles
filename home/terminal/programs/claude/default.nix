@@ -75,6 +75,9 @@ in
 {
   # Bearer token for the kratos entry in ../coding-mcps (also in ../opencode).
   sops.secrets.kratos_mcp_token.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+  # Grafana Viewer token for the grafana entry in ../coding-mcps (also in
+  # ../codex, ../opencode).
+  sops.secrets.grafana_mcp_token.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
 
   home.packages = [ claude-work ] ++ builtins.attrValues claudeScripts.packages;
 

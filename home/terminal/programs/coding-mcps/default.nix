@@ -64,6 +64,40 @@ let
       ''}";
       opencode.headers.Authorization = "Bearer {file:${config.sops.secrets.kratos_mcp_token.path}}";
     };
+    # Read-only Grafana over the homelab fleet (Mimir, Loki, dashboards,
+    # alerts). A dedicated Viewer service-account token from sops, declared in
+    # each consuming module (../claude, ../codex, ../opencode); the launcher
+    # reads it at start, so it is never in the store, argv or a config file.
+    # Flags and guardrails as the homelab's opencode VM
+    # (homelab: modules/opencode/monitoring-mcp.nix).
+    grafana = {
+      type = "stdio";
+      command = lib.getExe (
+        pkgs.writeShellApplication {
+          name = "grafana-mcp";
+          text = ''
+            token=${lib.escapeShellArg config.sops.secrets.grafana_mcp_token.path}
+            if [[ ! -s $token ]]; then
+              echo "Grafana Viewer token missing at $token (sops: grafana_mcp_token)" >&2
+              exit 1
+            fi
+            GRAFANA_SERVICE_ACCOUNT_TOKEN="$(< "$token")"
+            export GRAFANA_SERVICE_ACCOUNT_TOKEN
+            export GRAFANA_URL='https://monitoring.oolongtechnologies.io/grafana/'
+            export GRAFANA_ALLOW_CROSS_ORIGIN_REDIRECTS=false
+            exec ${lib.getExe (pkgs.callPackage ../../../../pkgs/mcp-grafana.nix { })} \
+              --transport stdio --disable-write \
+              --enabled-tools search,datasource,prometheus,loki,dashboard,alerting \
+              --grafana-timeout 20s --max-loki-log-limit 200 \
+              --loki-guardrail-mode enforce --loki-guardrail-max-range 1h \
+              --loki-guardrail-max-bytes 104857600 --loki-guardrail-on-estimate-failure block \
+              --prometheus-guardrail-mode enforce --prometheus-guardrail-max-range 2h \
+              --prometheus-guardrail-max-points 1200
+          '';
+        }
+      );
+      args = [ ];
+    };
     hey = {
       type = "stdio";
       # Saves drafts, never sends: a draft goes out from HEY or `hey draft send`.
@@ -81,6 +115,7 @@ let
       "linear"
       "figma"
       "kratos"
+      "grafana"
       "hey"
     ];
     work = [

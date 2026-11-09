@@ -48,6 +48,9 @@ in
     opencode_server_password.sopsFile = secretsFile;
     # Bearer token for the kratos entry in ../coding-mcps (also in ../claude).
     kratos_mcp_token.sopsFile = secretsFile;
+    # Grafana Viewer token for the grafana entry in ../coding-mcps (also in
+    # ../claude, ../codex).
+    grafana_mcp_token.sopsFile = secretsFile;
   };
 
   programs.opencode = {
