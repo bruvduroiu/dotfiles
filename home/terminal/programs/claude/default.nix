@@ -13,17 +13,6 @@ let
   # its own pkgs without this repo's overlays.
   egm = pkgs.callPackage ../../../../pkgs/egm.nix { };
 
-  # The work account's MCPs beyond the shared ones (../coding-agents/roster.nix).
-  # Both accounts run the same wrapper, whose generated plugin dir carries the
-  # `claude` selection, so the work wrapper adds the difference with
-  # --mcp-config. That flag only adds servers, hence the assertion below.
-  personalMcps = codingMcps.claudeServers "claude";
-  workMcps = codingMcps.claudeServers "claude-work";
-  workOnlyMcps = removeAttrs workMcps (builtins.attrNames personalMcps);
-  workMcpConfig = pkgs.writeText "claude-work-mcp.json" (
-    builtins.toJSON { mcpServers = workOnlyMcps; }
-  );
-
   # Hook scripts live in ./config/hooks/*.sh; hooks.nix wraps each one in a
   # writeShellApplication (deps pinned, shellchecked at build time) and exports
   # the settings.json registration graph that actually makes them fire.
@@ -42,29 +31,50 @@ let
   # the Keychain, so only settings and history separate.)
   workConfigDir = ".claude-work";
 
+  # Each account's MCPs (../coding-agents/roster.nix), handed over with
+  # --mcp-config rather than through the module's `mcpServers`: those land in
+  # one generated plugin both accounts load, and the flag can only add to it,
+  # so a personal server could never be kept out of the work account.
+  mcpConfigFor =
+    account:
+    pkgs.writeText "${account}-mcp.json" (
+      builtins.toJSON { mcpServers = codingMcps.claudeServers account; }
+    );
+
+  # pkgs.claude-code whose `claude` picks the MCPs by account, and the account
+  # is the config dir: anything that starts it under the work CLAUDE_CONFIG_DIR
+  # (claude-work, opencode's Claude Agent provider) gets the work set.
+  # `--mcp-config=` stays bound: the flag is variadic and would swallow a
+  # following subcommand. The version carries over, as HM 26.11 picks its
+  # plugin mechanism from it.
+  claudeLauncher = pkgs.writeShellScript "claude" ''
+    case "''${CLAUDE_CONFIG_DIR:-}" in
+      "$HOME/${workConfigDir}") mcp=${mcpConfigFor "claude-work"} ;;
+      *) mcp=${mcpConfigFor "claude"} ;;
+    esac
+    exec ${lib.getExe pkgs.claude-code} --mcp-config="$mcp" "$@"
+  '';
+  claudePackage = pkgs.symlinkJoin {
+    name = "claude-code-${pkgs.claude-code.version}";
+    inherit (pkgs.claude-code) version meta;
+    paths = [ pkgs.claude-code ];
+    postBuild = ''
+      rm $out/bin/claude
+      ln -s ${claudeLauncher} $out/bin/claude
+    '';
+  };
+
   # `claude-work`: the same binary and the same config, a different account.
-  #
-  # Execs finalPackage, NOT pkgs.claude-code. finalPackage is the module's
-  # wrapper, which passes `--plugin-dir <generated>` — and that generated
-  # plugin dir is where `mcpServers` below actually lives. Bypassing the
-  # wrapper silently drops every MCP server.
+  # Execs finalPackage, the module's wrapper, for the pinned plugins.
   claude-work = pkgs.writeShellScriptBin "claude-work" ''
     set -eu
     export CLAUDE_CONFIG_DIR="$HOME/${workConfigDir}"
-    exec ${config.programs.claude-code.finalPackage}/bin/claude \
-      --mcp-config ${workMcpConfig} "$@"
+    exec ${config.programs.claude-code.finalPackage}/bin/claude "$@"
   '';
 in
 {
   # Bearer token for the kratos entry in ../coding-mcps (also in ../opencode).
   sops.secrets.kratos_mcp_token.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
-
-  assertions = [
-    {
-      assertion = lib.all (name: workMcps ? ${name}) (builtins.attrNames personalMcps);
-      message = "coding-mcps: the claude-work selection must include every `claude` server; the work wrapper can only add servers.";
-    }
-  ];
 
   home.packages = [ claude-work ] ++ builtins.attrValues claudeScripts.packages;
 
@@ -101,7 +111,7 @@ in
   programs.claude-code = {
     enable = true;
 
-    package = pkgs.claude-code;
+    package = claudePackage;
 
     # ~/.claude/CLAUDE.md — global context loaded into every session. Holds the
     # NixOS operating manual (how to reach python/node/etc. without a system
@@ -129,9 +139,7 @@ in
     plugins =
       if lib.versionAtLeast config.home.version.release "26.11" then { inherit egm; } else [ egm ];
 
-    # The personal account's MCPs (../coding-agents/roster.nix); claude-work adds its
-    # own on top. Nix store paths are resolved at build time.
-    mcpServers = personalMcps;
+    # No mcpServers: claudePackage passes each account its own.
 
     # Settings
     settings = {
