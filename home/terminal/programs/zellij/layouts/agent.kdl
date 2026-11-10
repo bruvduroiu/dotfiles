@@ -8,8 +8,9 @@ layout {
         }
     }
 
-    tab name="agent" focus=true {
-        pane name="agent" command="direnv" {
+    // Unnamed so the agent's OSC title becomes the tab label (see workbench.kdl).
+    tab focus=true {
+        pane command="direnv" {
             args "exec" "." "agent"
         }
     }

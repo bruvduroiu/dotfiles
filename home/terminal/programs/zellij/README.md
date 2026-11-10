@@ -19,7 +19,8 @@ current directory with `default_layout`, which is `workbench`.
 | yazi `W` | `lzj <dirname>` in the hovered directory |
 
 Layouts: **workbench** has three full-screen tabs: the agent picker on
-`main`, Helix on `hx` and jjui on `vcs` (`Alt 1/2/3`). **agent** is the agent picker alone. **shell** is one shell. Command
+tab 1 (left unnamed, so the running agent's terminal title becomes the tab
+label), Helix on `hx` and jjui on `vcs` (`Alt 1/2/3`). **agent** is the agent picker alone. **shell** is one shell. Command
 panes run through `direnv exec .`.
 
 ## Keys (Alt, niri-shaped, no prefix)

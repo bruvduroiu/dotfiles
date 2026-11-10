@@ -1,5 +1,5 @@
 // Per-project workbench, one full-screen tab each: the coding-agent picker
-// (main), Helix (hx), jjui (vcs). Alt+1/2/3 jump between them. The
+// (unnamed, titled by the agent), Helix (hx), jjui (vcs). Alt+1/2/3 jump between them. The
 // `default_layout`, so every new session (`lzj NAME`, `zj NAME`, yazi `W`)
 // gets it; start one from the project root, since every pane inherits the
 // cwd and nothing here hardcodes a path.
@@ -17,8 +17,14 @@ layout {
         }
     }
 
-    tab name="main" focus=true {
-        pane name="agent" command="direnv" {
+    // Deliberately unnamed tab and pane: zellij (0.45+) labels a tab that
+    // still has its default name and holds one framed pane with that pane's
+    // OSC 0/2 title, so the agent (Claude Code, Codex, OpenCode) titles its
+    // own tab. A pane `name` would override the OSC title, and a tab `name`
+    // would disable the fallback. Alt Shift t pins a name by hand; a
+    // resurrected session serializes "Tab #1" literally and loses it.
+    tab focus=true {
+        pane command="direnv" {
             args "exec" "." "agent"
         }
     }
