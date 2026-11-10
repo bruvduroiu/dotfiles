@@ -253,7 +253,7 @@ in
         defaultMode = "auto";
       };
       env = {
-        SHELL = "fish";
+        CLAUDE_CODE_SUBAGENT_EFFORT = "medium";
         API_TIMEOUT_MS = "3000000";
         NIX_ENVIRONMENT = "true";
       };

@@ -15,10 +15,10 @@
           colors = import "${self}/lib/colors" prev.lib;
         };
         claude-code = prev.callPackage "${self}/pkgs/claude.nix" {
-          version = "2.1.303";
+          version = "2.1.321";
           hashes = {
-            "x86_64-linux" = "sha256-N1mI9Fd1ZSQjRpXPLY9krOmcX2hoLkfqJIYqhDwZFFA=";
-            "aarch64-linux" = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+            "x86_64-linux" = "sha256-QmwzgVymZFp3L3Ivv/ENvyy9sSSorqtzPBNl2/i79h8=";
+            "aarch64-linux" = "sha256-a+oGMwdGJ7p5Mo4AEV7QWIw6z5BqhGNhKyXbaW2/0/A=";
           };
         };
         # 26.05 pins codex 0.133; the config.toml schema this repo writes
