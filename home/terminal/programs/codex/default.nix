@@ -95,6 +95,10 @@ let
   codexConfigPython = pkgs.python3.withPackages (ps: [ ps.tomli-w ]);
 in
 {
+  # Bearer token for the kratos header helper in ../coding-mcps (also in
+  # ../claude, ../opencode).
+  sops.secrets.kratos_mcp_token.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";
+
   # Grafana Viewer token for the grafana entry in ../coding-mcps (also in
   # ../claude, ../opencode).
   sops.secrets.grafana_mcp_token.sopsFile = "${inputs.secrets}/secrets/common/api-keys.yaml";

@@ -38,10 +38,10 @@ in
   };
   codex = {
     work = false;
-    # No kratos: Codex takes a bearer token only from an environment variable.
     mcps = [
       "playwright"
       "linear"
+      "kratos"
       "grafana"
     ];
     skills = allSkills;

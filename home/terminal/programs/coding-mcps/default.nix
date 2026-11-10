@@ -48,18 +48,23 @@ let
     };
     # Kratos' read-only operator MCP: SQL over the production control plane,
     # all organizations. A static personal bearer token (kratos docs/mcp.md),
-    # from sops, declared in each consuming module (../claude, ../opencode).
-    # Claude Code reads it through a headers helper, so it is never in an
-    # environment or a config file.
-    kratos = {
-      type = "http";
-      url = "https://kratos.oolongtechnologies.io/mcp";
-      claude.headersHelper = "${pkgs.writeShellScript "kratos-mcp-headers" ''
-        ${lib.getExe pkgs.jq} -cn --rawfile t ${config.sops.secrets.kratos_mcp_token.path} \
-          '{Authorization: ("Bearer " + ($t | rtrimstr("\n")))}'
-      ''}";
-      opencode.headers.Authorization = "Bearer {file:${config.sops.secrets.kratos_mcp_token.path}}";
-    };
+    # from sops, declared in each consuming module (../claude, ../codex,
+    # ../opencode). Claude Code and Codex read it through a headers helper,
+    # so it is never in an environment or a config file.
+    kratos =
+      let
+        headersHelper = "${pkgs.writeShellScript "kratos-mcp-headers" ''
+          ${lib.getExe pkgs.jq} -cn --rawfile t ${config.sops.secrets.kratos_mcp_token.path} \
+            '{Authorization: ("Bearer " + ($t | rtrimstr("\n")))}'
+        ''}";
+      in
+      {
+        type = "http";
+        url = "https://kratos.oolongtechnologies.io/mcp";
+        claude.headersHelper = headersHelper;
+        codex.http_headers_helper = headersHelper;
+        opencode.headers.Authorization = "Bearer {file:${config.sops.secrets.kratos_mcp_token.path}}";
+      };
     # Read-only Grafana over the homelab fleet (Mimir, Loki, dashboards,
     # alerts). A dedicated Viewer service-account token from sops, declared in
     # each consuming module (../claude, ../codex, ../opencode); the launcher

@@ -46,7 +46,8 @@ in
     # opencode 2.x `serve` always requires basic auth (user `opencode`); without
     # this it mints a random password per start that is never shown.
     opencode_server_password.sopsFile = secretsFile;
-    # Bearer token for the kratos entry in ../coding-mcps (also in ../claude).
+    # Bearer token for the kratos entry in ../coding-mcps (also in ../claude,
+    # ../codex).
     kratos_mcp_token.sopsFile = secretsFile;
     # Grafana Viewer token for the grafana entry in ../coding-mcps (also in
     # ../claude, ../codex).
