@@ -36,8 +36,9 @@ input {
 // pins below down with it. Connector names stay for the built-in panel,
 // which is always eDP-1.
 //
-// Positions are LOGICAL px: the Asus is 3840 wide at scale 1, so eDP-1
-// starts at x=3840 (matches the old Hyprland 3840x0).
+// Positions are LOGICAL px. The laptop sits LEFT of the Asus: eDP-1 is
+// 2880 physical px at scale 1.3333 = 2160 logical, so the Asus starts at
+// x=2160. Changing eDP-1's scale means recomputing that offset.
 //
 // "Primary" is not a niri concept — it is these two properties: this
 // output takes focus at startup, and workspaces 1-3 pin to it (below).
@@ -48,13 +49,13 @@ input {
 output "ASUSTek COMPUTER INC ASUS VG289 0x000024DB" {
     mode "3840x2160"
     scale 1
-    position x=0 y=0
+    position x=2160 y=0
     // no variable-refresh-rate: this panel reports vrr_supported=false
     focus-at-startup
 }
 output "eDP-1" {
     scale 1.3333
-    position x=3840 y=0
+    position x=0 y=0
     variable-refresh-rate on-demand=true
     // Second in config order = laptop-only fallback for startup focus.
     focus-at-startup
